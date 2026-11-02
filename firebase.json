@@ -1,4 +1,9 @@
 {
+  "auth": {
+    "providers": {
+      "emailPassword": true
+    }
+  },
   "firestore": {
     "indexes": "firestore.indexes.json"
   }

@@ -50,11 +50,11 @@ Abra `index.html` em um servidor estático, como a extensão Live Server do VS C
 
 ## Configuração da API Firebase
 
-1. No Firebase, habilite o provedor **E-mail/senha** em Authentication e crie o banco Firestore no projeto `space-shooter-14d6a`.
+1. Crie o banco Firestore no projeto `space-shooter-14d6a`. O provedor **E-mail/senha** é configurado em `firebase.json` e publicado com `firebase deploy --only auth --project space-shooter-14d6a`.
 2. Crie uma chave nova de service account com acesso ao Firestore. Configure-a somente como secrets do Worker: `npx wrangler secret put FIREBASE_API_KEY --config worker/wrangler.toml`, e repita o comando para `FIREBASE_SERVICE_ACCOUNT_EMAIL` e `FIREBASE_PRIVATE_KEY`. A chave privada deve ser o PEM completo; nunca a coloque no repositório ou no frontend. Se uma chave foi compartilhada anteriormente, revogue-a e gere outra.
 3. Configure `FIREBASE_API_KEY` com a Web API key do Firebase. O ID do projeto já está em `worker/wrangler.toml`.
 4. Confira `ALLOWED_ORIGINS` em `worker/wrangler.toml`: inclua a origem exata do GitHub Pages (sem caminho) e as origens locais de desenvolvimento.
-5. Publique o índice e o Worker a partir da raiz do projeto: `firebase deploy --only firestore:indexes --project space-shooter-14d6a` e `npx wrangler deploy --config worker/wrangler.toml`. Faça isso com as CLIs autenticadas.
+5. Publique a configuração de autenticação, o índice e o Worker a partir da raiz do projeto: `firebase deploy --only auth,firestore:indexes --project space-shooter-14d6a` e `npx wrangler deploy --config worker/wrangler.toml`. Faça isso com as CLIs autenticadas.
 6. A URL do Worker configurada em `js/app.js` deve apontar para a implantação. O endpoint atual só pode ser testado depois que as rotas do Worker e os secrets estiverem implantados.
 
 O Worker valida autenticação, tamanho básico e formato dos dados, mas o jogo é executado no cliente e não possui validação antitrapaça autoritativa para recordes ou saldos. Não use esses dados para pagamentos ou decisões de confiança.

@@ -1,7 +1,14 @@
-name = "neon-void-api"
+name = "space-shooter"
 main = "index.js"
 compatibility_date = "2026-11-02"
+preview_urls = true
 
 [vars]
 FIREBASE_PROJECT_ID = "space-shooter-14d6a"
 ALLOWED_ORIGINS = "http://localhost:8766,http://127.0.0.1:8766,https://eugeniogabrielmoreira96.github.io"
+
+[observability]
+enabled = true
+
+[observability.logs]
+enabled = true
