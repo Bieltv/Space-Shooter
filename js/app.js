@@ -67,6 +67,16 @@ const translations = {
     ornamentRed: "Vermelha", ornamentGreen: "Verde", ornamentGold: "Dourada", ornamentSilver: "Prateada",
     badges: "Emblemas", badgesHint: "Colecione emblemas hexagonais e confira como conquistá-los.",
     badgeLocked: "Ainda não conquistado", badgeEarned: "Conquistado em {date}",
+    profile: "Perfil", profileHint: "Equipe até três emblemas conquistados. A seleção é conferida e salva na conta online.",
+    profileChecking: "Verificando emblemas salvos na conta...",
+    profileLoaded: "Perfil verificado no banco de dados.",
+    profileDatabaseRequired: "Este perfil precisa de uma conta conectada para verificar e salvar os emblemas.",
+    profileBadgeSaveSuccess: "Emblemas conferidos e salvos na conta.",
+    profileBadgeLimit: "Você pode equipar no máximo três emblemas.",
+    profileBadgeUnavailable: "Esse emblema ainda não está registrado na conta online.",
+    profileBadges: "Emblemas equipados", profileBadgeCollection: "Emblemas conquistados",
+    profileNoBadges: "Nenhum emblema conquistado ainda.",
+    equipBadge: "Equipar", unequipBadge: "Remover",
     messages: "Mensagens", rewards: "Recompensas", specialPackages: "Pacotes especiais",
     promoCode: "Código promocional", redeemCode: "Resgatar código",
     promoCodeInvalid: "Código inválido ou inativo.", promoCodeUsed: "Este código já foi resgatado nesta conta.",
@@ -180,7 +190,7 @@ const translations = {
     leaderboardEmpty: "Ainda não há jogadores participantes com pontuação.",
     leaderboardSaved: "Preferências do ranking compartilhado salvas.",
     playerProfile: "Perfil do jogador", playerProfileScore: "Recorde: {score}",
-    playerProfileBadges: "Emblemas conquistados", playerProfileNoBadges: "Nenhum emblema conquistado.",
+    playerProfileBadges: "Emblemas equipados", playerProfileNoBadges: "Nenhum emblema equipado.",
     playerNotFound: "Jogador não encontrado.", selectPlayerHint: "Clique para selecionar; clique duas vezes ou use o botão direito para abrir o perfil.",
     event: "EVENTO", eventNotFound: "Este evento não está mais disponível.",
     eventLocked: "Esta skin pertence a um evento e ainda está bloqueada.",
@@ -256,6 +266,16 @@ const translations = {
     ornamentRed: "Red", ornamentGreen: "Green", ornamentGold: "Gold", ornamentSilver: "Silver",
     badges: "Badges", badgesHint: "Collect hexagonal badges and see how to earn them.",
     badgeLocked: "Not earned yet", badgeEarned: "Earned on {date}",
+    profile: "Profile", profileHint: "Equip up to three earned badges. Your selection is verified and saved to your online account.",
+    profileChecking: "Checking badges saved to your account...",
+    profileLoaded: "Profile verified in the database.",
+    profileDatabaseRequired: "This profile needs a connected account to verify and save badges.",
+    profileBadgeSaveSuccess: "Badges verified and saved to your account.",
+    profileBadgeLimit: "You can equip up to three badges.",
+    profileBadgeUnavailable: "This badge is not registered to your online account yet.",
+    profileBadges: "Equipped badges", profileBadgeCollection: "Earned badges",
+    profileNoBadges: "No badges earned yet.",
+    equipBadge: "Equip", unequipBadge: "Remove",
     messages: "Messages", rewards: "Rewards", specialPackages: "Special packages",
     promoCode: "Promo code", redeemCode: "Redeem code",
     promoCodeInvalid: "This code is invalid or inactive.", promoCodeUsed: "This code has already been redeemed on this account.",
@@ -369,7 +389,7 @@ const translations = {
     leaderboardEmpty: "There are no participating players with a score yet.",
     leaderboardSaved: "Shared leaderboard preferences saved.",
     playerProfile: "Player profile", playerProfileScore: "High score: {score}",
-    playerProfileBadges: "Earned badges", playerProfileNoBadges: "No badges earned.",
+    playerProfileBadges: "Equipped badges", playerProfileNoBadges: "No badges equipped.",
     playerNotFound: "Player not found.", selectPlayerHint: "Click to select; double-click or right-click to open the profile.",
     event: "EVENT", eventNotFound: "This event is no longer available.",
     eventLocked: "This skin belongs to an event and is still locked.",
@@ -438,6 +458,11 @@ let diamonds = 0;
 let moneyVoid = 0;
 let activeSkinCategory = "ship";
 let selectedBadgeId = null;
+let verifiedProfileBadges = null;
+let profileStatusKey = null;
+let profileStatusMessage = null;
+let profileBadgeSaveInProgress = false;
+let ownProfileRequestId = 0;
 let activeLeaderboardScope = "national";
 let leaderboardRequestId = 0;
 let profileRequestId = 0;
@@ -520,6 +545,7 @@ function applyTranslations() {
   renderDiamondPackages();
   renderInbox();
   renderUpgrades();
+  renderOwnProfile();
   if (game.overlayMode === "paused") renderPauseMissions();
   if (game.overlayMode) showGameOverlay(game.overlayMode);
   if (!$("#screen-starting-skills").hidden) renderStartingSkills();
@@ -663,7 +689,8 @@ function normalizeCloudAccount(session, email, passwordSalt, passwordHash) {
     passwordHash,
     createdAt: serverState.createdAt || profile.createdAt || Date.now(),
     bestScore: Math.max(Number(serverState.bestScore) || 0, Number(profile.bestScore) || 0),
-    badges: { ...(profile.badges || {}), ...(serverState.badges || {}) }
+    badges: { ...(profile.badges || {}), ...(serverState.badges || {}) },
+    equippedBadges: profile.equippedBadges || serverState.equippedBadges || []
   });
 }
 
@@ -799,6 +826,10 @@ function normalizeAccount(nextAccount) {
   const savedBadges = nextAccount.badges && typeof nextAccount.badges === "object" ? nextAccount.badges : {};
   const badges = Object.fromEntries(Object.entries(savedBadges)
     .filter(([id, earnedAt]) => typeof id === "string" && Number.isSafeInteger(earnedAt) && earnedAt > 0));
+  const equippedBadges = Array.isArray(nextAccount.equippedBadges)
+    ? [...new Set(nextAccount.equippedBadges.filter((id) =>
+      typeof id === "string" && /^[a-z0-9-]{1,60}$/i.test(id)))].slice(0, 3)
+    : [];
   const savedBattlePass = nextAccount.battlePass && typeof nextAccount.battlePass === "object"
     ? nextAccount.battlePass
     : null;
@@ -848,6 +879,7 @@ function normalizeAccount(nextAccount) {
     moneyVoid: Number.isSafeInteger(nextAccount.moneyVoid) && nextAccount.moneyVoid >= 0 ? nextAccount.moneyVoid : 0,
     eventProgress,
     badges,
+    equippedBadges,
     battlePass,
     luckDropsOpened: Number.isSafeInteger(nextAccount.luckDropsOpened) && nextAccount.luckDropsOpened >= 0 ? nextAccount.luckDropsOpened : 0,
     redeemedPromoCodes,
@@ -1155,6 +1187,7 @@ function updateAccount(nextAccount) {
   renderAccuracyScreen();
   renderUpgrades();
   renderBadges();
+  renderOwnProfile();
   renderBattlePass();
   updateBattlePassVisibility();
   if (accountChanged) scheduleCloudSync();
@@ -1171,6 +1204,10 @@ function requireAuthentication() {
   selectedSkins = { ...defaultSkins };
   missionOwnerId = null;
   missionStorageKey = STORAGE_KEYS.missions;
+  verifiedProfileBadges = null;
+  profileStatusKey = null;
+  profileStatusMessage = null;
+  profileBadgeSaveInProgress = false;
   document.body.classList.remove("authenticated");
   $("#auth-gate").hidden = false;
   if ($("#purchase-dialog").open) $("#purchase-dialog").close();
@@ -1527,6 +1564,146 @@ function renderBadges() {
     return button;
   }));
   if (selectedBadgeId && $("#badge-detail-dialog").open) renderBadgeDetails(selectedBadgeId);
+}
+
+function renderOwnProfile() {
+  const grid = $("#profile-badge-grid");
+  if (!grid || !account || !badgeData || !skinData) return;
+  $("#own-profile-username").textContent = account.username;
+  $("#own-profile-player-id").textContent = account.playerId;
+  $("#own-profile-score").textContent = t("playerProfileScore")
+    .replace("{score}", Number(account.bestScore || 0).toLocaleString(language));
+
+  const equippedBadges = Array.isArray(account.equippedBadges) ? account.equippedBadges : [];
+  $("#profile-equipped-badges").replaceChildren(...(equippedBadges.length
+    ? equippedBadges.map((badgeId) => badgeData.badges.find((badge) => badge.id === badgeId)).filter(Boolean)
+      .map((badge) => createProfileBadge(badge, account.badges?.[badge.id], false))
+    : [Object.assign(document.createElement("p"), {
+      className: "profile-empty",
+      textContent: t("playerProfileNoBadges")
+    })]));
+
+  const status = $("#profile-database-status");
+  if (profileStatusMessage) {
+    status.textContent = profileStatusMessage;
+  } else if (profileStatusKey) {
+    status.textContent = t(profileStatusKey);
+  } else if (verifiedProfileBadges === null) {
+    status.textContent = account.cloudUid ? t("profileChecking") : t("profileDatabaseRequired");
+  }
+  grid.replaceChildren(...badgeData.badges.map((badge) => {
+    const earnedAt = verifiedProfileBadges?.get(badge.id);
+    const equipped = equippedBadges.includes(badge.id);
+    const locked = !Number.isSafeInteger(earnedAt) || earnedAt <= 0;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `profile-badge-option${equipped ? " equipped" : ""}${locked ? " locked" : ""}`;
+    button.disabled = !account.cloudUid || verifiedProfileBadges === null || locked ||
+      profileBadgeSaveInProgress || (!equipped && equippedBadges.length >= 3);
+    button.setAttribute("aria-pressed", String(equipped));
+    button.setAttribute("aria-label", `${localizedText(badge.name)} · ${locked ? t("badgeLocked") : equipped ? t("unequipBadge") : t("equipBadge")}`);
+    button.style.setProperty("--badge-color", skinData.rarities[badge.rarity].color);
+    const icon = document.createElement("span");
+    icon.className = "badge-hex";
+    icon.textContent = badge.symbol;
+    const name = document.createElement("strong");
+    name.textContent = localizedText(badge.name);
+    const action = document.createElement("small");
+    action.textContent = locked ? t("badgeLocked") : equipped ? t("unequipBadge") : t("equipBadge");
+    button.append(icon, name, action);
+    button.addEventListener("click", () => void toggleEquippedBadge(badge.id));
+    return button;
+  }));
+}
+
+function createProfileBadge(badge, earnedAt, showDate) {
+  const item = document.createElement("span");
+  item.className = `profile-badge rarity-${badge.rarity}`;
+  item.style.setProperty("--badge-color", skinData.rarities[badge.rarity].color);
+  item.title = `${localizedText(badge.name)}${earnedAt ? ` · ${new Date(earnedAt).toLocaleDateString(language)}` : ""}`;
+  const icon = document.createElement("span");
+  icon.className = "badge-hex";
+  icon.textContent = badge.symbol;
+  const name = document.createElement("span");
+  name.textContent = localizedText(badge.name);
+  item.append(icon, name);
+  if (showDate && earnedAt) {
+    const date = document.createElement("small");
+    date.textContent = new Date(earnedAt).toLocaleDateString(language);
+    item.append(date);
+  }
+  return item;
+}
+
+async function loadOwnProfile() {
+  const requestId = ++ownProfileRequestId;
+  verifiedProfileBadges = null;
+  profileStatusMessage = null;
+  profileStatusKey = account?.cloudUid ? "profileChecking" : "profileDatabaseRequired";
+  renderOwnProfile();
+  if (!account?.cloudUid) return;
+  try {
+    const response = await cloudRequest("/api/me");
+    if (requestId !== ownProfileRequestId || account?.cloudUid !== response.profile?.uid) return;
+    const profile = response.profile;
+    verifiedProfileBadges = new Map(Object.entries(profile.badges || {})
+      .filter(([badgeId, earnedAt]) => badgeData?.badges.some((badge) => badge.id === badgeId) &&
+        Number.isSafeInteger(earnedAt) && earnedAt > 0));
+    updateAccount({
+      ...account,
+      badges: { ...(account.badges || {}), ...(profile.badges || {}) },
+      equippedBadges: Array.isArray(profile.equippedBadges) ? profile.equippedBadges : []
+    });
+    profileStatusKey = "profileLoaded";
+    renderOwnProfile();
+  } catch (error) {
+    if (requestId === ownProfileRequestId) {
+      verifiedProfileBadges = new Map();
+      profileStatusKey = null;
+      profileStatusMessage = error.message;
+      renderOwnProfile();
+    }
+  }
+}
+
+async function toggleEquippedBadge(badgeId) {
+  if (!account?.cloudUid || !(verifiedProfileBadges instanceof Map) || profileBadgeSaveInProgress) return;
+  if (!verifiedProfileBadges.has(badgeId)) {
+    profileStatusKey = "profileBadgeUnavailable";
+    profileStatusMessage = null;
+    renderOwnProfile();
+    return;
+  }
+  const equippedBadges = [...(account.equippedBadges || [])];
+  const index = equippedBadges.indexOf(badgeId);
+  if (index >= 0) equippedBadges.splice(index, 1);
+  else {
+    if (equippedBadges.length >= 3) {
+      profileStatusKey = "profileBadgeLimit";
+      profileStatusMessage = null;
+      renderOwnProfile();
+      return;
+    }
+    equippedBadges.push(badgeId);
+  }
+  profileBadgeSaveInProgress = true;
+  renderOwnProfile();
+  try {
+    const response = await cloudRequest("/api/me/equipped-badges", {
+      method: "PUT",
+      body: { equippedBadges }
+    });
+    if (account?.cloudUid !== response.profile?.uid) return;
+    updateAccount({ ...account, equippedBadges: response.profile.equippedBadges || [] });
+    profileStatusKey = "profileBadgeSaveSuccess";
+    profileStatusMessage = null;
+  } catch (error) {
+    profileStatusKey = null;
+    profileStatusMessage = error.message;
+  } finally {
+    profileBadgeSaveInProgress = false;
+    renderOwnProfile();
+  }
 }
 
 function renderBadgeDetails(badgeId) {
@@ -3113,6 +3290,10 @@ function showScreen(name) {
   if (name === "accuracy") renderAccuracyScreen();
   if (name === "events") renderEvents();
   if (name === "badges") renderBadges();
+  if (name === "profile") {
+    renderOwnProfile();
+    void loadOwnProfile();
+  }
   if (name === "battle-pass") renderBattlePass();
   if (name === "starting-skills") renderStartingSkills();
   if (name === "inbox") {
@@ -3151,28 +3332,17 @@ async function openPublicProfile(uid) {
     $("#player-profile-title").textContent = profile.username;
     $("#player-profile-score").textContent = t("playerProfileScore")
       .replace("{score}", Number(profile.bestScore || 0).toLocaleString(language));
-    const earnedBadges = Object.entries(profile.badges || {})
+    const equippedBadges = (Array.isArray(profile.equippedBadges) ? profile.equippedBadges : [])
+      .map((badgeId) => [badgeId, profile.badges?.[badgeId]])
       .filter(([badgeId, earnedAt]) => badgeData?.badges.some((badge) => badge.id === badgeId) &&
         Number.isSafeInteger(earnedAt) && earnedAt > 0);
-    if (!earnedBadges.length) {
+    if (!equippedBadges.length) {
       $("#player-profile-badges").textContent = t("playerProfileNoBadges");
       return;
     }
-    $("#player-profile-badges").replaceChildren(...earnedBadges.map(([badgeId, earnedAt]) => {
+    $("#player-profile-badges").replaceChildren(...equippedBadges.map(([badgeId, earnedAt]) => {
       const badge = badgeData.badges.find((entry) => entry.id === badgeId);
-      const item = document.createElement("span");
-      item.className = `profile-badge rarity-${badge.rarity}`;
-      item.style.setProperty("--badge-color", skinData.rarities[badge.rarity].color);
-      item.title = `${localizedText(badge.name)} · ${new Date(earnedAt).toLocaleDateString(language)}`;
-      const icon = document.createElement("span");
-      icon.className = "badge-hex";
-      icon.textContent = badge.symbol;
-      const name = document.createElement("span");
-      name.textContent = localizedText(badge.name);
-      const date = document.createElement("small");
-      date.textContent = new Date(earnedAt).toLocaleDateString(language);
-      item.append(icon, name, date);
-      return item;
+      return createProfileBadge(badge, earnedAt, true);
     }));
   } catch (error) {
     if (requestId === profileRequestId) {
@@ -3220,6 +3390,21 @@ async function loadLeaderboard(scope) {
       const player = document.createElement("span");
       player.className = "leaderboard-entry-name";
       player.textContent = entry.username;
+      const equippedBadges = (Array.isArray(entry.equippedBadges) ? entry.equippedBadges : [])
+        .map((badgeId) => badgeData?.badges.find((badge) => badge.id === badgeId))
+        .filter(Boolean);
+      if (equippedBadges.length) {
+        const badgeList = document.createElement("small");
+        badgeList.className = "leaderboard-entry-badges";
+        badgeList.setAttribute("aria-label", t("playerProfileBadges"));
+        equippedBadges.forEach((badge) => {
+          const symbol = document.createElement("span");
+          symbol.textContent = badge.symbol;
+          symbol.title = localizedText(badge.name);
+          badgeList.append(symbol);
+        });
+        player.append(badgeList);
+      }
       if (scope === "national" && entry.region) {
         const region = document.createElement("small");
         region.className = "leaderboard-entry-region";
@@ -4421,6 +4606,7 @@ async function submitAuthForm(form, mode) {
           startingAbilityCharges: Object.fromEntries(STARTING_ABILITIES.map((ability) => [ability.id, 1]))
         },
         badges: {},
+        equippedBadges: [],
         leaderboardOptIn: false,
         region: "",
         welcomeOffer: { available: true, purchased: false, expiresAt: Date.now() + 45 * 24 * 60 * 60 * 1000 },

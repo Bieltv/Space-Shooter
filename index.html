@@ -13,8 +13,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=21">
-  <script defer src="js/app.js?v=25"></script>
+  <link rel="stylesheet" href="css/style.css?v=22">
+  <script defer src="js/app.js?v=26"></script>
 </head>
 <body>
   <div class="starfield" aria-hidden="true"></div>
@@ -35,6 +35,9 @@
     <div class="topbar-actions">
       <button class="debug-toggle" id="debug-toggle" type="button" aria-expanded="false" hidden>◈ <span data-i18n="debug">Depuração</span></button>
       <nav class="quick-nav" aria-label="Acesso rápido">
+        <button class="quick-nav-button profile-quick-button" type="button" data-screen="profile" data-i18n-aria-label="profile" title="Perfil">
+          <span aria-hidden="true">◉</span>
+        </button>
         <button class="quick-nav-button" type="button" data-screen="inbox" data-i18n-aria-label="inbox" title="Caixa de entrada">
           <span aria-hidden="true">✉</span><span class="quick-nav-badge inbox-badge" id="home-inbox-count" hidden></span>
         </button>
@@ -50,6 +53,9 @@
       </nav>
     </div>
   </header>
+  <button class="profile-side-button" type="button" data-screen="profile" data-i18n-aria-label="profile" title="Perfil">
+    <span aria-hidden="true">◉</span><span data-i18n="profile">Perfil</span>
+  </button>
 
   <section class="auth-gate" id="auth-gate" aria-labelledby="auth-title">
     <div class="auth-panel">
@@ -270,6 +276,29 @@
         <h2 id="badges-title" data-i18n="badges">Emblemas</h2>
         <p class="section-copy" data-i18n="badgesHint">Colecione emblemas hexagonais e confira como conquistá-los.</p>
         <div class="badge-grid" id="badge-grid"></div>
+        <button class="neon-button back-button" data-screen="home" data-i18n="back">Voltar</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-profile" aria-labelledby="profile-title" hidden>
+      <div class="panel profile-panel">
+        <p class="eyebrow" data-i18n="menuLabel">MENU</p>
+        <h2 id="profile-title" data-i18n="profile">Perfil</h2>
+        <p class="section-copy" data-i18n="profileHint">Equipe até três emblemas conquistados. A seleção é conferida e salva na conta online.</p>
+        <div class="profile-summary">
+          <strong id="own-profile-username"></strong>
+          <span id="own-profile-player-id"></span>
+          <span id="own-profile-score"></span>
+        </div>
+        <p class="profile-database-status inline-status" id="profile-database-status" role="status" aria-live="polite"></p>
+        <section class="profile-badge-section" aria-labelledby="profile-badges-title">
+          <h3 id="profile-badges-title" data-i18n="profileBadges">Emblemas equipados</h3>
+          <div class="profile-equipped-list" id="profile-equipped-badges"></div>
+        </section>
+        <section class="profile-badge-section" aria-labelledby="profile-collection-title">
+          <h3 id="profile-collection-title" data-i18n="profileBadgeCollection">Emblemas conquistados</h3>
+          <div class="profile-badge-grid" id="profile-badge-grid"></div>
+        </section>
         <button class="neon-button back-button" data-screen="home" data-i18n="back">Voltar</button>
       </div>
     </section>

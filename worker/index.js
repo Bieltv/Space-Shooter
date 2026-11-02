@@ -182,6 +182,9 @@ function sanitizeGameState(value) {
     state.bestScore = 0;
   }
   if (!Array.isArray(state.ownedSkins)) state.ownedSkins = [];
+  state.equippedBadges = Array.isArray(state.equippedBadges)
+    ? [...new Set(state.equippedBadges.filter((id) => typeof id === "string" && /^[a-z0-9-]{1,60}$/i.test(id)))].slice(0, 3)
+    : [];
   if (!state.badges || typeof state.badges !== "object" || Array.isArray(state.badges)) state.badges = {};
   state.badges = Object.fromEntries(Object.entries(state.badges)
     .filter(([id, earnedAt]) => /^[a-z0-9-]{1,60}$/i.test(id) &&
@@ -199,6 +202,7 @@ function publicProfile(profile) {
     username: profile.username,
     bestScore: Number.isSafeInteger(profile.bestScore) ? profile.bestScore : 0,
     badges: profile.badges && typeof profile.badges === "object" ? profile.badges : {},
+    equippedBadges: Array.isArray(profile.equippedBadges) ? profile.equippedBadges : [],
     region: typeof profile.region === "string" ? profile.region : "",
     createdAt: profile.createdAt
   };
@@ -231,6 +235,7 @@ async function reserveUsername(env, username, uid, accessToken, state, createdAt
     normalizedName,
     bestScore: state.bestScore,
     badges: state.badges,
+    equippedBadges: state.equippedBadges,
     leaderboardOptIn: state.leaderboardOptIn === true,
     region: typeof state.region === "string" ? state.region : "",
     state,
@@ -378,16 +383,43 @@ async function saveCurrentUser(request, env, uid) {
   if (!current) return jsonResponse({ error: "Perfil de jogo não encontrado." }, 404);
   const body = await request.json();
   const state = sanitizeGameState(body.state);
+  const equippedBadges = Array.isArray(current.equippedBadges) ? current.equippedBadges : [];
+  state.equippedBadges = equippedBadges;
   const profile = {
     ...current,
     bestScore: Math.max(current.bestScore || 0, state.bestScore),
     badges: { ...(current.badges || {}), ...state.badges },
+    equippedBadges,
     leaderboardOptIn: state.leaderboardOptIn === true,
     region: typeof state.region === "string" ? state.region : "",
     state,
     updatedAt: Date.now()
   };
   const accessToken = await googleAccessToken(env);
+  await writeProfile(env, profile, accessToken);
+  return jsonResponse({ profile: publicProfile(profile), state });
+}
+
+async function saveEquippedBadges(request, env, uid) {
+  const { accessToken, profile: current } = await currentUser(request, env, uid);
+  if (!current) return jsonResponse({ error: "Perfil de jogo não encontrado." }, 404);
+  const body = await request.json();
+  if (!Array.isArray(body.equippedBadges) || body.equippedBadges.length > 3 ||
+      body.equippedBadges.some((id) => typeof id !== "string" || !/^[a-z0-9-]{1,60}$/i.test(id)) ||
+      new Set(body.equippedBadges).size !== body.equippedBadges.length) {
+    return jsonResponse({ error: "Selecione até três emblemas válidos." }, 400);
+  }
+  const earnedBadges = current.badges && typeof current.badges === "object" ? current.badges : {};
+  if (body.equippedBadges.some((id) =>
+    !Number.isSafeInteger(earnedBadges[id]) || earnedBadges[id] <= 0)) {
+    return jsonResponse({ error: "Só é possível equipar emblemas registrados na conta." }, 403);
+  }
+  const equippedBadges = body.equippedBadges;
+  const state = {
+    ...(current.state && typeof current.state === "object" ? current.state : {}),
+    equippedBadges
+  };
+  const profile = { ...current, equippedBadges, state, updatedAt: Date.now() };
   await writeProfile(env, profile, accessToken);
   return jsonResponse({ profile: publicProfile(profile), state });
 }
@@ -521,6 +553,11 @@ export default {
         response = await refreshSession(request, env);
       } else if (request.method === "GET" && url.pathname === "/api/leaderboard") {
         response = await listLeaderboard(request, env);
+      } else if (request.method === "PUT" && url.pathname === "/api/me/equipped-badges") {
+        const uid = await authenticate(request, env);
+        response = uid
+          ? await saveEquippedBadges(request, env, uid)
+          : jsonResponse({ error: "Autenticação necessária." }, 401);
       } else if (url.pathname === "/api/me" && ["GET", "PUT", "DELETE"].includes(request.method)) {
         const uid = await authenticate(request, env);
         if (!uid) response = jsonResponse({ error: "Autenticação necessária." }, 401);
@@ -539,7 +576,7 @@ export default {
       } else if (request.method === "GET" && url.pathname === "/") {
         response = jsonResponse({
           status: "Neon Void API pronta.",
-          endpoints: ["/api/auth/register", "/api/auth/login", "/api/auth/refresh", "/api/leaderboard", "/api/me (GET, PUT, DELETE)", "/api/profiles/:uid"]
+          endpoints: ["/api/auth/register", "/api/auth/login", "/api/auth/refresh", "/api/leaderboard", "/api/me (GET, PUT, DELETE)", "/api/me/equipped-badges (PUT)", "/api/profiles/:uid"]
         });
       } else {
         response = jsonResponse({ error: "Rota não encontrada." }, 404);
