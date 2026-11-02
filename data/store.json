@@ -1,0 +1,54 @@
+{
+  "welcomePackage": {
+    "id": "welcome-pack",
+    "title": {
+      "pt-BR": "Pacote Inicial!",
+      "en": "Starter Pack!"
+    },
+    "description": {
+      "pt-BR": "1x Solaris Skin, 1x Prisma e 1x Espectro para começar sua jornada pelo vazio.",
+      "en": "1x Solaris Skin, 1x Prism, and 1x Specter to begin your journey through the void."
+    },
+    "priceCoins": 25000,
+    "offerDurationDays": 45,
+    "items": [
+      {
+        "category": "ship",
+        "skinId": "ship-rare"
+      },
+      {
+        "category": "shield",
+        "skinId": "shield-epic"
+      },
+      {
+        "category": "shot",
+        "skinId": "shot-epic"
+      }
+    ]
+  },
+  "luckDrop": {
+    "priceCoins": 1000,
+    "rarityOdds": {
+      "common": 58.6,
+      "uncommon": 25,
+      "rare": 10,
+      "epic": 5,
+      "legendary": 1.4
+    },
+    "coinRewards": {
+      "common": 100,
+      "uncommon": 250,
+      "rare": 500,
+      "epic": 1000,
+      "legendary": 2500
+    },
+    "exclusiveSkinId": "ship-void-neon"
+  },
+  "diamondPackages": [
+    { "id": "diamonds-100", "diamonds": 100, "priceMoneyVoid": 1000 },
+    { "id": "diamonds-500", "diamonds": 500, "priceMoneyVoid": 4500 },
+    { "id": "diamonds-1000", "diamonds": 1000, "priceMoneyVoid": 8000 },
+    { "id": "diamonds-2500", "diamonds": 2500, "priceMoneyVoid": 18000 },
+    { "id": "diamonds-4500", "diamonds": 4500, "priceMoneyVoid": 30000 }
+  ]
+}

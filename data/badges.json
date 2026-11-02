@@ -1,0 +1,77 @@
+{
+  "badges": [
+    {
+      "id": "account-created",
+      "rarity": "common",
+      "symbol": "✦",
+      "name": { "pt-BR": "Boas-vindas", "en": "Welcome" },
+      "description": { "pt-BR": "Crie sua conta no Neon Void.", "en": "Create your Neon Void account." }
+    },
+    {
+      "id": "player-beta",
+      "rarity": "legendary",
+      "symbol": "∅",
+      "name": { "pt-BR": "Jogador Beta", "en": "Beta Player" },
+      "description": {
+        "pt-BR": "Eu estive aqui quando tudo era vazio. Concedido a contas criadas de 2 a 30 de novembro de 2026.",
+        "en": "I was here when everything was empty. Awarded to accounts created from November 2 through 30, 2026."
+      }
+    },
+    {
+      "id": "first-coin-purchase",
+      "rarity": "uncommon",
+      "symbol": "N",
+      "name": { "pt-BR": "Primeiro investimento", "en": "First Investment" },
+      "description": { "pt-BR": "Faça sua primeira compra usando Neon-moedas.", "en": "Make your first purchase using Neon Coins." }
+    },
+    {
+      "id": "first-diamond-purchase",
+      "rarity": "rare",
+      "symbol": "◇",
+      "name": { "pt-BR": "Poder do diamante", "en": "Diamond Power" },
+      "description": { "pt-BR": "Faça sua primeira compra usando diamantes. Será liberado quando houver uma loja que aceite essa moeda.", "en": "Make your first purchase using diamonds. This will unlock when a store accepts this currency." }
+    },
+    {
+      "id": "christmas-2026",
+      "rarity": "legendary",
+      "symbol": "❄",
+      "name": { "pt-BR": "Lenda do Natal 2026", "en": "Christmas Legend 2026" },
+      "description": { "pt-BR": "Complete todos os objetivos do evento Natal Neon 2026.", "en": "Complete every objective in the 2026 Neon Christmas event." }
+    },
+    {
+      "id": "collect-10-epic",
+      "rarity": "epic",
+      "symbol": "✧",
+      "name": { "pt-BR": "Colecionador épico", "en": "Epic Collector" },
+      "description": { "pt-BR": "Colecione 10 skins épicas de nave, escudo ou tiro.", "en": "Collect 10 epic ship, shield, or shot skins." }
+    },
+    {
+      "id": "collect-5-legendary",
+      "rarity": "legendary",
+      "symbol": "★",
+      "name": { "pt-BR": "Coleção lendária", "en": "Legendary Collection" },
+      "description": { "pt-BR": "Colecione 5 skins lendárias de nave, escudo ou tiro.", "en": "Collect 5 legendary ship, shield, or shot skins." }
+    },
+    {
+      "id": "collect-30-rare",
+      "rarity": "rare",
+      "symbol": "◆",
+      "name": { "pt-BR": "Caçador de raridades", "en": "Rare Hunter" },
+      "description": { "pt-BR": "Colecione 30 skins raras de nave, escudo ou tiro.", "en": "Collect 30 rare ship, shield, or shot skins." }
+    },
+    {
+      "id": "collect-100-common",
+      "rarity": "common",
+      "symbol": "●",
+      "name": { "pt-BR": "Coleção comum", "en": "Common Collection" },
+      "description": { "pt-BR": "Colecione 100 skins comuns de nave, escudo ou tiro.", "en": "Collect 100 common ship, shield, or shot skins." }
+    },
+    {
+      "id": "collect-200-uncommon",
+      "rarity": "uncommon",
+      "symbol": "❋",
+      "name": { "pt-BR": "Coleção incomum", "en": "Uncommon Collection" },
+      "description": { "pt-BR": "Colecione 200 skins incomuns de nave, escudo ou tiro.", "en": "Collect 200 uncommon ship, shield, or shot skins." }
+    }
+  ]
+}

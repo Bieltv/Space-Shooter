@@ -1,0 +1,33 @@
+{
+  "codes": [
+    {
+      "code": "DEPURATIONMODE",
+      "active": true,
+      "title": {
+        "pt-BR": "Modo de depuração",
+        "en": "Debug mode"
+      },
+      "unlockFeatures": ["debug"],
+      "rewards": []
+    },
+    {
+      "code": "NEONSTART",
+      "active": true,
+      "title": {
+        "pt-BR": "Bônus de demonstração",
+        "en": "Demo bonus"
+      },
+      "rewards": [
+        {
+          "type": "coins",
+          "amount": 250
+        },
+        {
+          "type": "skin",
+          "skinId": "shot-uncommon",
+          "fallbackCoins": 250
+        }
+      ]
+    }
+  ]
+}

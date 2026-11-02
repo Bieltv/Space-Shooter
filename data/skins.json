@@ -1,0 +1,60 @@
+{
+  "rarities": {
+    "uncommon": { "pt-BR": "Incomum", "en": "Uncommon", "color": "#42ee78" },
+    "common": { "pt-BR": "Comum", "en": "Common", "color": "#54dfff" },
+    "rare": { "pt-BR": "Raro", "en": "Rare", "color": "#ffd45c" },
+    "epic": { "pt-BR": "Épico", "en": "Epic", "color": "#bf72ff" },
+    "legendary": { "pt-BR": "Lendária", "en": "Legendary", "color": "#ff536b" }
+  },
+  "categories": {
+    "ship": [
+      { "id": "ship-uncommon", "rarity": "uncommon", "color": "#42ee78", "shape": "triangle", "name": { "pt-BR": "Vagalume", "en": "Firefly" }, "description": { "pt-BR": "Um brilho verde no vazio.", "en": "A green glow in the void." } },
+      { "id": "ship-common", "rarity": "common", "color": "#31eaff", "shape": "triangle", "name": { "pt-BR": "Pioneira", "en": "Pioneer" }, "description": { "pt-BR": "A nave clássica de exploração.", "en": "The classic exploration ship." } },
+      { "id": "ship-rare", "rarity": "rare", "color": "#ffd45c", "shape": "diamond", "name": { "pt-BR": "Solaris", "en": "Solaris" }, "description": { "pt-BR": "Cortando o espaço em dourado.", "en": "Cutting through space in gold." } },
+      { "id": "ship-epic", "rarity": "epic", "color": "#bf72ff", "shape": "triangle-wide", "name": { "pt-BR": "Nebulosa", "en": "Nebula" }, "description": { "pt-BR": "Nascida entre estrelas violetas.", "en": "Born among violet stars." } },
+      { "id": "ship-legendary", "rarity": "legendary", "color": "#ff536b", "shape": "triangle", "name": { "pt-BR": "Supernova", "en": "Supernova" }, "description": { "pt-BR": "Uma lenda que deixa seu rastro.", "en": "A legend that leaves its mark." } },
+      { "id": "ship-void-neon", "rarity": "legendary", "color": "#080714", "accentColor": "#bf72ff", "shape": "void-neon", "name": { "pt-BR": "Vazio Neon", "en": "Neon Void" }, "description": { "pt-BR": "Uma esfera negra atravessada por um raio violeta.", "en": "A black sphere pierced by a violet lightning bolt." } },
+      { "id": "ship-christmas-ornament", "rarity": "epic", "color": "#ef3340", "shape": "christmas-ornament", "evolutive": true, "name": { "pt-BR": "Bola de Natal", "en": "Christmas Ornament" }, "description": { "pt-BR": "Uma bola natalina neon que evolui e fortalece os disparos.", "en": "A neon Christmas ornament that evolves and strengthens shots." } },
+      { "id": "ship-pass-ruby", "rarity": "common", "color": "#ff536b", "shape": "triangle", "name": { "pt-BR": "Rubra", "en": "Ruby" }, "description": { "pt-BR": "Uma nave simples em vermelho natalino.", "en": "A simple ship in Christmas red." } },
+      { "id": "ship-pass-emerald", "rarity": "uncommon", "color": "#35d56a", "shape": "triangle-wide", "name": { "pt-BR": "Esmeralda", "en": "Emerald" }, "description": { "pt-BR": "Uma nave verde de brilho festivo.", "en": "A festive green ship." } },
+      { "id": "ship-pass-sapphire", "rarity": "common", "color": "#4c8dff", "shape": "diamond", "name": { "pt-BR": "Safira", "en": "Sapphire" }, "description": { "pt-BR": "Uma nave azul de linhas simples.", "en": "A simple blue ship." } },
+      { "id": "ship-pass-amber", "rarity": "rare", "color": "#ffb23f", "shape": "triangle", "name": { "pt-BR": "Âmbar", "en": "Amber" }, "description": { "pt-BR": "Uma nave dourada para a trilha premium.", "en": "A golden ship for the premium track." } },
+      { "id": "ship-pass-magenta", "rarity": "uncommon", "color": "#ff58d4", "shape": "triangle-wide", "name": { "pt-BR": "Magenta", "en": "Magenta" }, "description": { "pt-BR": "Uma nave rosa vibrante.", "en": "A vibrant pink ship." } },
+      { "id": "ship-pass-frost", "rarity": "common", "color": "#b9f4ff", "shape": "diamond", "name": { "pt-BR": "Geada", "en": "Frost" }, "description": { "pt-BR": "Uma nave azul-clara da trilha premium.", "en": "A pale blue ship from the premium track." } },
+      { "id": "ship-pass-pink", "rarity": "common", "color": "#ff85cb", "shape": "triangle", "name": { "pt-BR": "Rosa de Inverno", "en": "Winter Rose" }, "description": { "pt-BR": "Uma cor exclusiva das Luck Drops do passe.", "en": "A pass Luck Drop exclusive color." } },
+      { "id": "ship-pass-azure", "rarity": "uncommon", "color": "#42caff", "shape": "triangle-wide", "name": { "pt-BR": "Azul Glacial", "en": "Glacial Blue" }, "description": { "pt-BR": "Uma cor exclusiva das Luck Drops do passe.", "en": "A pass Luck Drop exclusive color." } },
+      { "id": "ship-pass-lilac", "rarity": "rare", "color": "#c38bff", "shape": "diamond", "name": { "pt-BR": "Lilás Invernal", "en": "Winter Lilac" }, "description": { "pt-BR": "Uma cor exclusiva das Luck Drops do passe.", "en": "A pass Luck Drop exclusive color." } },
+      { "id": "ship-white-neon", "rarity": "legendary", "color": "#f8fbff", "accentColor": "#78f5ff", "shape": "white-neon", "name": { "pt-BR": "Neve Neon", "en": "Neon Snow" }, "description": { "pt-BR": "Uma nave lendária branca com brilho neon.", "en": "A legendary white ship with a neon glow." } },
+      { "id": "ship-christmas-tree", "rarity": "legendary", "color": "#2bd77c", "accentColor": "#62f7ff", "shape": "christmas-tree", "evolutive": true, "name": { "pt-BR": "Árvore de Natal", "en": "Christmas Tree" }, "description": { "pt-BR": "Uma árvore natalina que evolui em três estágios.", "en": "A Christmas tree that evolves through three stages." } },
+      { "id": "ship-gray-neon", "rarity": "epic", "color": "#aeb8c7", "accentColor": "#78f5ff", "shape": "triangle-wide", "name": { "pt-BR": "Névoa de Prata", "en": "Silver Haze" }, "description": { "pt-BR": "Uma nave épica cinza com contorno neon.", "en": "An epic gray ship with a neon outline." } }
+    ],
+    "shield": [
+      { "id": "shield-uncommon", "rarity": "uncommon", "color": "#42ee78", "shape": "circle", "name": { "pt-BR": "Broto", "en": "Sprout" }, "description": { "pt-BR": "Uma barreira verde e vibrante.", "en": "A vivid green barrier." } },
+      { "id": "shield-common", "rarity": "common", "color": "#31eaff", "shape": "circle", "name": { "pt-BR": "Órbita", "en": "Orbit" }, "description": { "pt-BR": "Um anel ciano de proteção.", "en": "A cyan ring of protection." } },
+      { "id": "shield-rare", "rarity": "rare", "color": "#ffd45c", "shape": "double-circle", "name": { "pt-BR": "Aegis", "en": "Aegis" }, "description": { "pt-BR": "Duas órbitas de energia dourada.", "en": "Two golden energy orbits." } },
+      { "id": "shield-epic", "rarity": "epic", "color": "#bf72ff", "shape": "hexagon", "name": { "pt-BR": "Prisma", "en": "Prism" }, "description": { "pt-BR": "Uma barreira facetada violeta.", "en": "A faceted violet barrier." } },
+      { "id": "shield-legendary", "rarity": "legendary", "color": "#ff536b", "shape": "circle", "name": { "pt-BR": "Coração Estelar", "en": "Starheart" }, "description": { "pt-BR": "Um anel lendário em chamas.", "en": "A legendary ring ablaze." } },
+      { "id": "shield-christmas-wreath", "rarity": "epic", "color": "#42ee78", "shape": "petal-ring", "name": { "pt-BR": "Guirlanda de Natal", "en": "Christmas Wreath" }, "description": { "pt-BR": "Pétalas verdes duplicadas ao redor de um círculo protetor.", "en": "Green petals repeated around a protective circle." } },
+      { "id": "shield-pass-cyan", "rarity": "common", "color": "#31eaff", "shape": "circle", "name": { "pt-BR": "Ciano", "en": "Cyan" }, "description": { "pt-BR": "Um escudo simples em azul neon.", "en": "A simple neon blue shield." } },
+      { "id": "shield-pass-violet", "rarity": "uncommon", "color": "#a65cff", "shape": "double-circle", "name": { "pt-BR": "Violeta", "en": "Violet" }, "description": { "pt-BR": "Duas órbitas violetas para a trilha gratuita.", "en": "Two violet rings for the free track." } },
+      { "id": "shield-pass-lime", "rarity": "common", "color": "#a9f542", "shape": "circle", "name": { "pt-BR": "Lima", "en": "Lime" }, "description": { "pt-BR": "Um escudo simples da trilha premium.", "en": "A simple premium track shield." } },
+      { "id": "shield-pass-coral", "rarity": "uncommon", "color": "#ff7187", "shape": "double-circle", "name": { "pt-BR": "Coral", "en": "Coral" }, "description": { "pt-BR": "Um escudo coral da trilha premium.", "en": "A coral premium track shield." } },
+      { "id": "shield-pass-rose", "rarity": "common", "color": "#ff85b4", "shape": "circle", "name": { "pt-BR": "Rosa de Inverno", "en": "Winter Rose" }, "description": { "pt-BR": "Uma cor exclusiva das Luck Drops do passe.", "en": "A pass Luck Drop exclusive color." } },
+      { "id": "shield-pass-mint", "rarity": "uncommon", "color": "#55f3b3", "shape": "double-circle", "name": { "pt-BR": "Menta Glacial", "en": "Glacial Mint" }, "description": { "pt-BR": "Uma cor exclusiva das Luck Drops do passe.", "en": "A pass Luck Drop exclusive color." } },
+      { "id": "shield-pass-sun", "rarity": "rare", "color": "#ffd45c", "shape": "hexagon", "name": { "pt-BR": "Sol de Inverno", "en": "Winter Sun" }, "description": { "pt-BR": "Uma cor exclusiva das Luck Drops do passe.", "en": "A pass Luck Drop exclusive color." } },
+      { "id": "shield-golden-pulse", "rarity": "epic", "color": "#ffd45c", "shape": "gold-pulse", "name": { "pt-BR": "Pulso Dourado", "en": "Golden Pulse" }, "description": { "pt-BR": "Um escudo épico dourado que pulsa com energia.", "en": "An epic golden shield pulsing with energy." } },
+      { "id": "shield-christmas-lights", "rarity": "epic", "color": "#54515e", "accentColor": "#53f18e", "shape": "christmas-lights", "name": { "pt-BR": "Pisca-Pisca", "en": "Christmas Lights" }, "description": { "pt-BR": "Fios escuros com luzes coloridas e quatro modos de animação.", "en": "Dark wires with colorful lights and four animation modes." } },
+      { "id": "shield-gray-neon", "rarity": "epic", "color": "#aeb8c7", "shape": "double-circle", "name": { "pt-BR": "Órbita Cinza", "en": "Gray Orbit" }, "description": { "pt-BR": "Um escudo épico de órbitas cinza neon.", "en": "An epic shield of gray neon orbits." } }
+    ],
+    "shot": [
+      { "id": "shot-uncommon", "rarity": "uncommon", "color": "#42ee78", "shape": "line-thin", "name": { "pt-BR": "Folha", "en": "Leaf" }, "description": { "pt-BR": "Um disparo verde e veloz.", "en": "A fast green shot." } },
+      { "id": "shot-common", "rarity": "common", "color": "#31eaff", "shape": "line", "name": { "pt-BR": "Pulso", "en": "Pulse" }, "description": { "pt-BR": "O traço de energia padrão.", "en": "The standard energy streak." } },
+      { "id": "shot-rare", "rarity": "rare", "color": "#ffd45c", "shape": "line-wide", "name": { "pt-BR": "Cometa", "en": "Comet" }, "description": { "pt-BR": "Um rastro dourado e intenso.", "en": "An intense golden trail." } },
+      { "id": "shot-epic", "rarity": "epic", "color": "#bf72ff", "shape": "double-line", "name": { "pt-BR": "Espectro", "en": "Specter" }, "description": { "pt-BR": "Dois feixes violeta em um só tiro.", "en": "Two violet beams in one shot." } },
+      { "id": "shot-legendary", "rarity": "legendary", "color": "#ff536b", "shape": "line-wide", "name": { "pt-BR": "Fúria Rubra", "en": "Red Fury" }, "description": { "pt-BR": "Uma linha lendária incandescente.", "en": "An incandescent legendary streak." } },
+      { "id": "shot-christmas-stars", "rarity": "epic", "color": "#ffd45c", "shape": "star", "name": { "pt-BR": "Estrelas de Natal", "en": "Christmas Stars" }, "description": { "pt-BR": "Disparos em forma de estrelas douradas.", "en": "Golden star-shaped shots." } },
+      { "id": "shot-candy-cane", "rarity": "epic", "color": "#ff536b", "accentColor": "#fff4e8", "shape": "candy-cane", "name": { "pt-BR": "Bengala Doce", "en": "Candy Cane" }, "description": { "pt-BR": "Disparos listrados em vermelho e branco da trilha premium.", "en": "Red-and-white striped shots from the premium track." } },
+      { "id": "shot-gray-neon", "rarity": "epic", "color": "#aeb8c7", "shape": "double-line", "name": { "pt-BR": "Raio Cinza", "en": "Gray Bolt" }, "description": { "pt-BR": "Dois disparos épicos cinza com brilho neon.", "en": "Two epic gray shots with a neon glow." } }
+    ]
+  }
+}

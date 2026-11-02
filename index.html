@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080714">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Neon Void</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/neon-void.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icons/neon-void-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=21">
+  <script defer src="js/app.js?v=25"></script>
+</head>
+<body>
+  <div class="starfield" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="#" data-screen="home" aria-label="Neon Void - início"><span>Neon</span> <b>Void</b></a>
+    <div class="wallet-currencies" aria-label="Carteira">
+      <div class="wallet">
+        <span class="wallet-icon" aria-hidden="true">N</span>
+        <span class="wallet-copy"><span data-i18n="coins">Neon-moedas</span><b id="coin-value">0</b></span>
+      </div>
+      <div class="wallet diamond-wallet">
+        <span class="wallet-icon" aria-hidden="true">◇</span>
+        <span class="wallet-copy"><span data-i18n="diamonds">Diamantes</span><b id="diamond-value">0</b></span>
+      </div>
+    </div>
+    <span class="player-id" id="player-id" hidden></span>
+    <button class="small-button account-logout" id="logout-button" type="button" data-i18n="logout" hidden>Sair da conta</button>
+    <div class="topbar-actions">
+      <button class="debug-toggle" id="debug-toggle" type="button" aria-expanded="false" hidden>◈ <span data-i18n="debug">Depuração</span></button>
+      <nav class="quick-nav" aria-label="Acesso rápido">
+        <button class="quick-nav-button" type="button" data-screen="inbox" data-i18n-aria-label="inbox" title="Caixa de entrada">
+          <span aria-hidden="true">✉</span><span class="quick-nav-badge inbox-badge" id="home-inbox-count" hidden></span>
+        </button>
+        <button class="quick-nav-button event-quick-button" type="button" data-screen="events" data-i18n-aria-label="events" title="Eventos">
+          <span aria-hidden="true">✦</span><span class="quick-nav-badge inbox-badge" id="home-event-count" hidden></span>
+        </button>
+        <button class="quick-nav-button pass-quick-button" type="button" data-screen="battle-pass" data-i18n-aria-label="battlePass" title="Passe do Néon" hidden>
+          <span aria-hidden="true">❄</span>
+        </button>
+        <button class="quick-nav-button badges-quick-button" type="button" data-screen="badges" data-i18n-aria-label="badges" title="Emblemas" aria-label="Emblemas">
+          <span aria-hidden="true">⬡</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <section class="auth-gate" id="auth-gate" aria-labelledby="auth-title">
+    <div class="auth-panel">
+      <a class="brand auth-brand" href="#" aria-label="Neon Void"><span>Neon</span> <b>Void</b></a>
+      <p class="eyebrow" data-i18n="accountSystem">SISTEMA NEON VOID</p>
+      <h1 id="auth-title" data-i18n="welcomeBack">Entre na sua conta</h1>
+      <div class="auth-tabs" role="tablist" aria-label="Conta">
+        <button type="button" role="tab" aria-selected="true" aria-controls="login-form" id="login-tab" data-auth-mode="login" data-i18n="login">Entrar</button>
+        <button type="button" role="tab" aria-selected="false" aria-controls="register-form" id="register-tab" data-auth-mode="register" data-i18n="register">Criar conta</button>
+      </div>
+      <form class="auth-form" id="login-form" autocomplete="on">
+        <label><span data-i18n="loginIdentifier">E-mail ou nome antigo</span><input name="identity" type="text" required maxlength="254" autocomplete="username"></label>
+        <label><span data-i18n="password">Senha</span><input name="password" type="password" required minlength="10" maxlength="128" autocomplete="current-password"></label>
+        <button class="neon-button pink" type="submit" data-i18n="login">Entrar</button>
+      </form>
+      <form class="account-import" id="backup-import-form">
+        <h2 data-i18n="backupImport">Importar conta JSON</h2>
+        <p data-i18n="backupImportHint">Selecione seu backup criptografado e informe seu nome e senha.</p>
+        <label><span data-i18n="playerName">Nome de jogador</span><input name="username" required minlength="3" maxlength="20" autocomplete="username"></label>
+        <label><span data-i18n="password">Senha</span><input name="password" type="password" required minlength="10" maxlength="128" autocomplete="current-password"></label>
+        <label><span data-i18n="backupFile">Arquivo de backup criptografado</span><input name="backup" type="file" accept=".json,application/json" required></label>
+        <button class="small-button" type="submit" data-i18n="backupImportButton">Importar conta</button>
+      </form>
+      <form class="auth-form" id="register-form" autocomplete="on" hidden>
+        <label><span data-i18n="playerName">Nome de jogador</span><input name="username" required minlength="3" maxlength="20" pattern="[\p{L}\p{N}_\-]{3,20}" autocomplete="username"></label>
+        <label><span data-i18n="emailAddress">E-mail</span><input name="email" type="email" required maxlength="254" autocomplete="email"></label>
+        <label><span data-i18n="password">Senha</span><input name="password" type="password" required minlength="10" maxlength="128" autocomplete="new-password"></label>
+        <p class="form-hint" data-i18n="passwordHint">Use ao menos 10 caracteres. Sua conta é autenticada pelo Firebase.</p>
+        <label class="faq-acknowledgement"><input name="faqAcknowledged" type="checkbox" required><span><span data-i18n="faqAcknowledgement">Li o FAQ e entendi que a conta é deste protótipo e que o pacote usa apenas moedas virtuais.</span> <button type="button" class="inline-link" data-faq data-i18n="faq">FAQ do jogo</button></span></label>
+        <button class="neon-button pink" type="submit" data-i18n="createAccount">Criar minha conta</button>
+      </form>
+      <p class="auth-status" id="auth-status" role="status" aria-live="polite"></p>
+      <p class="faq-notice" data-i18n="faqNotice">O FAQ explica o funcionamento atual do protótipo; não há pagamentos em dinheiro real.</p>
+    </div>
+  </section>
+
+  <main>
+    <section class="screen active" id="screen-home" aria-labelledby="game-title">
+      <div class="home-content">
+        <p class="eyebrow" data-i18n="tagline">UM SHOOTER DE OUTRA GALÁXIA</p>
+        <h1 class="game-title" id="game-title"><span>Neon</span> <b>Void</b></h1>
+        <p class="subtitle" data-i18n="subtitle">O vazio está chamando. Você vai responder?</p>
+        <div class="home-wallet" aria-label="Saldo de Neon-moedas">
+          <span class="home-wallet-icon" aria-hidden="true">N</span>
+          <span class="home-wallet-copy"><small data-i18n="walletBalance">CARTEIRA</small><strong><span id="home-coin-value">0</span> <span data-i18n="coins">Neon-moedas</span></strong><strong class="home-diamond-balance"><span id="home-diamond-value">0</span> <span data-i18n="diamonds">Diamantes</span></strong></span>
+          <span class="wallet-arrow" aria-hidden="true">✦</span>
+        </div>
+        <nav class="main-menu" aria-label="Menu principal">
+          <button class="neon-button pink" id="play-button" data-action="play" data-i18n="play" disabled>Jogar</button>
+          <button class="neon-button cyan" data-screen="settings" data-i18n="settings">Configurações</button>
+          <button class="neon-button cyan" data-screen="skins" data-i18n="skins">Skins</button>
+          <button class="neon-button gold-button" data-screen="store" data-i18n="store">Loja</button>
+          <button class="neon-button cyan" id="leaderboard-button" data-screen="leaderboard" data-i18n="leaderboard" hidden>Ranking</button>
+          <button class="neon-button pink" data-screen="missions" data-i18n="missions">Missões</button>
+          <button class="neon-button cyan" data-screen="evolution" data-i18n="evolution">Evolução</button>
+          <button class="neon-button gold-button" data-screen="battle-pass" data-i18n="battlePass" hidden>Passe do Néon</button>
+          <button class="neon-button muted" data-action="exit" data-i18n="exit">Sair</button>
+        </nav>
+        <p class="control-hint" data-i18n="homeHint">Mova o mouse ou toque para mover · Tiro automático</p>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-settings" aria-labelledby="settings-title" hidden>
+      <div class="panel">
+        <p class="eyebrow" data-i18n="menuLabel">MENU</p>
+        <h2 id="settings-title" data-i18n="settings">Configurações</h2>
+        <div class="setting-row">
+          <div><h3 data-i18n="graphics">Gráficos</h3><p data-i18n="graphicsHint">Define a quantidade de partículas e efeitos animados.</p></div>
+          <div class="segmented" role="group" aria-label="Qualidade gráfica">
+            <button type="button" data-quality="minimum" data-i18n="minimum">Mínimo</button>
+            <button type="button" data-quality="medium" data-i18n="medium">Médio</button>
+            <button type="button" data-quality="high" data-i18n="high">Alto</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div><h3 data-i18n="language">Idioma</h3><p data-i18n="languageHint">Escolha o idioma da interface.</p></div>
+          <select id="language-select" aria-label="Idioma">
+            <option value="pt-BR">Português (Brasil)</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <div><h3 data-i18n="canvasSize">Tamanho do canvas</h3><p data-i18n="canvasSizeHint">Use uma janela ou peça tela cheia no PC.</p></div>
+          <select id="canvas-mode" aria-label="Tamanho do canvas">
+            <option value="windowed" data-i18n="windowed">Janela</option>
+            <option value="fullscreen" data-i18n="fullscreen">Tela cheia (PC)</option>
+          </select>
+        </div>
+        <div class="setting-row account-id-row">
+          <div><h3 data-i18n="playerId">ID do jogador</h3><p id="settings-player-id"></p></div>
+        </div>
+        <div class="setting-row">
+          <div><h3 data-i18n="exportAccount">Exportar conta JSON</h3><p data-i18n="exportHint">Crie um backup criptografado para transferir sua conta para outro aparelho.</p></div>
+          <button class="small-button" id="open-export-account" type="button" data-i18n="exportAccountButton">Exportar backup</button>
+        </div>
+        <div class="setting-row" id="cloud-migration-row">
+          <div><h3 data-i18n="cloudMigration">Migrar conta local</h3><p data-i18n="cloudMigrationHint">Vincule esta conta local ao Firebase e sincronize seu progresso.</p></div>
+          <button class="small-button" id="open-cloud-migration" type="button" data-i18n="cloudMigrationButton">Migrar para a nuvem</button>
+        </div>
+        <div class="setting-row">
+          <div><h3 data-i18n="evolution">Evolução</h3><p data-i18n="evolutionsHint">Melhore sua nave até o nível 10 usando moedas.</p></div>
+          <button class="small-button" data-screen="evolution" data-i18n="evolution">Evolução</button>
+        </div>
+        <div class="setting-row" id="leaderboard-settings" hidden>
+          <div>
+            <h3 data-i18n="leaderboardPrivacy">Privacidade do ranking</h3>
+            <p data-i18n="leaderboardPrivacyHint">Participar é opcional. Se ativado, seu nome de jogador, melhor pontuação e estado escolhido ficarão visíveis no ranking.</p>
+          </div>
+          <div class="leaderboard-preferences">
+            <label class="toggle-control"><input id="leaderboard-opt-in" type="checkbox"><span data-i18n="joinLeaderboard">Participar do ranking</span></label>
+            <label class="region-control"><span data-i18n="state">Estado</span>
+              <select id="leaderboard-region">
+                <option value="" data-i18n="noState">Não informar</option>
+                <option value="AC">Acre (AC)</option><option value="AL">Alagoas (AL)</option>
+                <option value="AP">Amapá (AP)</option><option value="AM">Amazonas (AM)</option>
+                <option value="BA">Bahia (BA)</option><option value="CE">Ceará (CE)</option>
+                <option value="DF">Distrito Federal (DF)</option><option value="ES">Espírito Santo (ES)</option>
+                <option value="GO">Goiás (GO)</option><option value="MA">Maranhão (MA)</option>
+                <option value="MT">Mato Grosso (MT)</option><option value="MS">Mato Grosso do Sul (MS)</option>
+                <option value="MG">Minas Gerais (MG)</option><option value="PA">Pará (PA)</option>
+                <option value="PB">Paraíba (PB)</option><option value="PR">Paraná (PR)</option>
+                <option value="PE">Pernambuco (PE)</option><option value="PI">Piauí (PI)</option>
+                <option value="RJ">Rio de Janeiro (RJ)</option><option value="RN">Rio Grande do Norte (RN)</option>
+                <option value="RS">Rio Grande do Sul (RS)</option><option value="RO">Rondônia (RO)</option>
+                <option value="RR">Roraima (RR)</option><option value="SC">Santa Catarina (SC)</option>
+                <option value="SP">São Paulo (SP)</option><option value="SE">Sergipe (SE)</option>
+                <option value="TO">Tocantins (TO)</option>
+              </select>
+            </label>
+            <p id="leaderboard-preference-status" class="inline-status" role="status" aria-live="polite"></p>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div><h3 data-i18n="missionPopups">Avisos de missão</h3><p data-i18n="missionPopupsHint">Exibe um aviso quando uma missão for concluída.</p></div>
+          <label class="toggle-control"><input id="mission-popups" type="checkbox" checked><span data-i18n="enabled">Ativado</span></label>
+        </div>
+        <div class="setting-row">
+          <div><h3 data-i18n="faq">FAQ do jogo</h3><p data-i18n="faqSettingsHint">Veja respostas sobre contas locais e moedas virtuais.</p></div>
+          <button class="small-button" type="button" data-faq data-i18n="openFaq">Abrir FAQ</button>
+        </div>
+        <div class="setting-row danger-zone">
+          <div><h3 data-i18n="deleteAccount">Excluir conta e dados</h3><p data-i18n="deleteAccountHint">Apaga permanentemente sua conta e os dados salvos neste navegador.</p></div>
+          <button class="small-button danger-button" id="open-delete-account" type="button" data-i18n="deleteAccount">Excluir conta e dados</button>
+        </div>
+        <button class="neon-button back-button" id="settings-return-to-game" type="button" data-i18n="returnToGame" hidden>Voltar para a partida</button>
+        <button class="neon-button back-button" id="settings-back-button" data-screen="home" data-i18n="back">Voltar</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-evolution" aria-labelledby="evolution-title" hidden>
+      <div class="panel evolution-panel">
+        <p class="eyebrow" data-i18n="menuLabel">MENU</p>
+        <h2 id="evolution-title" data-i18n="evolution">Evolução</h2>
+        <p class="section-copy" data-i18n="evolutionsHint">Melhore sua nave até o nível 10 usando moedas.</p>
+        <div class="evolution-list" id="evolution-list"></div>
+        <button class="neon-button back-button" data-screen="home" data-i18n="back">Voltar</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-skins" aria-labelledby="skins-title" hidden>
+      <div class="panel">
+        <p class="eyebrow" data-i18n="menuLabel">MENU</p>
+        <h2 id="skins-title" data-i18n="skins">Skins</h2>
+        <p class="section-copy" data-i18n="skinsHint">Escolha visuais para nave, escudo e tiro.</p>
+        <div class="skin-tabs" role="tablist" aria-label="Categorias de skins">
+          <button type="button" role="tab" id="skin-tab-ship" aria-controls="skin-grid" aria-selected="true" data-skin-category="ship" data-i18n="ship">Nave</button>
+          <button type="button" role="tab" id="skin-tab-shield" aria-controls="skin-grid" aria-selected="false" data-skin-category="shield" data-i18n="shield">Escudo</button>
+          <button type="button" role="tab" id="skin-tab-shot" aria-controls="skin-grid" aria-selected="false" data-skin-category="shot" data-i18n="shot">Tiro</button>
+        </div>
+        <div class="skin-list" id="skin-grid" role="tabpanel" aria-labelledby="skin-tab-ship"></div>
+        <div id="skin-extras"></div>
+        <button class="neon-button back-button" data-screen="home" data-i18n="back">Voltar</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-battle-pass" aria-labelledby="battle-pass-title" hidden>
+      <div class="panel battle-pass-panel">
+        <p class="eyebrow" data-i18n="menuLabel">MENU</p>
+        <h2 id="battle-pass-title" data-i18n="battlePass">Passe do Néon</h2>
+        <p class="section-copy" data-i18n="battlePassHint">Colete fichas que caem durante as partidas para avançar até o nível 30.</p>
+        <div class="battle-pass-overview">
+          <div class="battle-pass-level-summary">
+            <span data-i18n="battlePassLevel">Nível do passe</span>
+            <strong id="battle-pass-level">1 / 30</strong>
+          </div>
+          <div class="battle-pass-token-summary">
+            <span data-i18n="battlePassTokens">Fichas</span>
+            <strong id="battle-pass-token-count">0 / 5</strong>
+          </div>
+          <div class="battle-pass-progress" role="progressbar" aria-label="Progresso do Passe do Néon" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <i id="battle-pass-progress-fill"></i>
+          </div>
+        </div>
+        <p class="battle-pass-status" id="battle-pass-status" role="status" aria-live="polite"></p>
+        <div class="battle-pass-actions">
+          <button class="neon-button gold-button" id="buy-battle-pass-premium" type="button" data-i18n="battlePassBuy">Desbloquear Ouro · 450 diamantes</button>
+          <button class="neon-button cyan" id="open-battle-pass-drop" type="button" data-i18n="battlePassOpenDrop" disabled>Abrir Luck Drop do passe</button>
+        </div>
+        <div class="battle-pass-level-list" id="battle-pass-level-list" aria-label="Recompensas dos 30 níveis"></div>
+        <button class="neon-button back-button" data-screen="home" data-i18n="back">Voltar</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-events" aria-labelledby="events-title" hidden>
+      <div class="panel events-panel">
+        <p class="eyebrow" data-i18n="menuLabel">MENU</p>
+        <h2 id="events-title" data-i18n="events">Eventos</h2>
+        <p class="section-copy" data-i18n="eventsHint">Confira os eventos ativos e os próximos eventos.</p>
+        <div class="event-wallet"><span data-i18n="moneyVoid">Money-Void</span><strong id="events-money-void">0</strong></div>
+        <div class="events-list" id="events-list"></div>
+        <button class="neon-button back-button" data-screen="home" data-i18n="back">Voltar</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-badges" aria-labelledby="badges-title" hidden>
+      <div class="panel badges-panel">
+        <p class="eyebrow" data-i18n="menuLabel">MENU</p>
+        <h2 id="badges-title" data-i18n="badges">Emblemas</h2>
+        <p class="section-copy" data-i18n="badgesHint">Colecione emblemas hexagonais e confira como conquistá-los.</p>
+        <div class="badge-grid" id="badge-grid"></div>
+        <button class="neon-button back-button" data-screen="home" data-i18n="back">Voltar</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-event" aria-labelledby="event-title" hidden>
+      <div class="panel event-panel">
+        <p class="eyebrow" data-i18n="event">EVENTO</p>
+        <h2 id="event-title"></h2>
+        <p class="section-copy" id="event-description"></p>
+        <p class="offer-countdown" id="event-countdown"></p>
+        <section class="event-progress" id="event-progress" hidden>
+          <div class="event-wallet"><span data-i18n="moneyVoid">Money-Void</span><strong id="event-money-void">0</strong></div>
+          <p class="event-score-summary" id="event-score-summary"></p>
+          <p class="event-boss-reward" id="event-boss-reward"></p>
+          <div class="event-phase-list" id="event-phase-list"></div>
+        </section>
+        <button class="neon-button pink" id="play-event-button" type="button" data-i18n="playEvent" hidden>Jogar evento</button>
+        <button class="neon-button back-button" id="event-back" type="button" data-screen="events" data-i18n="back">Voltar</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-store" aria-labelledby="store-title" hidden>
+      <div class="panel store-panel">
+        <p class="eyebrow" data-i18n="menuLabel">MENU</p>
+        <h2 id="store-title" data-i18n="store">Loja</h2>
+        <div class="store-wallet">
+          <span data-i18n="yourBalance">Seus saldos</span>
+          <strong><span id="store-coin-value">0</span> <span data-i18n="coins">Neon-moedas</span> · <span id="store-diamond-value">0</span> <span data-i18n="diamonds">Diamantes</span></strong>
+        </div>
+        <article class="store-feature luck-drop-card">
+          <div>
+            <span class="banner-kicker" data-i18n="luckDropLabel">CAIXA DA SORTE</span>
+            <h3 data-i18n="luckDropTitle">Luck Drop</h3>
+            <p data-i18n="luckDropHint">Abra uma caixa para receber uma skin ou Neon-moedas. Sem duplicatas.</p>
+            <p class="luck-drop-odds" data-i18n="luckDropOdds">A skin lendária Vazio Neon tem 1,4% de chance.</p>
+          </div>
+          <button class="neon-button gold-button" id="buy-luck-drop" type="button" data-i18n="buyLuckDrop">Comprar · 1.000</button>
+        </article>
+        <div class="store-actions">
+          <button class="neon-button cyan" type="button" data-screen="diamonds" data-i18n="diamondStore">Loja de diamantes</button>
+          <button class="neon-button pink" type="button" data-screen="accuracy" data-i18n="accuracyGame">Minigame de acerto</button>
+        </div>
+        <h3 class="store-section-title" data-i18n="specialPackages">Pacotes especiais</h3>
+        <article class="welcome-banner" id="welcome-banner" hidden>
+          <div class="banner-copy">
+            <span class="banner-kicker" data-i18n="newAccountOffer">OFERTA DE NOVA CONTA</span>
+            <h3 id="package-title">Pacote Inicial!</h3>
+            <p id="package-description"></p>
+            <span class="offer-countdown" id="offer-countdown" aria-live="polite"></span>
+          </div>
+          <div class="banner-rewards" id="banner-rewards" aria-label="Itens inclusos"></div>
+          <div class="banner-footer">
+            <strong class="package-price"><span id="package-price">25.000</span> <span data-i18n="coins">Neon-moedas</span></strong>
+            <button type="button" class="neon-button gold-button" id="open-purchase" data-i18n="viewOffer">Ver pacote</button>
+          </div>
+        </article>
+        <div class="store-empty" id="store-empty" hidden>
+          <span class="store-empty-icon" aria-hidden="true">◇</span>
+          <p data-i18n="noOffers">Nenhum pacote especial disponível para esta conta no momento.</p>
+        </div>
+        <button class="neon-button back-button" data-screen="home" data-i18n="back">Voltar</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-diamonds" aria-labelledby="diamonds-title" hidden>
+      <div class="panel store-panel">
+        <p class="eyebrow" data-i18n="menuLabel">MENU</p>
+        <h2 id="diamonds-title" data-i18n="diamondStore">Loja de diamantes</h2>
+        <p class="section-copy" data-i18n="diamondStoreHint">Use Money-Void, uma moeda virtual, para adquirir diamantes. Não há pagamentos reais.</p>
+        <div class="store-wallet"><span data-i18n="yourBalance">Seus saldos</span><strong><span id="diamond-screen-money-void">0</span> <span data-i18n="moneyVoid">Money-Void</span> · <span id="diamond-screen-value">0</span> <span data-i18n="diamonds">Diamantes</span></strong></div>
+        <div class="diamond-package-list" id="diamond-package-list"></div>
+        <button class="neon-button back-button" data-screen="store" data-i18n="back">Voltar</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-accuracy" aria-labelledby="accuracy-title" hidden>
+      <div class="panel accuracy-panel">
+        <p class="eyebrow" data-i18n="minigameLabel">DESAFIO DE PRECISÃO</p>
+        <h2 id="accuracy-title" data-i18n="accuracyGame">Minigame de acerto</h2>
+        <p class="section-copy" data-i18n="accuracyHint">A cada 6 horas, tente acertar o alvo móvel no centro para ganhar 100 Money-Void.</p>
+        <p class="accuracy-cooldown" id="accuracy-cooldown" role="status" aria-live="polite"></p>
+        <div class="accuracy-arena" id="accuracy-arena" aria-label="Área do minigame de precisão">
+          <span class="accuracy-reticle" aria-hidden="true"></span>
+          <span class="accuracy-target" id="accuracy-target" aria-hidden="true"></span>
+          <button type="button" class="accuracy-hit-area" id="accuracy-hit-area" aria-label="Tentar acertar o alvo" disabled></button>
+        </div>
+        <p class="accuracy-result" id="accuracy-result" role="status" aria-live="polite"></p>
+        <button class="neon-button pink" type="button" id="start-accuracy-game" data-i18n="startAttempt">Iniciar tentativa</button>
+        <button class="neon-button back-button" data-screen="store" data-i18n="back">Voltar</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-inbox" aria-labelledby="inbox-title" hidden>
+      <div class="panel inbox-panel">
+        <p class="eyebrow" data-i18n="menuLabel">MENU</p>
+        <h2 id="inbox-title" data-i18n="inbox">Caixa de entrada</h2>
+        <form class="promo-code-form" id="promo-code-form">
+          <label for="promo-code-input" data-i18n="promoCode">Código promocional</label>
+          <div class="promo-code-controls">
+            <input id="promo-code-input" name="code" type="text" maxlength="40" autocomplete="off" required>
+            <button class="neon-button cyan" type="submit" data-i18n="redeemCode">Resgatar código</button>
+          </div>
+          <p class="inline-status" id="promo-code-status" role="status" aria-live="polite"></p>
+          <small class="promo-code-notice" data-i18n="promoCodePublicNotice">Os códigos deste protótipo ficam visíveis no JSON do jogo.</small>
+        </form>
+        <div class="inbox-tabs" role="tablist" aria-label="Caixa de entrada">
+          <button type="button" role="tab" id="inbox-messages-tab" aria-controls="inbox-list" aria-selected="true" data-inbox-tab="messages" data-i18n="messages">Mensagens</button>
+          <button type="button" role="tab" id="inbox-rewards-tab" aria-controls="inbox-list" aria-selected="false" data-inbox-tab="rewards" data-i18n="rewards">Recompensas</button>
+        </div>
+        <div class="inbox-list" id="inbox-list" role="tabpanel" aria-labelledby="inbox-messages-tab"></div>
+        <button class="neon-button back-button" data-screen="home" data-i18n="back">Voltar</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-leaderboard" aria-labelledby="leaderboard-title" hidden>
+      <div class="panel">
+        <p class="eyebrow" data-i18n="menuLabel">MENU</p>
+        <h2 id="leaderboard-title" data-i18n="leaderboard">Ranking</h2>
+        <p class="section-copy" data-i18n="leaderboardDisclaimer">Pontuações são verificadas por plausibilidade, mas ainda não há validação antitrapaça autoritativa.</p>
+        <p class="section-copy" data-i18n="selectPlayerHint">Clique para selecionar; clique duas vezes ou botão direito para abrir o perfil.</p>
+        <div class="leaderboard-tabs" role="group" aria-label="Categoria do ranking">
+          <button type="button" class="small-button" id="leaderboard-national" data-leaderboard-scope="national" aria-pressed="true" data-i18n="national">Local</button>
+          <button type="button" class="small-button" id="leaderboard-state-tab" data-leaderboard-scope="state" aria-pressed="false" data-i18n="regional">Estado</button>
+        </div>
+        <p class="inline-status" id="leaderboard-status" role="status" aria-live="polite"></p>
+        <ol class="leaderboard-list" id="leaderboard-list"></ol>
+        <button class="neon-button back-button" data-screen="home" data-i18n="back">Voltar</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-missions" aria-labelledby="missions-title" hidden>
+      <div class="panel missions-panel">
+        <p class="eyebrow" data-i18n="menuLabel">MENU</p>
+        <h2 id="missions-title" data-i18n="missions">Missões</h2>
+        <p class="section-copy" id="mission-cycle"></p>
+        <div class="mission-timer" id="mission-timer" aria-live="polite"></div>
+        <div class="mission-list" id="mission-list"></div>
+        <button class="neon-button back-button" data-screen="home" data-i18n="back">Voltar</button>
+      </div>
+    </section>
+
+    <section class="screen starting-skills-screen" id="screen-starting-skills" aria-labelledby="starting-skills-title" hidden>
+      <div class="panel starting-skills-panel">
+        <p class="eyebrow" data-i18n="menuLabel">MENU</p>
+        <h2 id="starting-skills-title" data-i18n="startingSkills">Habilidade inicial</h2>
+        <p class="section-copy" data-i18n="startingSkillsHint">Escolha uma carga para esta partida. A habilidade será consumida ao iniciar.</p>
+        <p class="starting-skill-charge-status" id="starting-skill-charge-status" aria-live="polite"></p>
+        <div class="starting-skill-list" id="starting-skill-list"></div>
+        <div class="dialog-actions">
+          <button class="neon-button muted" id="cancel-starting-skill" type="button" data-i18n="back">Voltar</button>
+          <button class="neon-button pink" id="confirm-starting-skill" type="button" data-i18n="startingSkillConfirm" disabled>Continuar</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen game-screen" id="screen-game" aria-label="Jogo" hidden>
+      <div class="game-hud">
+        <div class="score-display" id="score-display">
+          <span class="hud-label" data-i18n="score">Pontos</span>
+          <strong id="score-value">0</strong>
+          <span class="score-meter" aria-hidden="true"><i id="score-meter-fill"></i></span>
+        </div>
+        <div class="lives-display">
+          <span class="hud-label" data-i18n="lives">Vidas</span>
+          <div class="life-bars" id="life-bars" role="img" aria-label="3 vidas">
+            <i class="life-segment" data-life="1"></i>
+            <i class="life-segment" data-life="2"></i>
+            <i class="life-segment" data-life="3"></i>
+          </div>
+          <span class="visually-hidden" id="lives-value">3</span>
+        </div>
+        <span id="powerup-status" aria-live="polite"></span>
+        <button class="small-button" id="pause-button" type="button" data-i18n="pause">Pausar</button>
+      </div>
+      <div class="game-stage">
+        <canvas id="game-canvas" width="360" height="640" aria-label="Jogo vertical de nave espacial"></canvas>
+        <div class="boss-alert" id="boss-alert" role="status" aria-live="polite" hidden></div>
+        <div class="boss-hud" id="boss-hud" hidden>
+          <span id="boss-hud-label">VIDA DO CHEFE</span>
+          <div class="boss-health-track"><i id="boss-health-fill"></i></div>
+          <span id="boss-guardian-count"></span>
+        </div>
+        <div class="game-overlay" id="game-overlay" hidden>
+          <h2 id="game-overlay-title"></h2>
+          <p id="game-overlay-copy"></p>
+          <section class="pause-missions" id="pause-missions-wrap" hidden>
+            <h3 data-i18n="activeMissions">Missões em andamento</h3>
+            <div class="pause-mission-list" id="pause-mission-list"></div>
+          </section>
+          <div class="overlay-actions">
+            <button class="neon-button cyan" id="resume-button" type="button" data-i18n="resume">Continuar</button>
+            <button class="neon-button cyan" id="pause-settings-button" type="button" data-i18n="pauseSettings" hidden>Configurações</button>
+            <button class="neon-button pink" id="restart-button" type="button" data-i18n="restart">Jogar novamente</button>
+            <button class="neon-button pink" id="give-up-button" type="button" data-i18n="giveUp">Desistir e voltar ao menu</button>
+            <button class="neon-button muted" id="game-menu-button" type="button" data-i18n="mainMenu">Menu principal</button>
+          </div>
+        </div>
+      </div>
+      <p class="game-controls" data-i18n="gameHint">Mova o mouse ou toque para mover · Tiro automático · Esc pausa</p>
+    </section>
+  </main>
+
+  <dialog class="game-dialog" id="export-account-dialog" aria-labelledby="export-account-title">
+    <form class="dialog-panel" id="export-account-form">
+      <p class="eyebrow" data-i18n="exportAccount">EXPORTAR CONTA</p>
+      <h2 id="export-account-title" data-i18n="backupExportTitle">Exportar conta criptografada</h2>
+      <p class="section-copy" data-i18n="backupExportHint">Confirme sua senha. Ela será usada para criptografar o arquivo e não será incluída nele.</p>
+      <label class="delete-password-label"><span data-i18n="password">Senha</span><input id="export-account-password" name="password" type="password" required minlength="10" maxlength="128" autocomplete="current-password"></label>
+      <p id="export-account-error" class="dialog-error" role="status"></p>
+      <div class="dialog-actions">
+        <button type="button" class="neon-button muted" id="cancel-export-account" data-i18n="cancel">Cancelar</button>
+        <button type="submit" class="neon-button cyan" data-i18n="exportAccountButton">Exportar backup</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="game-dialog" id="purchase-dialog" aria-labelledby="purchase-title">
+    <div class="dialog-panel">
+      <p class="eyebrow" data-i18n="purchaseConfirmation">CONFIRMAR COMPRA</p>
+      <h2 id="purchase-title">Pacote Inicial!</h2>
+      <div class="purchase-breakdown">
+        <p><span data-i18n="yourBalance">Seu saldo</span><strong id="purchase-balance">0</strong></p>
+        <p><span data-i18n="packageCost">Custo do pacote</span><strong id="purchase-cost">25.000</strong></p>
+        <p class="purchase-remaining"><span data-i18n="balanceAfter">Saldo após comprar</span><strong id="purchase-after">0</strong></p>
+      </div>
+      <p id="purchase-error" class="dialog-error" role="status"></p>
+      <div class="dialog-actions">
+        <button type="button" class="neon-button muted" id="cancel-purchase" data-i18n="cancel">Cancelar</button>
+        <button type="button" class="neon-button gold-button" id="confirm-purchase" data-i18n="buy">Comprar</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="game-dialog" id="starting-skill-dialog" aria-labelledby="starting-skill-confirm-title">
+    <div class="dialog-panel">
+      <p class="eyebrow" data-i18n="startingSkills">Habilidade inicial</p>
+      <h2 id="starting-skill-confirm-title" data-i18n="startingSkillConfirmTitle">Confirmar habilidade?</h2>
+      <p class="section-copy" id="starting-skill-confirm-copy"></p>
+      <div class="dialog-actions">
+        <button type="button" class="neon-button muted" id="cancel-starting-skill-confirm" data-i18n="cancel">Cancelar</button>
+        <button type="button" class="neon-button pink" id="start-with-selected-skill" data-i18n="startingSkillStart">Confirmar e jogar</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="game-dialog" id="battle-pass-purchase-dialog" aria-labelledby="battle-pass-purchase-title">
+    <div class="dialog-panel">
+      <p class="eyebrow" data-i18n="purchaseConfirmation">CONFIRMAR COMPRA</p>
+      <h2 id="battle-pass-purchase-title" data-i18n="battlePassPremium">Passe Neon Ouro</h2>
+      <div class="purchase-breakdown">
+        <p><span data-i18n="yourBalance">Seu saldo</span><strong id="battle-pass-purchase-balance">0</strong></p>
+        <p><span data-i18n="packageCost">Custo</span><strong id="battle-pass-purchase-cost">450</strong></p>
+        <p class="purchase-remaining"><span data-i18n="balanceAfter">Saldo após comprar</span><strong id="battle-pass-purchase-after">0</strong></p>
+      </div>
+      <p id="battle-pass-purchase-error" class="dialog-error" role="status"></p>
+      <div class="dialog-actions">
+        <button type="button" class="neon-button muted" id="cancel-battle-pass-purchase" data-i18n="cancel">Cancelar</button>
+        <button type="button" class="neon-button gold-button" id="confirm-battle-pass-purchase" data-i18n="buy">Comprar</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="game-dialog" id="diamond-purchase-dialog" aria-labelledby="diamond-purchase-title">
+    <div class="dialog-panel">
+      <p class="eyebrow" data-i18n="purchaseConfirmation">CONFIRMAR COMPRA</p>
+      <h2 id="diamond-purchase-title" data-i18n="diamonds">Diamantes</h2>
+      <div class="purchase-breakdown">
+        <p><span data-i18n="yourBalance">Seu saldo</span><strong id="diamond-purchase-balance">0</strong></p>
+        <p><span data-i18n="packageCost">Custo</span><strong id="diamond-purchase-cost">0</strong></p>
+        <p class="purchase-remaining"><span data-i18n="balanceAfter">Saldo após comprar</span><strong id="diamond-purchase-after">0</strong></p>
+      </div>
+      <p id="diamond-purchase-error" class="dialog-error" role="status"></p>
+      <div class="dialog-actions">
+        <button type="button" class="neon-button muted" id="cancel-diamond-purchase" data-i18n="cancel">Cancelar</button>
+        <button type="button" class="neon-button gold-button" id="confirm-diamond-purchase" data-i18n="buy">Comprar</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="game-dialog" id="luck-drop-result-dialog" aria-labelledby="luck-drop-result-title">
+    <div class="dialog-panel luck-result-panel">
+      <p class="eyebrow" data-i18n="luckDropLabel">CAIXA DA SORTE</p>
+      <h2 id="luck-drop-result-title" data-i18n="luckDropConfirmTitle">Girar Luck Drop?</h2>
+      <div class="luck-drop-confirmation" id="luck-drop-confirmation">
+        <p data-i18n="luckDropConfirmHint">Quer mesmo girar a Luck Drop?</p>
+        <p class="luck-drop-price"><span data-i18n="luckDropPrice">Preço</span><strong id="luck-drop-price">1.000</strong></p>
+        <p class="luck-drop-balance"><span data-i18n="yourBalance">Seu saldo</span><strong id="luck-drop-balance">0</strong></p>
+      </div>
+      <div class="luck-spin-window" id="luck-spin-window" aria-label="Roleta de recompensas" hidden>
+        <span class="luck-spin-marker" aria-hidden="true"></span>
+        <div class="luck-spin-track" id="luck-spin-track"></div>
+      </div>
+      <div class="luck-revealed-result" id="luck-revealed-result" hidden>
+        <div class="luck-result-visual" id="luck-drop-result-visual" aria-hidden="true"></div>
+        <p class="luck-result-copy" id="luck-drop-result-copy" role="status" aria-live="polite"></p>
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="neon-button muted" id="close-luck-drop-result" data-i18n="cancel">Cancelar</button>
+        <button type="button" class="neon-button gold-button" id="spin-luck-drop" data-i18n="spinLuckDrop">Girar</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="game-dialog faq-dialog" id="faq-dialog" aria-labelledby="faq-title">
+    <div class="dialog-panel">
+      <p class="eyebrow" data-i18n="faq">FAQ DO JOGO</p>
+      <h2 id="faq-title" data-i18n="faq">FAQ do jogo</h2>
+      <div class="faq-content" id="faq-content"></div>
+      <button type="button" class="neon-button cyan" id="close-faq" data-i18n="close">Fechar</button>
+    </div>
+  </dialog>
+
+  <dialog class="game-dialog badge-detail-dialog" id="badge-detail-dialog" aria-labelledby="badge-detail-title">
+    <div class="dialog-panel">
+      <div class="badge-detail-icon" id="badge-detail-icon" aria-hidden="true"></div>
+      <p class="eyebrow" id="badge-detail-rarity"></p>
+      <h2 id="badge-detail-title"></h2>
+      <p class="badge-detail-description" id="badge-detail-description"></p>
+      <p class="badge-detail-earned" id="badge-detail-earned"></p>
+      <button type="button" class="neon-button cyan" id="close-badge-detail" data-i18n="close">Fechar</button>
+    </div>
+  </dialog>
+
+  <dialog class="game-dialog" id="delete-account-dialog" aria-labelledby="delete-account-title">
+    <form class="dialog-panel" id="delete-account-form">
+      <p class="eyebrow danger-text" data-i18n="deleteAccount">EXCLUIR CONTA E DADOS</p>
+      <h2 id="delete-account-title" data-i18n="deleteAccountConfirmTitle">Confirmar exclusão da conta?</h2>
+      <p class="delete-warning" data-i18n="deleteAccountConfirmHint">Esta ação é permanente. A conta Firebase, o perfil público, saldos, skins, caixa de entrada e dados locais das missões serão apagados e não poderão ser recuperados.</p>
+      <label class="delete-password-label"><span data-i18n="password">Senha</span><input id="delete-account-password" name="password" type="password" required autocomplete="current-password"></label>
+      <p id="delete-account-error" class="dialog-error" role="status"></p>
+      <div class="dialog-actions">
+        <button type="button" class="neon-button muted" id="cancel-delete-account" data-i18n="cancel">Cancelar</button>
+        <button type="submit" class="neon-button pink" id="confirm-delete-account" data-i18n="confirmDelete">Excluir permanentemente</button>
+      </div>
+    </form>
+  </dialog>
+
+  
+  <aside class="debug-panel" id="debug-panel" hidden aria-label="Painel de depuração">
+    <div class="debug-heading"><strong data-i18n="debugPanel">Painel de depuração</strong><button type="button" id="debug-close" aria-label="Fechar depuração">×</button></div>
+    <p data-i18n="debugDescription">Ferramentas para validar o estado do jogo.</p>
+    <button type="button" id="run-checks" data-i18n="runChecks">Executar verificações</button>
+    <button type="button" id="test-boss" data-i18n="testBoss">Testar chefe</button>
+    <button type="button" id="test-shield" data-i18n="testShield">Testar power-up de escudo</button>
+    <button type="button" id="test-triple" data-i18n="testTriple">Testar tiro triplo</button>
+    <button type="button" id="test-pass-token" data-i18n="testPassToken">Testar ficha do passe</button>
+    <button type="button" id="test-game-over" data-i18n="testGameOver">Simular derrota (250 pontos)</button>
+    <button type="button" id="reset-coins" data-i18n="resetCoins">Zerar moedas</button>
+    <button type="button" id="grant-test-coins" data-i18n="grantTestCoins">Adicionar 25.000 moedas de teste</button>
+    <button type="button" id="complete-missions" data-i18n="completeMissions">Concluir missões atuais</button>
+    <button type="button" id="reset-progress" data-i18n="resetProgress">Limpar progresso local</button>
+    <pre id="debug-output" aria-live="polite"></pre>
+  </aside>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <dialog class="game-dialog" id="cloud-migration-dialog" aria-labelledby="cloud-migration-title">
+    <form class="dialog-panel" id="cloud-migration-form">
+      <p class="eyebrow" data-i18n="cloudMigration">MIGRAR CONTA</p>
+      <h2 id="cloud-migration-title" data-i18n="cloudMigrationTitle">Migrar conta para Firebase</h2>
+      <p class="section-copy" data-i18n="cloudMigrationHint">Vincule esta conta local ao Firebase e sincronize seu progresso.</p>
+      <label class="delete-password-label"><span data-i18n="localPassword">Senha atual da conta local</span><input name="localPassword" type="password" required minlength="10" maxlength="128" autocomplete="current-password"></label>
+      <label class="delete-password-label"><span data-i18n="emailAddress">E-mail</span><input name="email" type="email" required maxlength="254" autocomplete="email"></label>
+      <label class="delete-password-label"><span data-i18n="newCloudPassword">Nova senha da conta na nuvem</span><input name="cloudPassword" type="password" required minlength="10" maxlength="128" autocomplete="new-password"></label>
+      <p id="cloud-migration-error" class="dialog-error" role="status"></p>
+      <div class="dialog-actions">
+        <button type="button" class="neon-button muted" id="cancel-cloud-migration" data-i18n="cancel">Cancelar</button>
+        <button type="submit" class="neon-button pink" id="confirm-cloud-migration" data-i18n="cloudMigrationButton">Migrar para a nuvem</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="game-dialog badge-detail-dialog" id="player-profile-dialog" aria-labelledby="player-profile-title">
+    <div class="dialog-panel">
+      <p class="eyebrow" data-i18n="playerProfile">PERFIL DO JOGADOR</p>
+      <h2 id="player-profile-title"></h2>
+      <p id="player-profile-score" class="section-copy"></p>
+      <div id="player-profile-badges" class="player-profile-badges"></div>
+      <div class="dialog-actions">
+        <button type="button" class="neon-button muted" id="close-player-profile" data-i18n="close">Fechar</button>
+      </div>
+    </div>
+  </dialog>
+</body>
+</html>

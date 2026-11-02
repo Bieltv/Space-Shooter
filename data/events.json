@@ -1,0 +1,103 @@
+{
+  "events": [
+    {
+      "id": "festival-do-vazio-2026",
+      "title": {
+        "pt-BR": "Festival do Vazio",
+        "en": "Void Festival"
+      },
+      "description": {
+        "pt-BR": "Um evento de boas-vindas ao Neon Void. Confira as novidades e acompanhe o jogo durante o período do festival.",
+        "en": "A welcome event for Neon Void. Check out the updates and enjoy the game during the festival."
+      },
+      "startsAt": "2026-10-25T00:00:00-03:00",
+      "endsAt": "2026-11-30T23:59:59-03:00"
+    },
+    {
+      "id": "natal-2026",
+      "title": {
+        "pt-BR": "Natal Neon",
+        "en": "Neon Christmas"
+      },
+      "description": {
+        "pt-BR": "Enfrente ondas de inimigos de neve neon, acumule pontuação entre partidas e fases e derrote o chefe natalino para ganhar 5.000 pontos extras.",
+        "en": "Face waves of snow-neon enemies, carry your score across runs and phases, and defeat the Christmas boss for 5,000 bonus points."
+      },
+      "startsAt": "2026-12-01T00:00:00-03:00",
+      "endsAt": "2026-12-25T23:59:59-03:00",
+      "scheduledDaysBefore": 7,
+      "gameMode": "christmas",
+      "bossScoreBonus": 5000,
+      "milestoneRewards": [
+        { "atScore": 90000, "skinId": "shot-christmas-stars" },
+        { "atScore": 190000, "skinId": "shield-christmas-wreath" },
+        { "atScore": 550000, "skinId": "ship-christmas-ornament" }
+      ],
+      "phases": [
+        {
+          "number": 1,
+          "startsAt": "2026-12-01T00:00:00-03:00",
+          "endsAt": "2026-12-06T23:59:59-03:00",
+          "scoreTargets": [10000, 15000, 20000]
+        },
+        {
+          "number": 2,
+          "startsAt": "2026-12-07T00:00:00-03:00",
+          "endsAt": "2026-12-12T23:59:59-03:00",
+          "scoreTargets": [45000, 60000, 90000]
+        },
+        {
+          "number": 3,
+          "startsAt": "2026-12-13T00:00:00-03:00",
+          "endsAt": "2026-12-18T23:59:59-03:00",
+          "scoreTargets": [120000, 170000, 190000]
+        },
+        {
+          "number": 4,
+          "startsAt": "2026-12-19T00:00:00-03:00",
+          "endsAt": "2026-12-25T23:59:59-03:00",
+          "scoreTargets": [240000, 300000, 430000, 550000]
+        }
+      ]
+    },
+    {
+      "id": "neon-cinza-2026",
+      "title": {
+        "pt-BR": "Desafio Neon Cinza",
+        "en": "Gray Neon Challenge"
+      },
+      "description": {
+        "pt-BR": "Jogue partidas normais, escolha suas habilidades iniciais e acumule pontos em três etapas. Ao alcançar 440.000 pontos, receba o pacote épico Neon Cinza para nave, escudo e tiro.",
+        "en": "Play normal runs, choose your starting ability, and accumulate points across three stages. Reach 440,000 points to earn the Gray Neon epic ship, shield, and shot."
+      },
+      "startsAt": "2026-11-30T00:00:00-03:00",
+      "endsAt": "2026-12-25T23:59:59-03:00",
+      "gameMode": "standard",
+      "milestoneRewards": [
+        { "atScore": 440000, "skinId": "ship-gray-neon" },
+        { "atScore": 440000, "skinId": "shield-gray-neon" },
+        { "atScore": 440000, "skinId": "shot-gray-neon" }
+      ],
+      "phases": [
+        {
+          "number": 1,
+          "startsAt": "2026-11-30T00:00:00-03:00",
+          "endsAt": "2026-12-08T23:59:59-03:00",
+          "scoreTargets": [150000]
+        },
+        {
+          "number": 2,
+          "startsAt": "2026-12-09T00:00:00-03:00",
+          "endsAt": "2026-12-17T23:59:59-03:00",
+          "scoreTargets": [300000]
+        },
+        {
+          "number": 3,
+          "startsAt": "2026-12-18T00:00:00-03:00",
+          "endsAt": "2026-12-25T23:59:59-03:00",
+          "scoreTargets": [440000]
+        }
+      ]
+    }
+  ]
+}

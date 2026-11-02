@@ -1,0 +1,65 @@
+{
+  "id": "neon-pass-2026",
+  "visibleFrom": "2026-11-30T00:00:00-03:00",
+  "priceDiamonds": 450,
+  "tokenIntervalSeconds": 15,
+  "levelRequirements": [
+    5, 5, 5, 5, 5, 5, 5,
+    10, 10, 10, 10, 10, 10, 10, 10, 10,
+    20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+    25, 25, 25, 25
+  ],
+  "treeEvolutionCosts": [0, 450, 700],
+  "luckDrop": {
+    "rarityOdds": {
+      "common": 58.6,
+      "uncommon": 25,
+      "rare": 10,
+      "epic": 5,
+      "legendary": 1.4
+    },
+    "skinIds": [
+      "ship-pass-pink",
+      "shield-pass-rose",
+      "ship-pass-azure",
+      "shield-pass-mint",
+      "ship-pass-lilac",
+      "shield-pass-sun",
+      "shield-golden-pulse",
+      "ship-white-neon"
+    ],
+    "duplicateCoins": 500
+  },
+  "levels": [
+    { "level": 1, "free": [{ "type": "charge" }], "premium": [{ "type": "charge" }, { "type": "skin", "category": "shot", "skinId": "shot-candy-cane" }] },
+    { "level": 2, "free": [{ "type": "drop" }], "premium": [{ "type": "drop" }] },
+    { "level": 3, "free": [{ "type": "coins", "amount": 300 }], "premium": [{ "type": "coins", "amount": 300 }] },
+    { "level": 4, "free": [{ "type": "skin", "category": "ship", "skinId": "ship-pass-ruby" }], "premium": [{ "type": "skin", "category": "ship", "skinId": "ship-pass-amber" }] },
+    { "level": 5, "free": [{ "type": "drop" }], "premium": [{ "type": "drop" }] },
+    { "level": 6, "free": [{ "type": "empty" }], "premium": [{ "type": "empty" }] },
+    { "level": 7, "free": [{ "type": "skin", "category": "shield", "skinId": "shield-pass-cyan" }], "premium": [{ "type": "skin", "category": "shield", "skinId": "shield-pass-lime" }] },
+    { "level": 8, "free": [{ "type": "drop" }], "premium": [{ "type": "drop" }] },
+    { "level": 9, "free": [{ "type": "coins", "amount": 300 }], "premium": [{ "type": "coins", "amount": 300 }] },
+    { "level": 10, "free": [{ "type": "charge" }], "premium": [{ "type": "charge" }] },
+    { "level": 11, "free": [{ "type": "skin", "category": "ship", "skinId": "ship-pass-emerald" }], "premium": [{ "type": "skin", "category": "ship", "skinId": "ship-pass-magenta" }] },
+    { "level": 12, "free": [{ "type": "drop" }], "premium": [{ "type": "drop" }] },
+    { "level": 13, "free": [{ "type": "empty" }], "premium": [{ "type": "empty" }] },
+    { "level": 14, "free": [{ "type": "coins", "amount": 300 }], "premium": [{ "type": "coins", "amount": 300 }] },
+    { "level": 15, "free": [{ "type": "drop" }], "premium": [{ "type": "drop" }, { "type": "skin", "category": "shield", "skinId": "shield-christmas-lights" }] },
+    { "level": 16, "free": [{ "type": "skin", "category": "shield", "skinId": "shield-pass-violet" }], "premium": [{ "type": "skin", "category": "shield", "skinId": "shield-pass-coral" }] },
+    { "level": 17, "free": [{ "type": "charge" }], "premium": [{ "type": "charge" }] },
+    { "level": 18, "free": [{ "type": "empty" }], "premium": [{ "type": "empty" }] },
+    { "level": 19, "free": [{ "type": "drop" }], "premium": [{ "type": "drop" }] },
+    { "level": 20, "free": [{ "type": "coins", "amount": 300 }], "premium": [{ "type": "coins", "amount": 300 }] },
+    { "level": 21, "free": [{ "type": "skin", "category": "ship", "skinId": "ship-pass-sapphire" }], "premium": [{ "type": "skin", "category": "ship", "skinId": "ship-pass-frost" }] },
+    { "level": 22, "free": [{ "type": "drop" }], "premium": [{ "type": "drop" }] },
+    { "level": 23, "free": [{ "type": "empty" }], "premium": [{ "type": "empty" }] },
+    { "level": 24, "free": [{ "type": "charge" }], "premium": [{ "type": "charge" }] },
+    { "level": 25, "free": [{ "type": "coins", "amount": 300 }], "premium": [{ "type": "coins", "amount": 300 }] },
+    { "level": 26, "free": [{ "type": "drop" }], "premium": [{ "type": "drop" }] },
+    { "level": 27, "free": [{ "type": "empty" }], "premium": [{ "type": "empty" }] },
+    { "level": 28, "free": [{ "type": "drop" }], "premium": [{ "type": "drop" }] },
+    { "level": 29, "free": [{ "type": "charge" }], "premium": [{ "type": "charge" }] },
+    { "level": 30, "free": [{ "type": "drop" }], "premium": [{ "type": "drop" }, { "type": "skin", "category": "ship", "skinId": "ship-christmas-tree" }] }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "missionSets": [
+    {
+      "id": "set-alpha",
+      "missions": [
+        {
+          "id": "first-contact",
+          "metric": "kills",
+          "goal": 5,
+          "title": { "pt-BR": "Primeiro contato", "en": "First contact" },
+          "description": { "pt-BR": "Destrua 5 inimigos.", "en": "Destroy 5 enemies." }
+        },
+        {
+          "id": "deep-space",
+          "metric": "survivalSeconds",
+          "goal": 30,
+          "title": { "pt-BR": "Espaço profundo", "en": "Deep space" },
+          "description": { "pt-BR": "Sobreviva por 30 segundos em uma partida.", "en": "Survive for 30 seconds in one run." }
+        },
+        {
+          "id": "stardust",
+          "metric": "score",
+          "goal": 100,
+          "title": { "pt-BR": "Poeira estelar", "en": "Stardust" },
+          "description": { "pt-BR": "Marque 100 pontos.", "en": "Score 100 points." }
+        }
+      ]
+    },
+    {
+      "id": "set-beta",
+      "missions": [
+        {
+          "id": "hunter",
+          "metric": "kills",
+          "goal": 10,
+          "title": { "pt-BR": "Caçador orbital", "en": "Orbital hunter" },
+          "description": { "pt-BR": "Destrua 10 inimigos.", "en": "Destroy 10 enemies." }
+        },
+        {
+          "id": "long-haul",
+          "metric": "survivalSeconds",
+          "goal": 45,
+          "title": { "pt-BR": "Viagem longa", "en": "Long haul" },
+          "description": { "pt-BR": "Sobreviva por 45 segundos em uma partida.", "en": "Survive for 45 seconds in one run." }
+        },
+        {
+          "id": "high-score",
+          "metric": "score",
+          "goal": 200,
+          "title": { "pt-BR": "Pontuação máxima", "en": "High score" },
+          "description": { "pt-BR": "Marque 200 pontos.", "en": "Score 200 points." }
+        }
+      ]
+    }
+  ]
+}
