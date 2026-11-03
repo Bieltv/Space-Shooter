@@ -3931,161 +3931,6 @@ async function loadLeaderboard(scope) {
           event.preventDefault();
           void openPublicProfile(entry.uid);
         }
-
-        function addWeeklyMedal(nextAccount, tier, mode, weekId, awardedAt = Date.now()) {
-          if (!["gold", "silver", "bronze"].includes(tier) || !["players", "ai"].includes(mode)) return nextAccount;
-          const medalId = `${weekId}:${tier}:${mode}`;
-          if (nextAccount.medals.some((medal) => medal.id === medalId)) return nextAccount;
-          return {
-            ...nextAccount,
-            medals: [...nextAccount.medals, { id: medalId, weekId, tier, mode, awardedAt }]
-          };
-        }
-
-        function applyWeeklyPlacement(nextAccount, rank, mode, weekId) {
-          if (rank < 1 || rank > 5) return nextAccount;
-          const rewards = {
-            1: { coins: 10000, drops: 15, medal: "gold" },
-            2: { coins: 5000, drops: 5, medal: "silver" },
-            3: { coins: 2000, drops: 3, medal: "bronze" },
-            4: { coins: 1500, drops: 0 },
-            5: { coins: 1500, drops: 0 }
-          }[rank];
-          let updated = {
-            ...nextAccount,
-            coins: nextAccount.coins + rewards.coins,
-            missionDropCredits: nextAccount.missionDropCredits + rewards.drops
-          };
-          if (rewards.medal) {
-            updated = addWeeklyMedal(updated, rewards.medal, mode, weekId);
-            if (rank === 1) updated = applyGoldMedalBonus(updated);
-          }
-          if (rank === 1) {
-            updated = { ...updated, weeklyTop1Wins: updated.weeklyTop1Wins + 1 };
-            if (mode === "players") {
-              updated = { ...updated, bestScore: Math.max(updated.bestScore, updated.weeklyCompetition.score) };
-            }
-          }
-          return updated;
-        }
-
-        function applyGoldMedalBonus(nextAccount) {
-          const bonusPool = [
-            { type: "skin", skinId: "ship-golden-star", odds: 0.7 },
-            { type: "skin", skinId: "shield-golden-star", odds: 0.7 },
-            { type: "skin", skinId: "shot-double-gold", odds: 0.7 },
-            { type: "coins", amount: 100, odds: 40 },
-            { type: "coins", amount: 200, odds: 25 },
-            { type: "coins", amount: 400, odds: 15 },
-            { type: "coins", amount: 600, odds: 10 },
-            { type: "coins", amount: 800, odds: 5 },
-            { type: "coins", amount: 1600, odds: 2.9 }
-          ];
-          const roll = crypto.getRandomValues(new Uint32Array(1))[0] / 0x100000000 * 100;
-          let cumulative = 0;
-          const bonus = bonusPool.find((reward) => {
-            cumulative += reward.odds;
-            return roll < cumulative;
-          });
-          if (!bonus) throw new Error("A recompensa da medalha de ouro está incompleta.");
-          const owned = new Set(nextAccount.ownedSkins);
-          const eclipseDuplicate = owned.has("shield-eclipse");
-          const bonusDuplicate = bonus.type === "skin" && owned.has(bonus.skinId);
-          owned.add("shield-eclipse");
-          if (bonus.type === "skin" && !bonusDuplicate) owned.add(bonus.skinId);
-          const bonusCoins = (bonus.type === "coins" ? bonus.amount : bonusDuplicate ? 1600 : 0) +
-            (eclipseDuplicate ? 1600 : 0);
-          return {
-            ...nextAccount,
-            coins: nextAccount.coins + bonusCoins,
-            ownedSkins: [...owned]
-          };
-        }
-
-        async function settlePreviousWeek() {
-          if (!account) return;
-          const previous = account.weeklyCompetition;
-          const thisWeek = currentWeekId();
-          if (!previous.weekId || previous.weekId === thisWeek || account.settledWeeks.includes(previous.weekId)) return;
-          let updated = account;
-          try {
-            if (account.leaderboardOptIn && account.cloudUid && previous.score > 0) {
-              const response = await cloudRequest(`/api/leaderboard?mode=weekly&week=${encodeURIComponent(previous.weekId)}`, { auth: false });
-              const players = Array.isArray(response.players) ? response.players : [];
-              const rank = players.findIndex((player) => player.uid === account.cloudUid) + 1;
-              if (rank > 0) updated = applyWeeklyPlacement(updated, rank, "players", previous.weekId);
-            }
-            if (previous.score > 0) {
-              const aiScores = previous.aiScores.length
-                ? previous.aiScores
-                : Array.from({ length: 5 }, (_, index) => previous.score * (index + 1));
-              const aiRank = [previous.score, ...aiScores].sort((a, b) => b - a).indexOf(previous.score) + 1;
-              updated = applyWeeklyPlacement(updated, aiRank, "ai", previous.weekId);
-            }
-            updated = { ...updated, settledWeeks: [...updated.settledWeeks, previous.weekId].slice(-8) };
-            persistAccount(updated);
-            showToast(t("weeklyPrizesGranted"));
-          } catch (error) {
-            showToast(`${t("weeklyPrizeError")} ${error.message}`);
-          }
-        }
-
-        function currentWeekId(now = new Date()) {
-          const monday = new Date(now);
-          monday.setHours(0, 0, 0, 0);
-          monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
-          return `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, "0")}-${String(monday.getDate()).padStart(2, "0")}`;
-        }
-
-        function rotateWeeklyCompetition(nextAccount) {
-          const weekId = currentWeekId();
-          if (nextAccount.weeklyCompetition.weekId === weekId) return nextAccount;
-          const previous = nextAccount.weeklyCompetition;
-          const history = previous.weekId
-            ? [...nextAccount.weeklyHistory, {
-              weekId: previous.weekId,
-              score: previous.score,
-              aiScores: previous.aiScores
-            }].slice(-8)
-            : nextAccount.weeklyHistory;
-          return {
-            ...nextAccount,
-            weeklyHistory: history,
-            weeklyCompetition: { weekId, score: 0, aiScores: [] }
-          };
-        }
-
-        function refreshAiCompetition() {
-          if (!account) return;
-          const scores = Array.from({ length: 5 }, (_, index) =>
-            Math.floor(account.weeklyCompetition.score * (index + 1) * 0.1));
-          const hour = new Date().getHours();
-          if ((hour >= 10 && hour < 11) || (hour >= 18 && hour < 19)) {
-            scores.forEach((score, index) => {
-              scores[index] = Math.floor(account.weeklyCompetition.score * (index + 1));
-              scores[index] = Math.max(score, scores[index]);
-            });
-          }
-          const previous = account.weeklyCompetition.aiScores;
-          const nextScores = scores.map((score, index) => Math.max(score, previous[index] || 0));
-          if (JSON.stringify(previous) !== JSON.stringify(nextScores)) {
-            persistAccount({
-              ...account,
-              weeklyCompetition: { ...account.weeklyCompetition, aiScores: nextScores }
-            });
-          }
-        }
-
-        function getAiLeaderboardEntries(score = account?.weeklyCompetition.score || 0, savedAiScores = account?.weeklyCompetition.aiScores || []) {
-          const aiScores = savedAiScores;
-          return [
-            { username: account?.username || t("player"), bestScore: score },
-            ...Array.from({ length: 5 }, (_, index) => ({
-              username: `${t("anonymousPlayer")} ${index + 1}`,
-              bestScore: aiScores[index] || Math.floor(score * (index + 1) * 0.1)
-            }))
-          ];
-        }
       });
       return row;
     }));
@@ -4095,6 +3940,161 @@ async function loadLeaderboard(scope) {
   } finally {
     if (requestId === leaderboardRequestId) $("#leaderboard-list").setAttribute("aria-busy", "false");
   }
+}
+
+function addWeeklyMedal(nextAccount, tier, mode, weekId, awardedAt = Date.now()) {
+  if (!["gold", "silver", "bronze"].includes(tier) || !["players", "ai"].includes(mode)) return nextAccount;
+  const medalId = `${weekId}:${tier}:${mode}`;
+  if (nextAccount.medals.some((medal) => medal.id === medalId)) return nextAccount;
+  return {
+    ...nextAccount,
+    medals: [...nextAccount.medals, { id: medalId, weekId, tier, mode, awardedAt }]
+  };
+}
+
+function applyWeeklyPlacement(nextAccount, rank, mode, weekId) {
+  if (rank < 1 || rank > 5) return nextAccount;
+  const rewards = {
+    1: { coins: 10000, drops: 15, medal: "gold" },
+    2: { coins: 5000, drops: 5, medal: "silver" },
+    3: { coins: 2000, drops: 3, medal: "bronze" },
+    4: { coins: 1500, drops: 0 },
+    5: { coins: 1500, drops: 0 }
+  }[rank];
+  let updated = {
+    ...nextAccount,
+    coins: nextAccount.coins + rewards.coins,
+    missionDropCredits: nextAccount.missionDropCredits + rewards.drops
+  };
+  if (rewards.medal) {
+    updated = addWeeklyMedal(updated, rewards.medal, mode, weekId);
+    if (rank === 1) updated = applyGoldMedalBonus(updated);
+  }
+  if (rank === 1) {
+    updated = { ...updated, weeklyTop1Wins: updated.weeklyTop1Wins + 1 };
+    if (mode === "players") {
+      updated = { ...updated, bestScore: Math.max(updated.bestScore, updated.weeklyCompetition.score) };
+    }
+  }
+  return updated;
+}
+
+function applyGoldMedalBonus(nextAccount) {
+  const bonusPool = [
+    { type: "skin", skinId: "ship-golden-star", odds: 0.7 },
+    { type: "skin", skinId: "shield-golden-star", odds: 0.7 },
+    { type: "skin", skinId: "shot-double-gold", odds: 0.7 },
+    { type: "coins", amount: 100, odds: 40 },
+    { type: "coins", amount: 200, odds: 25 },
+    { type: "coins", amount: 400, odds: 15 },
+    { type: "coins", amount: 600, odds: 10 },
+    { type: "coins", amount: 800, odds: 5 },
+    { type: "coins", amount: 1600, odds: 2.9 }
+  ];
+  const roll = crypto.getRandomValues(new Uint32Array(1))[0] / 0x100000000 * 100;
+  let cumulative = 0;
+  const bonus = bonusPool.find((reward) => {
+    cumulative += reward.odds;
+    return roll < cumulative;
+  });
+  if (!bonus) throw new Error("A recompensa da medalha de ouro está incompleta.");
+  const owned = new Set(nextAccount.ownedSkins);
+  const eclipseDuplicate = owned.has("shield-eclipse");
+  const bonusDuplicate = bonus.type === "skin" && owned.has(bonus.skinId);
+  owned.add("shield-eclipse");
+  if (bonus.type === "skin" && !bonusDuplicate) owned.add(bonus.skinId);
+  const bonusCoins = (bonus.type === "coins" ? bonus.amount : bonusDuplicate ? 1600 : 0) +
+    (eclipseDuplicate ? 1600 : 0);
+  return {
+    ...nextAccount,
+    coins: nextAccount.coins + bonusCoins,
+    ownedSkins: [...owned]
+  };
+}
+
+async function settlePreviousWeek() {
+  if (!account) return;
+  const previous = account.weeklyCompetition;
+  const thisWeek = currentWeekId();
+  if (!previous.weekId || previous.weekId === thisWeek || account.settledWeeks.includes(previous.weekId)) return;
+  let updated = account;
+  try {
+    if (account.leaderboardOptIn && account.cloudUid && previous.score > 0) {
+      const response = await cloudRequest(`/api/leaderboard?mode=weekly&week=${encodeURIComponent(previous.weekId)}`, { auth: false });
+      const players = Array.isArray(response.players) ? response.players : [];
+      const rank = players.findIndex((player) => player.uid === account.cloudUid) + 1;
+      if (rank > 0) updated = applyWeeklyPlacement(updated, rank, "players", previous.weekId);
+    }
+    if (previous.score > 0) {
+      const aiScores = previous.aiScores.length
+        ? previous.aiScores
+        : Array.from({ length: 5 }, (_, index) => previous.score * (index + 1));
+      const aiRank = [previous.score, ...aiScores].sort((a, b) => b - a).indexOf(previous.score) + 1;
+      updated = applyWeeklyPlacement(updated, aiRank, "ai", previous.weekId);
+    }
+    updated = { ...updated, settledWeeks: [...updated.settledWeeks, previous.weekId].slice(-8) };
+    persistAccount(updated);
+    showToast(t("weeklyPrizesGranted"));
+  } catch (error) {
+    showToast(`${t("weeklyPrizeError")} ${error.message}`);
+  }
+}
+
+function currentWeekId(now = new Date()) {
+  const monday = new Date(now);
+  monday.setHours(0, 0, 0, 0);
+  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+  return `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, "0")}-${String(monday.getDate()).padStart(2, "0")}`;
+}
+
+function rotateWeeklyCompetition(nextAccount) {
+  const weekId = currentWeekId();
+  if (nextAccount.weeklyCompetition.weekId === weekId) return nextAccount;
+  const previous = nextAccount.weeklyCompetition;
+  const history = previous.weekId
+    ? [...nextAccount.weeklyHistory, {
+      weekId: previous.weekId,
+      score: previous.score,
+      aiScores: previous.aiScores
+    }].slice(-8)
+    : nextAccount.weeklyHistory;
+  return {
+    ...nextAccount,
+    weeklyHistory: history,
+    weeklyCompetition: { weekId, score: 0, aiScores: [] }
+  };
+}
+
+function refreshAiCompetition() {
+  if (!account) return;
+  const scores = Array.from({ length: 5 }, (_, index) =>
+    Math.floor(account.weeklyCompetition.score * (index + 1) * 0.1));
+  const hour = new Date().getHours();
+  if ((hour >= 10 && hour < 11) || (hour >= 18 && hour < 19)) {
+    scores.forEach((score, index) => {
+      scores[index] = Math.floor(account.weeklyCompetition.score * (index + 1));
+      scores[index] = Math.max(score, scores[index]);
+    });
+  }
+  const previous = account.weeklyCompetition.aiScores;
+  const nextScores = scores.map((score, index) => Math.max(score, previous[index] || 0));
+  if (JSON.stringify(previous) !== JSON.stringify(nextScores)) {
+    persistAccount({
+      ...account,
+      weeklyCompetition: { ...account.weeklyCompetition, aiScores: nextScores }
+    });
+  }
+}
+
+function getAiLeaderboardEntries(score = account?.weeklyCompetition.score || 0, savedAiScores = account?.weeklyCompetition.aiScores || []) {
+  const aiScores = savedAiScores;
+  return [
+    { username: account?.username || t("player"), bestScore: score },
+    ...Array.from({ length: 5 }, (_, index) => ({
+      username: `${t("anonymousPlayer")} ${index + 1}`,
+      bestScore: aiScores[index] || Math.floor(score * (index + 1) * 0.1)
+    }))
+  ];
 }
 
 const canvas = $("#game-canvas");
