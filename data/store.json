@@ -44,6 +44,16 @@
     },
     "exclusiveSkinId": "ship-void-neon"
   },
+  "missionLuckDrop": {
+    "chargeOdds": { "1": 48, "3": 24, "5": 8, "7": 0.4 },
+    "coinRewards": [
+      { "amount": 100, "odds": 12 },
+      { "amount": 500, "odds": 4 },
+      { "amount": 1000, "odds": 2 },
+      { "amount": 3500, "odds": 1 },
+      { "amount": 5000, "odds": 0.6 }
+    ]
+  },
   "diamondPackages": [
     { "id": "diamonds-100", "diamonds": 100, "priceMoneyVoid": 1000 },
     { "id": "diamonds-500", "diamonds": 500, "priceMoneyVoid": 4500 },

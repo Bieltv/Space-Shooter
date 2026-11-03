@@ -24,6 +24,31 @@ const translations = {
     passNextLevel: "Próximo nível: {level}", passProgress: "{current} / {required} fichas",
     passPremiumLocked: "Desbloqueie Ouro para receber esta recompensa.",
     startingSkills: "Habilidade inicial", startingSkillsHint: "Cada habilidade tem suas próprias cargas. A carga escolhida será consumida ao iniciar.",
+    startingSkillShop: "Cargas de habilidades iniciais", startingSkillShopHint: "Compre cargas para escolher uma habilidade antes da partida.",
+    buyOneCharge: "Comprar x1", buyTenCharges: "Comprar x10", chargePrice: "{amount} moedas",
+    chargesPurchased: "{amount} cargas adicionadas para {ability}.",
+    missionDrops: "Luck Drops de missão", openMissionDrop: "Abrir Luck Drop",
+    missionDropCoinsReward: "Luck Drop de missão: {amount} Neon-moedas.",
+    missionDropChargesReward: "Luck Drop de missão: {amount} cargas de {ability}.",
+    missionDropNoCredits: "Conclua as seis missões diárias para ganhar uma Luck Drop.",
+    dropInfo: "Informações", dropInfoTitle: "Conteúdo e chances",
+    missionDropSection: "Luck Drop das missões", paidDropSection: "Luck Drop da loja",
+    dropOddsSummary: "{reward} · {odds}% de chance",
+    dropChargeOdds: "{amount} carga(s) de habilidade (sorteada entre as três habilidades)",
+    dropPaidSkinOdds: "{rarity}: {odds}%",
+    goldShieldRotation: "Rotação do escudo estrela dourada",
+    rotateShield: "Girar o escudo durante a partida",
+    soundEffects: "Efeitos sonoros", soundEffectsHint: "Ativa os sons dos menus, da roleta e das partidas.",
+    peopleCompetition: "Pessoas", aiCompetition: "IA",
+    player: "Jogador", anonymousPlayer: "Jogador",
+    weeklyPrizesGranted: "Recompensas da disputa da semana passada entregues.",
+    weeklyPrizeError: "Não foi possível calcular as recompensas semanais:",
+    medals: "Medalhas", medalGold: "Medalha de Ouro", medalSilver: "Medalha de Prata",
+    medalBronze: "Medalha de Bronze", medalForWeek: "Ranking semanal",
+    medalModalityPlayers: "Pessoas", medalModalityAi: "IA", medalModalityBoth: "Pessoas e IA",
+    medalEarnedOn: "Conquistada em {date} · {year}", medalEmpty: "Nenhuma medalha conquistada ainda.",
+    weeklyRewardsHint: "Fim da semana: top 1 recebe 15 Luck Drops e 10.000 moedas; top 2, 5 drops e 5.000; top 3, 3 drops e 2.000; top 4 e 5, 1.500 moedas.",
+    weeklyPeakHint: "A IA tem dois picos diários e pode chegar a cinco vezes seu recorde semanal.",
     startingSkillChargeStatus: "Cargas disponíveis: {amount}",
     startingSkillConfirm: "Continuar", startingSkillConfirmTitle: "Confirmar habilidade?",
     startingSkillStart: "Confirmar e jogar", startingSkillCancel: "Voltar",
@@ -117,9 +142,9 @@ const translations = {
     allRunMissionsComplete: "Objetivos concluídos nesta partida. Desistir descarta o progresso.",
     gameOver: "Fim de jogo", gameOverCopy: "Pontuação: {score} · Moedas recebidas: {coins}",
     shieldActive: "Escudo ativo", tripleShot: "Tiro triplo", missionComplete: "Missão concluída",
-    missionCompleteToast: "Todas as missões concluídas! O próximo ciclo começa em 12 horas.",
+    missionCompleteToast: "Todas as seis missões diárias concluídas! Você ganhou uma Luck Drop.",
     missionCycle: "Ciclo de missões {number}", timerUntil: "Novas missões em",
-    timerComplete: "Conclua todas as missões para iniciar o próximo ciclo de 12 horas.",
+    timerComplete: "Conclua as seis missões para ganhar uma Luck Drop diária.",
     missionDone: "Concluída", debugPanel: "Painel de depuração",
     debugDescription: "Ferramentas para validar o estado do jogo.", runChecks: "Executar verificações",
     completeMissions: "Concluir missões atuais", resetProgress: "Limpar progresso local",
@@ -223,6 +248,31 @@ const translations = {
     passNextLevel: "Next level: {level}", passProgress: "{current} / {required} tokens",
     passPremiumLocked: "Unlock Gold to receive this reward.",
     startingSkills: "Starting ability", startingSkillsHint: "Each ability has its own charges. The selected charge is consumed when you start.",
+    startingSkillShop: "Starting ability charges", startingSkillShopHint: "Buy charges to choose an ability before a match.",
+    buyOneCharge: "Buy x1", buyTenCharges: "Buy x10", chargePrice: "{amount} coins",
+    chargesPurchased: "Added {amount} charges for {ability}.",
+    missionDrops: "Mission Luck Drops", openMissionDrop: "Open Luck Drop",
+    missionDropCoinsReward: "Mission Luck Drop: {amount} Neon Coins.",
+    missionDropChargesReward: "Mission Luck Drop: {amount} charges of {ability}.",
+    missionDropNoCredits: "Complete all six daily missions to earn a Luck Drop.",
+    dropInfo: "Odds", dropInfoTitle: "Contents and odds",
+    missionDropSection: "Mission Luck Drop", paidDropSection: "Store Luck Drop",
+    dropOddsSummary: "{reward} · {odds}% chance",
+    dropChargeOdds: "{amount} ability charge(s), randomly selected from the three abilities",
+    dropPaidSkinOdds: "{rarity}: {odds}%",
+    goldShieldRotation: "Golden Star Shield rotation",
+    rotateShield: "Rotate the shield during a match",
+    soundEffects: "Sound effects", soundEffectsHint: "Enable sounds for menus, the reward wheel, and matches.",
+    peopleCompetition: "Players", aiCompetition: "AI",
+    player: "Player", anonymousPlayer: "Player",
+    weeklyPrizesGranted: "Last week's competition prizes were delivered.",
+    weeklyPrizeError: "Could not calculate weekly prizes:",
+    medals: "Medals", medalGold: "Gold Medal", medalSilver: "Silver Medal",
+    medalBronze: "Bronze Medal", medalForWeek: "Weekly leaderboard",
+    medalModalityPlayers: "Players", medalModalityAi: "AI", medalModalityBoth: "Players and AI",
+    medalEarnedOn: "Earned on {date} · {year}", medalEmpty: "No medals earned yet.",
+    weeklyRewardsHint: "Weekly prizes: 1st gets 15 Luck Drops and 10,000 coins; 2nd, 5 drops and 5,000; 3rd, 3 drops and 2,000; 4th and 5th, 1,500 coins.",
+    weeklyPeakHint: "AI has two daily peaks and can reach five times your weekly best score.",
     startingSkillChargeStatus: "Available charges: {amount}",
     startingSkillConfirm: "Continue", startingSkillConfirmTitle: "Confirm ability?",
     startingSkillStart: "Confirm and play", startingSkillCancel: "Back",
@@ -316,9 +366,9 @@ const translations = {
     allRunMissionsComplete: "Run objectives complete. Giving up discards this progress.",
     gameOver: "Game over", gameOverCopy: "Score: {score} · Coins earned: {coins}",
     shieldActive: "Shield active", tripleShot: "Triple shot", missionComplete: "Mission complete",
-    missionCompleteToast: "All missions complete! The next cycle starts in 12 hours.",
+    missionCompleteToast: "All six daily missions complete! You earned a Luck Drop.",
     missionCycle: "Mission cycle {number}", timerUntil: "New missions in",
-    timerComplete: "Complete all missions to start the next 12-hour cycle.",
+    timerComplete: "Complete all six missions to earn a daily Luck Drop.",
     missionDone: "Completed", debugPanel: "Debug panel",
     debugDescription: "Tools to validate the game state.", runChecks: "Run checks",
     completeMissions: "Complete current missions", resetProgress: "Clear local progress",
@@ -407,7 +457,7 @@ const STORAGE_KEYS = {
   cloudSession: "neonVoid.cloudSession"
 };
 const API_BASE_URL = "https://space-shooter.eugeniogabrielmoreira96.workers.dev";
-const CYCLE_MS = 12 * 60 * 60 * 1000;
+const CYCLE_MS = 24 * 60 * 60 * 1000;
 const ACCURACY_COOLDOWN_MS = 6 * 60 * 60 * 1000;
 const ACCURACY_ATTEMPT_MS = 8000;
 const ACCURACY_REWARD_MONEY_VOID = 100;
@@ -443,7 +493,7 @@ let badgeData;
 let promoCodeData;
 let battlePassData;
 let missionState = { cycle: 0, progress: {}, expiresAt: null };
-let settings = { quality: "high", language: "pt-BR", missionPopups: true, canvasMode: "windowed" };
+let settings = { quality: "high", language: "pt-BR", missionPopups: true, soundEffects: true, goldShieldRotates: false, canvasMode: "windowed" };
 let selectedSkins = { ...defaultSkins };
 let ownedSkins = new Set(Object.values(defaultSkins));
 let account = null;
@@ -464,6 +514,8 @@ let profileStatusMessage = null;
 let profileBadgeSaveInProgress = false;
 let ownProfileRequestId = 0;
 let activeLeaderboardScope = "national";
+let activeCompetitionMode = "players";
+let activeCollectionTab = "badges";
 let leaderboardRequestId = 0;
 let profileRequestId = 0;
 let activeInboxTab = "messages";
@@ -478,8 +530,12 @@ let toastTimeout;
 let offerTimer;
 let bossAlertTimeout;
 let luckSpinTimeout;
+let luckTickTimer;
 let luckSpinAnimationId = 0;
 let luckSpinInProgress = false;
+let audioContext = null;
+let audioUnavailableNotified = false;
+let weeklyAiScores = null;
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -491,6 +547,45 @@ function showToast(message) {
   toast.classList.add("visible");
   clearTimeout(toastTimeout);
   toastTimeout = setTimeout(() => toast.classList.remove("visible"), 3600);
+}
+
+function playSound(effect) {
+  if (!settings.soundEffects) return;
+  const AudioContextType = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextType) {
+    if (!audioUnavailableNotified) {
+      showToast("Este navegador não oferece suporte a áudio.");
+      audioUnavailableNotified = true;
+    }
+    return;
+  }
+  audioContext ||= new AudioContextType();
+  if (audioContext.state === "suspended") void audioContext.resume();
+  const patterns = {
+    button: [520],
+    menu: [440, 660],
+    shoot: [740],
+    hit: [180, 130],
+    reward: [660, 880, 1100],
+    tick: [380],
+    success: [660, 880]
+  };
+  const frequencies = patterns[effect];
+  if (!frequencies) throw new Error(`Efeito sonoro desconhecido: ${effect}.`);
+  frequencies.forEach((frequency, index) => {
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    const startedAt = audioContext.currentTime + index * 0.075;
+    oscillator.type = effect === "hit" ? "triangle" : "sine";
+    oscillator.frequency.setValueAtTime(frequency, startedAt);
+    gain.gain.setValueAtTime(0.0001, startedAt);
+    gain.gain.exponentialRampToValueAtTime(effect === "shoot" ? 0.018 : 0.04, startedAt + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, startedAt + 0.11);
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+    oscillator.start(startedAt);
+    oscillator.stop(startedAt + 0.12);
+  });
 }
 
 function loadStored(key, fallback) {
@@ -516,6 +611,8 @@ function loadSettings() {
   if (saved && qualityLevels.includes(saved.quality)) settings.quality = saved.quality;
   if (saved && Object.hasOwn(translations, saved.language)) settings.language = saved.language;
   if (saved && typeof saved.missionPopups === "boolean") settings.missionPopups = saved.missionPopups;
+  if (saved && typeof saved.soundEffects === "boolean") settings.soundEffects = saved.soundEffects;
+  if (saved && typeof saved.goldShieldRotates === "boolean") settings.goldShieldRotates = saved.goldShieldRotates;
   if (saved && ["windowed", "fullscreen"].includes(saved.canvasMode)) settings.canvasMode = saved.canvasMode;
   language = settings.language;
   document.body.dataset.quality = settings.quality;
@@ -523,6 +620,7 @@ function loadSettings() {
   $("#language-select").value = language;
   $("#canvas-mode").value = settings.canvasMode;
   $("#mission-popups").checked = settings.missionPopups;
+  $("#sound-effects").checked = settings.soundEffects;
   $$("[data-quality]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.quality === settings.quality)));
   applyTranslations();
 }
@@ -830,6 +928,33 @@ function normalizeAccount(nextAccount) {
     ? [...new Set(nextAccount.equippedBadges.filter((id) =>
       typeof id === "string" && /^[a-z0-9-]{1,60}$/i.test(id)))].slice(0, 3)
     : [];
+  const savedTenPacks = nextAccount.startingAbilityTenPacks && typeof nextAccount.startingAbilityTenPacks === "object"
+    ? nextAccount.startingAbilityTenPacks
+    : {};
+  const startingAbilityTenPacks = Object.fromEntries(STARTING_ABILITIES.map((ability) => [
+    ability.id,
+    Number.isSafeInteger(savedTenPacks[ability.id]) && savedTenPacks[ability.id] >= 0
+      ? savedTenPacks[ability.id]
+      : 0
+  ]));
+  const medals = Array.isArray(nextAccount.medals)
+    ? nextAccount.medals.filter((medal) => medal && /^\d{4}-\d{2}-\d{2}$/.test(medal.weekId) &&
+      ["gold", "silver", "bronze"].includes(medal.tier) &&
+      ["players", "ai"].includes(medal.mode) &&
+      Number.isSafeInteger(medal.awardedAt) && medal.awardedAt > 0)
+    : [];
+  const weeklyCompetition = nextAccount.weeklyCompetition && typeof nextAccount.weeklyCompetition === "object"
+    ? nextAccount.weeklyCompetition
+    : {};
+  const weeklyHistory = Array.isArray(nextAccount.weeklyHistory)
+    ? nextAccount.weeklyHistory.filter((week) => week && /^\d{4}-\d{2}-\d{2}$/.test(week.weekId) &&
+      Number.isSafeInteger(week.score) && week.score >= 0 &&
+      Array.isArray(week.aiScores) &&
+      week.aiScores.every((score) => Number.isSafeInteger(score) && score >= 0)).slice(-8)
+    : [];
+  const settledWeeks = Array.isArray(nextAccount.settledWeeks)
+    ? [...new Set(nextAccount.settledWeeks.filter((weekId) => /^\d{4}-\d{2}-\d{2}$/.test(weekId)))].slice(-8)
+    : [];
   const savedBattlePass = nextAccount.battlePass && typeof nextAccount.battlePass === "object"
     ? nextAccount.battlePass
     : null;
@@ -880,6 +1005,29 @@ function normalizeAccount(nextAccount) {
     eventProgress,
     badges,
     equippedBadges,
+    medals,
+    startingAbilityTenPacks,
+    missionDropCredits: Number.isSafeInteger(nextAccount.missionDropCredits) && nextAccount.missionDropCredits >= 0
+      ? nextAccount.missionDropCredits
+      : 0,
+    bossesDefeated: Number.isSafeInteger(nextAccount.bossesDefeated) && nextAccount.bossesDefeated >= 0
+      ? nextAccount.bossesDefeated
+      : 0,
+    weeklyTop1Wins: Number.isSafeInteger(nextAccount.weeklyTop1Wins) && nextAccount.weeklyTop1Wins >= 0
+      ? nextAccount.weeklyTop1Wins
+      : 0,
+    weeklyCompetition: {
+      weekId: /^\d{4}-\d{2}-\d{2}$/.test(weeklyCompetition.weekId) ? weeklyCompetition.weekId : "",
+      score: Number.isSafeInteger(weeklyCompetition.score) && weeklyCompetition.score >= 0
+        ? weeklyCompetition.score
+        : 0,
+      aiScores: Array.isArray(weeklyCompetition.aiScores) &&
+        weeklyCompetition.aiScores.every((score) => Number.isSafeInteger(score) && score >= 0)
+        ? weeklyCompetition.aiScores.slice(0, 5)
+        : []
+    },
+    weeklyHistory,
+    settledWeeks,
     battlePass,
     luckDropsOpened: Number.isSafeInteger(nextAccount.luckDropsOpened) && nextAccount.luckDropsOpened >= 0 ? nextAccount.luckDropsOpened : 0,
     redeemedPromoCodes,
@@ -951,6 +1099,7 @@ function nextUpgradePrice(level) {
 function upgradeValue(type, level = account?.upgrades?.[type] ?? 1) {
   if (type === "damage") return Math.max(1, level);
   if (type === "hull") return INITIAL_LIVES + Math.max(0, level - 1);
+  if (type === "shield" && selectedSkins.shield === "shield-eclipse") return Math.max(1, level) + 2;
   return Math.max(1, level);
 }
 
@@ -983,6 +1132,7 @@ function renderUpgrades() {
       button.textContent = t("maxLevel");
       button.disabled = true;
     } else {
+      playSound("success");
       const price = account.nextUpgradePrices[type];
       button.textContent = `${t("upgrade")} · ${price.toLocaleString(language)} ${t("coins")}`;
       button.disabled = coins < price;
@@ -1015,6 +1165,8 @@ function purchaseUpgrade(type) {
     };
     updatedAccount = recordBadge(updatedAccount, "first-coin-purchase");
     persistAccount(updatedAccount);
+    recordMissionMetric("coinsSpent", pack.priceCoins);
+    recordMissionMetric("coinsSpent", price);
     showToast(t("upgradePurchased"));
   } catch (error) {
     showToast(error.message);
@@ -1108,7 +1260,8 @@ async function decryptBackup(file, password, username) {
     missions: {
       cycle: Math.max(0, importedMissions.cycle),
       progress,
-      expiresAt: Number.isFinite(importedMissions.expiresAt) ? importedMissions.expiresAt : null
+      expiresAt: Number.isFinite(importedMissions.expiresAt) ? importedMissions.expiresAt : null,
+      rewardGranted: importedMissions.rewardGranted === true
     }
   };
 }
@@ -1161,6 +1314,7 @@ function updateAccount(nextAccount) {
     missionStorageKey = `${STORAGE_KEYS.missions}.${missionOwnerId}`;
     loadMissionState(account.missionState || legacyProgress);
     renderMissions();
+    if (allMissionsComplete()) maybeStartMissionTimer();
   }
   coins = account.coins;
   diamonds = account.diamonds;
@@ -1182,6 +1336,7 @@ function updateAccount(nextAccount) {
   updateWallet();
   renderSkins();
   renderStore();
+  renderMissions();
   renderDiamondPackages();
   renderInbox();
   renderAccuracyScreen();
@@ -1372,6 +1527,14 @@ function finishBoss() {
     awardScore(eventBoss.bossScoreBonus);
     showToast(t("eventBossDefeated"));
   } else {
+    if (gameUsesStandardRules()) {
+      try {
+        persistAccount({ ...account, bossesDefeated: account.bossesDefeated + 1 });
+        recordMissionMetric("bossDefeats", 1);
+      } catch (error) {
+        showToast(error.message);
+      }
+    }
     showToast(t("bossDefeated"));
   }
 }
@@ -1380,6 +1543,7 @@ function damagePlayer() {
   if (game.invulnerableUntil > game.elapsed) return;
   if (game.damageCooldown > 0) return;
   game.damageCooldown = 0.65;
+  playSound("hit");
   if (game.shieldHits > 0) {
     game.shieldHits -= 1;
   } else {
@@ -1393,6 +1557,7 @@ function damagePlayer() {
 
 function renderStore() {
   if (!storeData || !account) return;
+  renderStartingSkillShop();
   $("#buy-luck-drop").textContent = `${t("buy")} · ${storeData.luckDrop.priceCoins.toLocaleString(language)}`;
   $("#buy-luck-drop").disabled = coins < storeData.luckDrop.priceCoins;
   const offer = account.welcomeOffer;
@@ -1426,6 +1591,72 @@ function renderStore() {
     return reward;
   }));
   renderOfferCountdown();
+}
+
+const STARTING_ABILITY_PRICES = { "extra-lives": 500, shield: 400, triple: 300 };
+
+function renderStartingSkillShop() {
+  const list = $("#starting-skill-shop-list");
+  if (!list || !account) return;
+  list.replaceChildren(...STARTING_ABILITIES.map((ability) => {
+    const card = document.createElement("article");
+    card.className = "starting-skill-shop-card";
+    const title = document.createElement("strong");
+    title.textContent = t(ability.title);
+    const stock = document.createElement("span");
+    stock.textContent = t("startingSkillChargeStatus")
+      .replace("{amount}", String(account.battlePass.startingAbilityCharges[ability.id]));
+    const actions = document.createElement("div");
+    actions.className = "starting-skill-shop-actions";
+    for (const quantity of [1, 10]) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = quantity === 10 ? "small-button gold-button" : "small-button";
+      button.dataset.purchaseStartingSkill = ability.id;
+      button.dataset.quantity = String(quantity);
+      button.textContent = `${t(quantity === 1 ? "buyOneCharge" : "buyTenCharges")} · ${(STARTING_ABILITY_PRICES[ability.id] * quantity).toLocaleString(language)}`;
+      button.disabled = account.coins < STARTING_ABILITY_PRICES[ability.id] * quantity;
+      actions.append(button);
+    }
+    card.append(title, stock, actions);
+    return card;
+  }));
+}
+
+function purchaseStartingAbility(abilityId, quantity) {
+  const ability = STARTING_ABILITIES.find((entry) => entry.id === abilityId);
+  if (!account || !ability || ![1, 10].includes(quantity)) return;
+  const price = STARTING_ABILITY_PRICES[abilityId] * quantity;
+  if (account.coins < price) {
+    showToast(t("insufficientCoins"));
+    return;
+  }
+  try {
+    let updatedAccount = {
+      ...account,
+      coins: account.coins - price,
+      battlePass: {
+        ...account.battlePass,
+        startingAbilityCharges: {
+          ...account.battlePass.startingAbilityCharges,
+          [abilityId]: account.battlePass.startingAbilityCharges[abilityId] + quantity
+        }
+      },
+      startingAbilityTenPacks: quantity === 10
+        ? { ...account.startingAbilityTenPacks, [abilityId]: account.startingAbilityTenPacks[abilityId] + 1 }
+        : account.startingAbilityTenPacks
+    };
+    if (STARTING_ABILITIES.every((entry) => updatedAccount.startingAbilityTenPacks[entry.id] > 0)) {
+      updatedAccount = recordBadge(updatedAccount, "fartura");
+    }
+    persistAccount(updatedAccount);
+    recordMissionMetric("coinsSpent", price);
+    showToast(t("chargesPurchased")
+      .replace("{amount}", String(quantity))
+      .replace("{ability}", t(ability.title)));
+  } catch (error) {
+    showToast(error.message);
+  }
 }
 
 function localizedText(value) {
@@ -1528,6 +1759,15 @@ function evaluateAccountBadges(nextAccount) {
   thresholds.forEach(([badgeId, rarity, required]) => {
     if (countRarity(rarity) >= required) updatedAccount = recordBadge(updatedAccount, badgeId);
   });
+  if (STARTING_ABILITIES.every((ability) => updatedAccount.startingAbilityTenPacks[ability.id] > 0)) {
+    updatedAccount = recordBadge(updatedAccount, "fartura");
+  }
+  if (updatedAccount.bossesDefeated >= 10) {
+    updatedAccount = recordBadge(updatedAccount, "destroyer-of-plans");
+  }
+  if (updatedAccount.weeklyTop1Wins >= 5) {
+    updatedAccount = recordBadge(updatedAccount, "born-winner");
+  }
   const christmasEvent = eventData?.events.find((event) => event.id === "natal-2026");
   const finalTarget = christmasEvent?.milestoneRewards?.find((reward) =>
     reward.skinId === "ship-christmas-ornament")?.atScore;
@@ -1540,6 +1780,10 @@ function evaluateAccountBadges(nextAccount) {
 function renderBadges() {
   const grid = $("#badge-grid");
   if (!grid || !badgeData || !skinData) return;
+  grid.hidden = activeCollectionTab !== "badges";
+  $("#medal-list").hidden = activeCollectionTab !== "medals";
+  $("#collection-badges-tab").setAttribute("aria-selected", String(activeCollectionTab === "badges"));
+  $("#collection-medals-tab").setAttribute("aria-selected", String(activeCollectionTab === "medals"));
   grid.replaceChildren(...badgeData.badges.map((badge) => {
     const earnedAt = account?.badges?.[badge.id];
     const rarity = skinData.rarities[badge.rarity];
@@ -1563,7 +1807,54 @@ function renderBadges() {
     button.append(icon, title, rarityLabel, lock);
     return button;
   }));
+  renderMedals();
   if (selectedBadgeId && $("#badge-detail-dialog").open) renderBadgeDetails(selectedBadgeId);
+}
+
+function renderMedals() {
+  const list = $("#medal-list");
+  if (!list) return;
+  const names = { gold: "medalGold", silver: "medalSilver", bronze: "medalBronze" };
+  const groups = new Map();
+  for (const medal of account?.medals || []) {
+    const key = `${medal.weekId}:${medal.tier}`;
+    if (!groups.has(key)) groups.set(key, { ...medal, modes: new Set(), awardedAt: medal.awardedAt });
+    const group = groups.get(key);
+    group.modes.add(medal.mode);
+    group.awardedAt = Math.max(group.awardedAt, medal.awardedAt);
+  }
+  if (!groups.size) {
+    const empty = document.createElement("p");
+    empty.className = "medal-empty";
+    empty.textContent = t("medalEmpty");
+    list.replaceChildren(empty);
+    return;
+  }
+  list.replaceChildren(...[...groups.values()]
+    .sort((left, right) => right.awardedAt - left.awardedAt)
+    .map((medal) => {
+      const card = document.createElement("article");
+      card.className = `medal-card medal-${medal.tier}`;
+      const icon = document.createElement("span");
+      icon.className = "medal-icon";
+      icon.textContent = medal.tier === "gold" ? "🥇" : medal.tier === "silver" ? "🥈" : "🥉";
+      const copy = document.createElement("div");
+      const title = document.createElement("strong");
+      title.textContent = t(names[medal.tier]);
+      const modeLabel = medal.modes.size > 1
+        ? t("medalModalityBoth")
+        : t(medal.modes.has("ai") ? "medalModalityAi" : "medalModalityPlayers");
+      const detail = document.createElement("span");
+      detail.textContent = `${t("medalForWeek")} · ${modeLabel}`;
+      const date = document.createElement("small");
+      const earned = new Date(medal.awardedAt);
+      date.textContent = t("medalEarnedOn")
+        .replace("{date}", earned.toLocaleDateString(language, { year: "numeric", month: "long", day: "numeric" }))
+        .replace("{year}", String(earned.getFullYear()));
+      copy.append(title, detail, date);
+      card.append(icon, copy);
+      return card;
+    }));
 }
 
 function renderOwnProfile() {
@@ -1975,13 +2266,38 @@ function rollLuckDropReward() {
   };
 }
 
+function rollMissionLuckDropReward() {
+  const drop = storeData.missionLuckDrop;
+  const roll = crypto.getRandomValues(new Uint32Array(1))[0] / 0x100000000 * 100;
+  let cumulative = 0;
+  for (const amount of [1, 3, 5, 7]) {
+    cumulative += drop.chargeOdds[amount];
+    if (roll < cumulative) {
+      const ability = STARTING_ABILITIES[
+        Math.floor(crypto.getRandomValues(new Uint32Array(1))[0] / 0x100000000 * STARTING_ABILITIES.length)
+      ];
+      return { type: "charges", amount, abilityId: ability.id, rarity: "common", source: "mission" };
+    }
+  }
+  for (const reward of drop.coinRewards) {
+    cumulative += reward.odds;
+    if (roll < cumulative) {
+      return { type: "coins", amount: reward.amount, rarity: "common", source: "mission" };
+    }
+  }
+  throw new Error("A Luck Drop de missão não possui uma recompensa para esta chance.");
+}
+
 function createLuckDropTile(reward, winner = false) {
   const tile = document.createElement("div");
-  tile.className = `luck-spin-tile rarity-${reward.rarity}${winner ? " winner" : ""}`;
-  const rarity = skinData.rarities[reward.rarity];
+  tile.className = `luck-spin-tile rarity-${reward.rarity || "common"}${winner ? " winner" : ""}`;
+  const rarity = skinData.rarities[reward.rarity || "common"];
   tile.style.setProperty("--rarity-color", rarity.color);
   const visual = document.createElement("span");
-  if (reward.type === "skin") {
+  if (reward.type === "charges") {
+    visual.className = "luck-spin-coin";
+    visual.textContent = "✦";
+  } else if (reward.type === "skin") {
     const skin = findSkin(reward.skinId);
     visual.className = `skin-visual ${skin.shape}`;
     visual.style.setProperty("--skin-color", skin.color);
@@ -1992,7 +2308,9 @@ function createLuckDropTile(reward, winner = false) {
   const label = document.createElement("strong");
   label.textContent = reward.type === "skin"
     ? localizedText(findSkin(reward.skinId).name)
-    : `${reward.amount.toLocaleString(language)} ${t("coins")}`;
+    : reward.type === "charges"
+      ? `${reward.amount} · ${t(STARTING_ABILITIES.find((ability) => ability.id === reward.abilityId).title)}`
+      : `${reward.amount.toLocaleString(language)} ${t("coins")}`;
   const tier = document.createElement("small");
   tier.textContent = localizedText(rarity);
   tile.append(visual, label, tier);
@@ -2000,10 +2318,18 @@ function createLuckDropTile(reward, winner = false) {
 }
 
 function showLuckDropResult(reward) {
+  clearInterval(luckTickTimer);
+  playSound("reward");
   const visual = $("#luck-drop-result-visual");
   visual.className = "luck-result-visual";
   visual.replaceChildren();
-  if (reward.type === "skin") {
+  if (reward.type === "charges") {
+    visual.textContent = "✦";
+    const ability = STARTING_ABILITIES.find((entry) => entry.id === reward.abilityId);
+    $("#luck-drop-result-copy").textContent = t("missionDropChargesReward")
+      .replace("{amount}", String(reward.amount))
+      .replace("{ability}", t(ability.title));
+  } else if (reward.type === "skin") {
     const skin = findSkin(reward.skinId);
     const rarity = skinData.rarities[reward.rarity];
     const skinVisual = document.createElement("span");
@@ -2018,9 +2344,11 @@ function showLuckDropResult(reward) {
       .replace("{rarity}", localizedText(rarity));
   } else {
     visual.textContent = "N";
-    $("#luck-drop-result-copy").textContent = t("luckDropCoinsReward")
-      .replace("{amount}", reward.amount.toLocaleString(language))
-      .replace("{rarity}", localizedText(skinData.rarities[reward.rarity]));
+    $("#luck-drop-result-copy").textContent = reward.source === "mission"
+      ? t("missionDropCoinsReward").replace("{amount}", reward.amount.toLocaleString(language))
+      : t("luckDropCoinsReward")
+        .replace("{amount}", reward.amount.toLocaleString(language))
+        .replace("{rarity}", localizedText(skinData.rarities[reward.rarity]));
   }
   $("#luck-drop-result-title").textContent = t("luckDropOpened");
   $("#luck-revealed-result").hidden = false;
@@ -2030,15 +2358,26 @@ function showLuckDropResult(reward) {
   luckSpinInProgress = false;
 }
 
-function startLuckDropSpin(reward) {
+function startLuckDropSpin(reward, dropKind = "store") {
   const track = $("#luck-spin-track");
   const windowElement = $("#luck-spin-window");
   const winnerIndex = 24;
-  const previews = ["common", "uncommon", "rare", "epic", "legendary"]
-    .flatMap((rarity) => getLuckDropEligibleSkins(rarity))
-    .map((skin) => ({ type: "skin", skinId: skin.id, rarity: skin.rarity }));
-  for (const [rarity, amount] of Object.entries(storeData.luckDrop.coinRewards)) {
-    previews.push({ type: "coins", amount, rarity });
+  const previews = dropKind === "mission"
+    ? [
+      ...[1, 3, 5, 7].flatMap((amount) => STARTING_ABILITIES.map((ability) => ({
+        type: "charges", amount, abilityId: ability.id, rarity: "common"
+      }))),
+      ...storeData.missionLuckDrop.coinRewards.map((entry) => ({
+        type: "coins", amount: entry.amount, rarity: "common"
+      }))
+    ]
+    : ["common", "uncommon", "rare", "epic", "legendary"]
+      .flatMap((rarity) => getLuckDropEligibleSkins(rarity))
+      .map((skin) => ({ type: "skin", skinId: skin.id, rarity: skin.rarity }));
+  if (dropKind !== "mission") {
+    for (const [rarity, amount] of Object.entries(storeData.luckDrop.coinRewards)) {
+      previews.push({ type: "coins", amount, rarity });
+    }
   }
   const tiles = Array.from({ length: 31 }, () =>
     previews[Math.floor(Math.random() * previews.length)]
@@ -2053,6 +2392,9 @@ function startLuckDropSpin(reward) {
   $("#spin-luck-drop").hidden = true;
   $("#close-luck-drop-result").disabled = true;
   luckSpinInProgress = true;
+  playSound("menu");
+  clearInterval(luckTickTimer);
+  luckTickTimer = setInterval(() => playSound("tick"), 260);
   const reducedMotion = settings.quality === "minimum" ||
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const duration = reducedMotion ? 1100 : 5200;
@@ -2111,6 +2453,82 @@ function openLuckDrop() {
   $("#luck-drop-result-dialog").showModal();
 }
 
+function openMissionLuckDrop() {
+  if (!account || !account.missionDropCredits || luckSpinInProgress) {
+    if (account && !account.missionDropCredits) showToast(t("missionDropNoCredits"));
+    return;
+  }
+  try {
+    const reward = rollMissionLuckDropReward();
+    const nextAccount = {
+      ...account,
+      missionDropCredits: account.missionDropCredits - 1,
+      luckDropsOpened: account.luckDropsOpened + 1,
+      coins: reward.type === "coins" ? account.coins + reward.amount : account.coins,
+      battlePass: reward.type === "charges"
+        ? {
+          ...account.battlePass,
+          startingAbilityCharges: {
+            ...account.battlePass.startingAbilityCharges,
+            [reward.abilityId]: account.battlePass.startingAbilityCharges[reward.abilityId] + reward.amount
+          }
+        }
+        : account.battlePass
+    };
+    if (!Number.isSafeInteger(nextAccount.coins)) throw new Error(t("rewardBalanceError"));
+    persistAccount(nextAccount);
+    $("#luck-drop-result-title").textContent = t("luckDropSpinning");
+    $("#luck-drop-result-dialog").showModal();
+    startLuckDropSpin(reward, "mission");
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+function openLuckDropInfo() {
+  if (!storeData || !skinData) return;
+  const list = $("#luck-drop-info-list");
+  const sections = [];
+  const createSection = (title, rows) => {
+    const section = document.createElement("section");
+    section.className = "luck-drop-info-section";
+    const heading = document.createElement("h3");
+    heading.textContent = title;
+    const items = document.createElement("ul");
+    for (const [reward, odds] of rows) {
+      const item = document.createElement("li");
+      item.textContent = t("dropOddsSummary")
+        .replace("{reward}", reward)
+        .replace("{odds}", String(odds));
+      items.append(item);
+    }
+    section.append(heading, items);
+    sections.push(section);
+  };
+  const missionRows = [
+    ...[1, 3, 5, 7].map((amount) => [
+      t("dropChargeOdds").replace("{amount}", String(amount)),
+      storeData.missionLuckDrop.chargeOdds[amount]
+    ]),
+    ...storeData.missionLuckDrop.coinRewards.map((reward) => [
+      `${reward.amount.toLocaleString(language)} ${t("coins")}`, reward.odds
+    ])
+  ];
+  createSection(t("missionDropSection"), missionRows);
+  createSection(t("paidDropSection"), Object.entries(storeData.luckDrop.rarityOdds).map(([rarity, odds]) => {
+    const skins = getLuckDropEligibleSkins(rarity);
+    const prizes = skins.length
+      ? skins.map((skin) => localizedText(skin.name)).join(", ")
+      : `${storeData.luckDrop.coinRewards[rarity].toLocaleString(language)} ${t("coins")}`;
+    return [
+      `${prizes} · ${localizedText(skinData.rarities[rarity])}`,
+      odds
+    ];
+  }));
+  list.replaceChildren(...sections);
+  $("#luck-drop-info-dialog").showModal();
+}
+
 function confirmLuckDropSpin() {
   if (!account || !storeData?.luckDrop || luckSpinInProgress) return;
   if (account.coins < storeData.luckDrop.priceCoins) {
@@ -2133,6 +2551,7 @@ function confirmLuckDropSpin() {
     };
     nextAccount = recordBadge(nextAccount, "first-coin-purchase");
     persistAccount(nextAccount);
+    recordMissionMetric("coinsSpent", storeData.luckDrop.priceCoins);
     startLuckDropSpin(reward);
   } catch (error) {
     showToast(error.message);
@@ -2447,8 +2866,14 @@ function loadMissionState(legacyProgress = null) {
   const cycle = Number.isSafeInteger(saved?.cycle) && saved.cycle >= 0 ? saved.cycle : 0;
   const progress = saved?.progress && typeof saved.progress === "object" && !Array.isArray(saved.progress) ? saved.progress : {};
   const expiresAt = Number.isFinite(saved?.expiresAt) && saved.expiresAt > 0 ? saved.expiresAt : null;
-  missionState = { cycle, progress, expiresAt };
+  missionState = {
+    cycle,
+    progress,
+    expiresAt: expiresAt || Date.now() + CYCLE_MS,
+    rewardGranted: saved?.rewardGranted === true
+  };
   if (expiresAt && expiresAt <= Date.now()) resetMissionCycle();
+  else if (!expiresAt) saveMissionState();
 }
 
 function saveMissionState() {
@@ -2469,11 +2894,32 @@ function allMissionsComplete() {
 }
 
 function maybeStartMissionTimer() {
-  if (!missionState.expiresAt && allMissionsComplete()) {
-    missionState.expiresAt = Date.now() + CYCLE_MS;
+  if (allMissionsComplete() && !missionState.rewardGranted) {
+    missionState.rewardGranted = true;
+    try {
+      persistAccount({ ...account, missionDropCredits: account.missionDropCredits + 1 });
+    } catch (error) {
+      missionState.rewardGranted = false;
+      showToast(error.message);
+      return;
+    }
     saveMissionState();
     if (settings.missionPopups) showToast(t("missionCompleteToast"));
   }
+}
+
+function recordMissionMetric(metric, amount) {
+  if (!account || !Number.isFinite(amount) || amount <= 0) return;
+  let changed = false;
+  for (const mission of currentSet().missions) {
+    if (mission.metric !== metric || isMissionComplete(mission)) continue;
+    missionState.progress[mission.id] = Math.min(mission.goal, missionProgress(mission) + amount);
+    changed = true;
+  }
+  if (!changed) return;
+  maybeStartMissionTimer();
+  saveMissionState();
+  renderMissions();
 }
 
 function stageMissionMetric(metric, amount) {
@@ -2489,7 +2935,8 @@ function stageMissionMetric(metric, amount) {
 function resetMissionCycle() {
   missionState.cycle += 1;
   missionState.progress = {};
-  missionState.expiresAt = null;
+  missionState.expiresAt = Date.now() + CYCLE_MS;
+  missionState.rewardGranted = false;
   saveMissionState();
   renderMissions();
 }
@@ -2513,6 +2960,8 @@ function renderMissions() {
       <progress max="${mission.goal}" value="${progress}" aria-label="${escapeHtml(title)}: ${progress} / ${mission.goal}"></progress>
     </article>`;
   }).join("");
+  $("#mission-drop-count").textContent = String(account?.missionDropCredits || 0);
+  $("#open-mission-drop").disabled = !account?.missionDropCredits;
 }
 
 function validateSkinData(data) {
@@ -2524,8 +2973,8 @@ function validateSkinData(data) {
     }
     for (const skin of data.categories[category]) {
       const validShapes = {
-        ship: ["triangle", "triangle-wide", "diamond", "void-neon", "christmas-ornament", "white-neon", "christmas-tree"],
-        shield: ["circle", "double-circle", "hexagon", "petal-ring", "gold-pulse", "christmas-lights"],
+        ship: ["triangle", "triangle-wide", "diamond", "void-neon", "christmas-ornament", "white-neon", "christmas-tree", "star"],
+        shield: ["circle", "double-circle", "hexagon", "petal-ring", "gold-pulse", "christmas-lights", "star-points", "eclipse"],
         shot: ["line", "line-thin", "line-wide", "double-line", "star", "candy-cane"]
       };
       if (!skin.id || ids.has(skin.id) || !data.rarities[skin.rarity] || !skin.color ||
@@ -2695,8 +3144,8 @@ function validateEventData(data) {
 }
 
 function validateBadgeData(data) {
-  if (!Array.isArray(data?.badges) || data.badges.length !== 10) {
-    throw new Error("O catálogo deve conter os dez emblemas configurados.");
+  if (!Array.isArray(data?.badges) || data.badges.length !== 13) {
+    throw new Error("O catálogo deve conter os treze emblemas configurados.");
   }
   const ids = new Set();
   for (const badge of data.badges) {
@@ -2770,6 +3219,21 @@ function validateStoreData(data, skinCatalog) {
   }, 0);
   if (Math.abs(totalOdds - 100) > 0.000001 || luckDrop.rarityOdds.legendary !== 1.4) {
     throw new Error("As chances do Luck Drop devem totalizar 100%, com 1,4% para a raridade lendária.");
+  }
+  const missionDrop = data.missionLuckDrop;
+  const missionOdds = [
+    ...Object.values(missionDrop?.chargeOdds || {}),
+    ...(missionDrop?.coinRewards || []).map((reward) => reward.odds)
+  ];
+  if (!missionDrop || ![1, 3, 5, 7].every((amount) =>
+    Number.isFinite(missionDrop.chargeOdds[amount]) && missionDrop.chargeOdds[amount] >= 0) ||
+      !Array.isArray(missionDrop.coinRewards) ||
+      ![100, 500, 1000, 3500, 5000].every((amount) =>
+        missionDrop.coinRewards.some((reward) => reward.amount === amount &&
+          Number.isFinite(reward.odds) && reward.odds >= 0)) ||
+      Math.abs(missionOdds.reduce((total, odds) => total + odds, 0) - 100) > 0.000001 ||
+      missionDrop.chargeOdds[1] !== 48 || missionDrop.chargeOdds[7] !== 0.4) {
+    throw new Error("As chances da Luck Drop de missão devem somar 100%, incluindo 48% para uma carga e 0,4% para sete.");
   }
   const exclusiveShip = skinCatalog.categories.ship.find((skin) => skin.id === luckDrop.exclusiveSkinId);
   if (!exclusiveShip || exclusiveShip.rarity !== "legendary" || exclusiveShip.shape !== "void-neon") {
@@ -3098,13 +3562,16 @@ function renderSkins() {
         .replace("{bonus}", String(ornamentStage))
         .replace("{progress}", String(ornamentStage === 3 ? 500 : ornamentProgress)))}</small>`
       : "";
+    const attributeCopy = skin.attributes
+      ? `<small class="skin-attribute">${escapeHtml(localizedText(skin.attributes))}</small>`
+      : "";
     const visualData = tree
       ? ` data-tree-level="${account.battlePass.treeLevel || 1}"`
       : skin.id === "shield-christmas-lights"
         ? ` data-lights-mode="${account.battlePass.lightsMode}"`
         : "";
     return `<button class="skin-card skin-card-layout rarity-${skin.rarity}${selected ? " selected" : ""}${skin.id === "ship-void-neon" ? " skin-card-void-neon" : ""}" type="button" data-skin-id="${escapeHtml(skin.id)}" style="--rarity-color:${escapeHtml(rarity.color)};--skin-color:${escapeHtml(skinColor)};--accent-color:${escapeHtml(skin.accentColor || skinColor)}" aria-pressed="${selected}"${owned ? "" : " disabled"}>
-      <span class="skin-card-copy"><strong>${escapeHtml(skin.name[language])}</strong><span>${escapeHtml(skin.description[language])}</span><small>${escapeHtml(t("rarity"))}: ${escapeHtml(rarity[language])}</small>${ornamentCopy}</span>
+      <span class="skin-card-copy"><strong>${escapeHtml(skin.name[language])}</strong><span>${escapeHtml(skin.description[language])}</span><small>${escapeHtml(t("rarity"))}: ${escapeHtml(rarity[language])}</small>${attributeCopy}${ornamentCopy}</span>
       <span class="skin-visual ${escapeHtml(skin.shape)}"${visualData} aria-hidden="true"></span>
       <span class="skin-card-action">${!owned ? escapeHtml(t("luckDropExclusive")) : selected ? escapeHtml(t("equipped")) : escapeHtml(t("equip"))}</span>
     </button>`;
@@ -3125,6 +3592,7 @@ function renderSkinExtras() {
   if (!extras || !account) return;
   const hasTree = ownedSkins.has("ship-christmas-tree");
   const hasLights = ownedSkins.has("shield-christmas-lights");
+  const hasGoldenStarShield = ownedSkins.has("shield-golden-star");
   const treeLevel = account.battlePass.treeLevel || 1;
   const treePanel = activeSkinCategory === "ship" && hasTree
     ? `<section class="skin-extras-panel">
@@ -3156,7 +3624,13 @@ function renderSkinExtras() {
       ).join("")}</div>
     </section>`
     : "";
-  extras.innerHTML = `${treePanel}${lightsPanel}`;
+  const goldenStarPanel = activeSkinCategory === "shield" && hasGoldenStarShield
+    ? `<section class="skin-extras-panel">
+      <h3>${escapeHtml(t("goldShieldRotation"))}</h3>
+      <label class="toggle-control"><input id="rotate-golden-shield" type="checkbox"${settings.goldShieldRotates ? " checked" : ""}><span>${escapeHtml(t("rotateShield"))}</span></label>
+    </section>`
+    : "";
+  extras.innerHTML = `${treePanel}${lightsPanel}${goldenStarPanel}`;
 }
 
 function purchaseChristmasTreeEvolution(level) {
@@ -3353,6 +3827,15 @@ async function openPublicProfile(uid) {
 
 async function loadLeaderboard(scope) {
   if (!account) return;
+  const pendingPreviousWeek = account.weeklyCompetition.weekId &&
+    account.weeklyCompetition.weekId !== currentWeekId() &&
+    !account.settledWeeks.includes(account.weeklyCompetition.weekId);
+  if (pendingPreviousWeek) await settlePreviousWeek();
+  if (!account) return;
+  if (pendingPreviousWeek && !account.settledWeeks.includes(account.weeklyCompetition.weekId)) return;
+  const rotatedAccount = rotateWeeklyCompetition(account);
+  if (rotatedAccount !== account) persistAccount(rotatedAccount);
+  if (activeCompetitionMode === "ai") refreshAiCompetition();
   const requestId = ++leaderboardRequestId;
   activeLeaderboardScope = scope;
   $("#leaderboard-status").textContent = t("leaderboardLoading");
@@ -3361,11 +3844,18 @@ async function loadLeaderboard(scope) {
   $$("[data-leaderboard-scope]").forEach((button) => {
     button.setAttribute("aria-pressed", String(button.dataset.leaderboardScope === scope));
   });
+  $$("[data-competition-mode]").forEach((button) => {
+    button.setAttribute("aria-pressed", String(button.dataset.competitionMode === activeCompetitionMode));
+  });
+  $("#leaderboard-scope-tabs").hidden = activeCompetitionMode !== "players";
+  $("#leaderboard-disclaimer")?.remove();
   try {
-    const leaderboardUrl = scope === "state"
-      ? `/api/leaderboard?scope=state&region=${encodeURIComponent(account.region || "")}`
-      : "/api/leaderboard";
-    const response = await cloudRequest(leaderboardUrl, { auth: false });
+    const leaderboardUrl = activeCompetitionMode === "ai"
+      ? ""
+      : `/api/leaderboard?mode=weekly&week=${encodeURIComponent(account.weeklyCompetition.weekId)}${scope === "state" ? `&scope=state&region=${encodeURIComponent(account.region || "")}` : ""}`;
+    const response = activeCompetitionMode === "ai"
+      ? { players: getAiLeaderboardEntries() }
+      : await cloudRequest(leaderboardUrl, { auth: false });
     if (requestId !== leaderboardRequestId) return;
     let entries = Array.isArray(response.players) ? response.players : [];
     entries.sort((left, right) => right.bestScore - left.bestScore || left.username.localeCompare(right.username));
@@ -3383,7 +3873,7 @@ async function loadLeaderboard(scope) {
       row.tabIndex = 0;
       row.setAttribute("role", "button");
       row.setAttribute("aria-label", `${entry.username}, ${entry.bestScore.toLocaleString(language)}`);
-      row.dataset.profileUid = entry.uid;
+      if (entry.uid) row.dataset.profileUid = entry.uid;
       const rank = document.createElement("span");
       rank.className = "leaderboard-entry-rank";
       rank.textContent = `#${index + 1}`;
@@ -3417,6 +3907,7 @@ async function loadLeaderboard(scope) {
       row.append(rank, player, score);
       let lastClickAt = 0;
       row.addEventListener("click", () => {
+        if (!entry.uid) return;
         row.parentElement.querySelectorAll(".leaderboard-entry.selected").forEach((selected) => {
           selected.classList.remove("selected");
         });
@@ -3425,15 +3916,173 @@ async function loadLeaderboard(scope) {
         if (now - lastClickAt < 500) void openPublicProfile(entry.uid);
         lastClickAt = now;
       });
-      row.addEventListener("dblclick", () => void openPublicProfile(entry.uid));
+      row.addEventListener("dblclick", () => {
+        if (entry.uid) void openPublicProfile(entry.uid);
+      });
       row.addEventListener("contextmenu", (event) => {
+        if (!entry.uid) return;
         event.preventDefault();
         void openPublicProfile(entry.uid);
       });
       row.addEventListener("keydown", (event) => {
-        if (event.key === "Enter" || event.key === " ") {
+        if (entry.uid && (event.key === "Enter" || event.key === " ")) {
           event.preventDefault();
           void openPublicProfile(entry.uid);
+        }
+
+        function addWeeklyMedal(nextAccount, tier, mode, weekId, awardedAt = Date.now()) {
+          if (!["gold", "silver", "bronze"].includes(tier) || !["players", "ai"].includes(mode)) return nextAccount;
+          const medalId = `${weekId}:${tier}:${mode}`;
+          if (nextAccount.medals.some((medal) => medal.id === medalId)) return nextAccount;
+          return {
+            ...nextAccount,
+            medals: [...nextAccount.medals, { id: medalId, weekId, tier, mode, awardedAt }]
+          };
+        }
+
+        function applyWeeklyPlacement(nextAccount, rank, mode, weekId) {
+          if (rank < 1 || rank > 5) return nextAccount;
+          const rewards = {
+            1: { coins: 10000, drops: 15, medal: "gold" },
+            2: { coins: 5000, drops: 5, medal: "silver" },
+            3: { coins: 2000, drops: 3, medal: "bronze" },
+            4: { coins: 1500, drops: 0 },
+            5: { coins: 1500, drops: 0 }
+          }[rank];
+          let updated = {
+            ...nextAccount,
+            coins: nextAccount.coins + rewards.coins,
+            missionDropCredits: nextAccount.missionDropCredits + rewards.drops
+          };
+          if (rewards.medal) {
+            updated = addWeeklyMedal(updated, rewards.medal, mode, weekId);
+            if (rank === 1) updated = applyGoldMedalBonus(updated);
+          }
+          if (rank === 1) {
+            updated = { ...updated, weeklyTop1Wins: updated.weeklyTop1Wins + 1 };
+            if (mode === "players") {
+              updated = { ...updated, bestScore: Math.max(updated.bestScore, updated.weeklyCompetition.score) };
+            }
+          }
+          return updated;
+        }
+
+        function applyGoldMedalBonus(nextAccount) {
+          const bonusPool = [
+            { type: "skin", skinId: "ship-golden-star", odds: 0.7 },
+            { type: "skin", skinId: "shield-golden-star", odds: 0.7 },
+            { type: "skin", skinId: "shot-double-gold", odds: 0.7 },
+            { type: "coins", amount: 100, odds: 40 },
+            { type: "coins", amount: 200, odds: 25 },
+            { type: "coins", amount: 400, odds: 15 },
+            { type: "coins", amount: 600, odds: 10 },
+            { type: "coins", amount: 800, odds: 5 },
+            { type: "coins", amount: 1600, odds: 2.9 }
+          ];
+          const roll = crypto.getRandomValues(new Uint32Array(1))[0] / 0x100000000 * 100;
+          let cumulative = 0;
+          const bonus = bonusPool.find((reward) => {
+            cumulative += reward.odds;
+            return roll < cumulative;
+          });
+          if (!bonus) throw new Error("A recompensa da medalha de ouro está incompleta.");
+          const owned = new Set(nextAccount.ownedSkins);
+          const eclipseDuplicate = owned.has("shield-eclipse");
+          const bonusDuplicate = bonus.type === "skin" && owned.has(bonus.skinId);
+          owned.add("shield-eclipse");
+          if (bonus.type === "skin" && !bonusDuplicate) owned.add(bonus.skinId);
+          const bonusCoins = (bonus.type === "coins" ? bonus.amount : bonusDuplicate ? 1600 : 0) +
+            (eclipseDuplicate ? 1600 : 0);
+          return {
+            ...nextAccount,
+            coins: nextAccount.coins + bonusCoins,
+            ownedSkins: [...owned]
+          };
+        }
+
+        async function settlePreviousWeek() {
+          if (!account) return;
+          const previous = account.weeklyCompetition;
+          const thisWeek = currentWeekId();
+          if (!previous.weekId || previous.weekId === thisWeek || account.settledWeeks.includes(previous.weekId)) return;
+          let updated = account;
+          try {
+            if (account.leaderboardOptIn && account.cloudUid && previous.score > 0) {
+              const response = await cloudRequest(`/api/leaderboard?mode=weekly&week=${encodeURIComponent(previous.weekId)}`, { auth: false });
+              const players = Array.isArray(response.players) ? response.players : [];
+              const rank = players.findIndex((player) => player.uid === account.cloudUid) + 1;
+              if (rank > 0) updated = applyWeeklyPlacement(updated, rank, "players", previous.weekId);
+            }
+            if (previous.score > 0) {
+              const aiScores = previous.aiScores.length
+                ? previous.aiScores
+                : Array.from({ length: 5 }, (_, index) => previous.score * (index + 1));
+              const aiRank = [previous.score, ...aiScores].sort((a, b) => b - a).indexOf(previous.score) + 1;
+              updated = applyWeeklyPlacement(updated, aiRank, "ai", previous.weekId);
+            }
+            updated = { ...updated, settledWeeks: [...updated.settledWeeks, previous.weekId].slice(-8) };
+            persistAccount(updated);
+            showToast(t("weeklyPrizesGranted"));
+          } catch (error) {
+            showToast(`${t("weeklyPrizeError")} ${error.message}`);
+          }
+        }
+
+        function currentWeekId(now = new Date()) {
+          const monday = new Date(now);
+          monday.setHours(0, 0, 0, 0);
+          monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+          return `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, "0")}-${String(monday.getDate()).padStart(2, "0")}`;
+        }
+
+        function rotateWeeklyCompetition(nextAccount) {
+          const weekId = currentWeekId();
+          if (nextAccount.weeklyCompetition.weekId === weekId) return nextAccount;
+          const previous = nextAccount.weeklyCompetition;
+          const history = previous.weekId
+            ? [...nextAccount.weeklyHistory, {
+              weekId: previous.weekId,
+              score: previous.score,
+              aiScores: previous.aiScores
+            }].slice(-8)
+            : nextAccount.weeklyHistory;
+          return {
+            ...nextAccount,
+            weeklyHistory: history,
+            weeklyCompetition: { weekId, score: 0, aiScores: [] }
+          };
+        }
+
+        function refreshAiCompetition() {
+          if (!account) return;
+          const scores = Array.from({ length: 5 }, (_, index) =>
+            Math.floor(account.weeklyCompetition.score * (index + 1) * 0.1));
+          const hour = new Date().getHours();
+          if ((hour >= 10 && hour < 11) || (hour >= 18 && hour < 19)) {
+            scores.forEach((score, index) => {
+              scores[index] = Math.floor(account.weeklyCompetition.score * (index + 1));
+              scores[index] = Math.max(score, scores[index]);
+            });
+          }
+          const previous = account.weeklyCompetition.aiScores;
+          const nextScores = scores.map((score, index) => Math.max(score, previous[index] || 0));
+          if (JSON.stringify(previous) !== JSON.stringify(nextScores)) {
+            persistAccount({
+              ...account,
+              weeklyCompetition: { ...account.weeklyCompetition, aiScores: nextScores }
+            });
+          }
+        }
+
+        function getAiLeaderboardEntries(score = account?.weeklyCompetition.score || 0, savedAiScores = account?.weeklyCompetition.aiScores || []) {
+          const aiScores = savedAiScores;
+          return [
+            { username: account?.username || t("player"), bestScore: score },
+            ...Array.from({ length: 5 }, (_, index) => ({
+              username: `${t("anonymousPlayer")} ${index + 1}`,
+              bestScore: aiScores[index] || Math.floor(score * (index + 1) * 0.1)
+            }))
+          ];
         }
       });
       return row;
@@ -3534,6 +4183,10 @@ async function startGame(eventId = null, startingAbilityId = null) {
     requireAuthentication();
     return;
   }
+  await settlePreviousWeek();
+  if (account.weeklyCompetition.weekId &&
+      account.weeklyCompetition.weekId !== currentWeekId() &&
+      !account.settledWeeks.includes(account.weeklyCompetition.weekId)) return;
   const selectedEvent = eventId ? eventData.events.find((event) => event.id === eventId) : null;
   if (eventId && (!selectedEvent || !["standard", "christmas"].includes(selectedEvent.gameMode) ||
       !selectedEvent.phases?.length ||
@@ -3573,6 +4226,7 @@ async function startGame(eventId = null, startingAbilityId = null) {
     }
   }
   game.starting = true;
+  playSound("menu");
   showScreen("game");
   const fullscreenRequest = requestGameFullscreen().then(() => true, () => false);
   if (!await fullscreenRequest) showToast(t("fullscreenUnavailable"));
@@ -3638,6 +4292,7 @@ function updatePowerupStatus() {
 }
 
 function showGameOverlay(mode) {
+  if (mode === "over") playSound("hit");
   game.overlayMode = mode;
   const overlay = $("#game-overlay");
   overlay.hidden = false;
@@ -3687,14 +4342,22 @@ function finishRun() {
       : account;
     if (standardRules) {
       const earnedScore = game.eventId ? Math.max(0, score - game.runStartingScore) : score;
+      const currentWeek = rotateWeeklyCompetition(updatedAccount);
       updatedAccount = {
-        ...updatedAccount,
+        ...currentWeek,
         coins: updatedAccount.coins + coinsForScore(earnedScore),
-        bestScore: Math.max(updatedAccount.bestScore || 0, score)
+        bestScore: Math.max(updatedAccount.bestScore || 0, score),
+        weeklyCompetition: {
+          ...currentWeek.weeklyCompetition,
+          score: Math.max(currentWeek.weeklyCompetition.score, score)
+        }
       };
     }
     persistAccount(updatedAccount);
-    if (standardRules) commitRunProgress(runProgress);
+    if (standardRules) {
+      refreshAiCompetition();
+      commitRunProgress(runProgress);
+    }
   } catch (error) {
     showToast(`${t("gameFinishError")} ${error.message}`);
   }
@@ -3806,6 +4469,7 @@ function updateGame(delta) {
     game.shotElapsed += delta;
     if (game.shotElapsed >= SHOT_INTERVAL_MS / 1000) {
       game.shotElapsed %= SHOT_INTERVAL_MS / 1000;
+      playSound("shoot");
       const lanes = game.elapsed < game.tripleShotUntil ? [-10, 0, 10] : [0];
       for (const lane of lanes) {
         const ornamentStage = selectedSkins.ship === "ship-christmas-ornament"
@@ -3815,7 +4479,8 @@ function updateGame(delta) {
           x: game.player.x + lane,
           y: game.player.y - 17,
           speed: 460,
-          damage: upgradeValue("damage") * (1 + ornamentStage / 100)
+          damage: (upgradeValue("damage") + (selectedSkins.shot === "shot-double-gold" ? 1 : 0)) *
+            (1 + ornamentStage / 100)
         });
       }
     }
@@ -3932,10 +4597,11 @@ function updateGame(delta) {
         if (collected) showToast(t("battlePassTokens"));
         continue;
       }
-      if (powerUp.type === "shield") game.shieldHits = upgradeValue("shield");
+      if (powerUp.type === "shield") game.shieldHits += upgradeValue("shield");
       else game.tripleShotUntil = Math.max(game.tripleShotUntil, game.elapsed) + TRIPLE_SHOT_DURATION_SECONDS;
       game.powerUps.splice(index, 1);
       updatePowerupStatus();
+      playSound("success");
       showToast(powerUp.type === "shield" ? t("shieldActive") : t("tripleShot"));
     }
   }
@@ -4051,7 +4717,21 @@ function drawGame() {
     context.stroke();
   } else {
     context.beginPath();
-    if (shipSkin.shape === "diamond") {
+    if (shipSkin.shape === "star") {
+      context.fillStyle = shipSkin.color;
+      context.strokeStyle = shipSkin.accentColor || "#fff3b0";
+      for (let point = 0; point < 10; point++) {
+        const angle = -Math.PI / 2 + point * Math.PI / 5;
+        const radius = point % 2 === 0 ? 17 : 8;
+        const x = game.player.x + Math.cos(angle) * radius;
+        const y = game.player.y + Math.sin(angle) * radius;
+        if (point === 0) context.moveTo(x, y);
+        else context.lineTo(x, y);
+      }
+      context.closePath();
+      context.fill();
+      context.stroke();
+    } else if (shipSkin.shape === "diamond") {
       context.moveTo(game.player.x, game.player.y - 17);
       context.lineTo(game.player.x + 13, game.player.y);
       context.lineTo(game.player.x, game.player.y + 17);
@@ -4062,8 +4742,10 @@ function drawGame() {
       context.lineTo(game.player.x, game.player.y + 7);
       context.lineTo(game.player.x - (shipSkin.shape === "triangle-wide" ? 17 : 13), game.player.y + 13);
     }
-    context.closePath();
-    context.stroke();
+    if (shipSkin.shape !== "star") {
+      context.closePath();
+      context.stroke();
+    }
   }
   if (game.shieldHits > 0 || game.invulnerableUntil > game.elapsed) drawShield();
   context.restore();
@@ -4291,6 +4973,36 @@ function drawShield() {
     context.stroke();
     return;
   }
+  if (shieldSkin.shape === "star-points") {
+    const rotation = settings.goldShieldRotates ? game.elapsed * 0.45 : 0;
+    context.save();
+    context.translate(game.player.x, game.player.y);
+    context.rotate(rotation);
+    context.lineWidth = 3;
+    context.beginPath();
+    for (let point = 0; point < 10; point++) {
+      const angle = -Math.PI / 2 + point * Math.PI / 5;
+      const radius = point % 2 === 0 ? 27 : 15;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      if (point === 0) context.moveTo(x, y);
+      else context.lineTo(x, y);
+    }
+    context.closePath();
+    context.stroke();
+    context.restore();
+    return;
+  }
+  if (shieldSkin.shape === "eclipse") {
+    context.lineWidth = 3;
+    context.beginPath();
+    context.ellipse(game.player.x, game.player.y, 27, 21, -0.3, 0, Math.PI * 2);
+    context.stroke();
+    context.beginPath();
+    context.arc(game.player.x + 5, game.player.y, 18, -Math.PI / 2, Math.PI / 2);
+    context.stroke();
+    return;
+  }
   if (shieldSkin.shape === "christmas-lights") {
     const mode = shieldSkin.lightsMode || "off";
     const blinkSpeed = mode === "fast" ? 12 : 2;
@@ -4398,13 +5110,13 @@ function runDebugChecks() {
         event.milestoneRewards.every((reward) => reward.atScore === 440000 &&
           skinCategories.some((category) => skinData.categories[category].some((skin) =>
             skin.id === reward.skinId && skin.rarity === "epic")))))],
-    ["Catálogo de dez emblemas válido",
-      badgeData?.badges.length === 10 &&
+    ["Catálogo de treze emblemas válido",
+      badgeData?.badges.length === 13 &&
       badgeData.badges.some((badge) => badge.id === "player-beta" && badge.rarity === "legendary")],
     ["Códigos promocionais válidos", Array.isArray(promoCodeData?.codes)],
     ["Idioma suportado", Object.hasOwn(translations, language)],
     ["Qualidade gráfica válida", qualityLevels.includes(settings.quality)],
-    ["Conjunto de missões atual válido", Boolean(missionData?.missionSets?.length && currentSet().missions.length > 0)],
+    ["Seis missões diárias", Boolean(missionData?.missionSets?.length && currentSet().missions.length === 6)],
     ["Intervalo de tiro em 500 ms", SHOT_INTERVAL_MS === 500],
     ["Inimigos valem 50 pontos", ENEMY_SCORE === 50],
     ["Próximo chefe surge 60 segundos após a derrota",
@@ -4512,6 +5224,11 @@ async function initialize() {
     updateBattlePassVisibility();
     setInterval(updateMissionClock, 1000);
     setInterval(renderAccuracyScreen, 1000);
+    setInterval(() => {
+      if (!$("#screen-leaderboard").hidden && activeCompetitionMode === "ai") {
+        void loadLeaderboard(activeLeaderboardScope);
+      }
+    }, 60000);
     setInterval(renderEvents, 60000);
     setInterval(updateBattlePassVisibility, 60000);
     offerTimer = setInterval(renderOfferCountdown, 1000);
@@ -4838,9 +5555,22 @@ async function saveLeaderboardPreferences() {
 document.addEventListener("click", (event) => {
   const target = event.target.closest("button, a");
   if (!target) return;
+  playSound("button");
   if (target.dataset.authMode) setAuthMode(target.dataset.authMode);
   if (target.hasAttribute("data-faq")) openFaq();
   if (target.dataset.badgeId) openBadgeDetails(target.dataset.badgeId);
+  if (target.hasAttribute("data-luck-drop-info")) openLuckDropInfo();
+  if (target.dataset.collectionTab) {
+    activeCollectionTab = target.dataset.collectionTab;
+    renderBadges();
+  }
+  if (target.dataset.competitionMode) {
+    activeCompetitionMode = target.dataset.competitionMode;
+    void loadLeaderboard(activeLeaderboardScope);
+  }
+  if (target.dataset.purchaseStartingSkill) {
+    purchaseStartingAbility(target.dataset.purchaseStartingSkill, Number(target.dataset.quantity));
+  }
   if (target.id === "play-event-button") {
     event.preventDefault();
     openStartingSkills(target.dataset.eventId);
@@ -4964,6 +5694,7 @@ $("#start-with-selected-skill").addEventListener("click", () => {
 $("#cancel-battle-pass-purchase").addEventListener("click", () => $("#battle-pass-purchase-dialog").close());
 $("#confirm-battle-pass-purchase").addEventListener("click", purchaseBattlePassPremium);
 $("#buy-luck-drop").addEventListener("click", openLuckDrop);
+$("#open-mission-drop").addEventListener("click", openMissionLuckDrop);
 $("#spin-luck-drop").addEventListener("click", confirmLuckDropSpin);
 $("#confirm-diamond-purchase").addEventListener("click", purchaseDiamonds);
 $("#cancel-diamond-purchase").addEventListener("click", () => {
@@ -4980,7 +5711,18 @@ $("#start-accuracy-game").addEventListener("click", startAccuracyAttempt);
 $("#accuracy-hit-area").addEventListener("click", attemptAccuracyHit);
 $("#leaderboard-opt-in").addEventListener("change", () => void saveLeaderboardPreferences());
 $("#leaderboard-region").addEventListener("change", () => void saveLeaderboardPreferences());
+$("#sound-effects").addEventListener("change", (event) => {
+  settings.soundEffects = event.currentTarget.checked;
+  saveSettings();
+  if (settings.soundEffects) playSound("success");
+});
+document.addEventListener("change", (event) => {
+  if (event.target.id !== "rotate-golden-shield") return;
+  settings.goldShieldRotates = event.target.checked;
+  saveSettings();
+});
 $("#close-faq").addEventListener("click", () => $("#faq-dialog").close());
+$("#close-luck-drop-info").addEventListener("click", () => $("#luck-drop-info-dialog").close());
 $("#close-badge-detail").addEventListener("click", () => $("#badge-detail-dialog").close());
 $("#open-delete-account").addEventListener("click", () => {
   $("#delete-account-error").textContent = "";

@@ -369,6 +369,10 @@ body { font-size: 9px; }
 .skin-visual.circle, .skin-visual.double-circle { width: 43px; height: 43px; border: 2px solid var(--skin-color); border-radius: 50%; }
 .skin-visual.double-circle::after { position: absolute; inset: 5px; border: 1px solid var(--skin-color); border-radius: 50%; content: ""; }
 .skin-visual.hexagon { width: 47px; height: 43px; border: 2px solid var(--skin-color); clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%); }
+.skin-visual.star, .skin-visual.star-points { background: var(--skin-color); clip-path: polygon(50% 0, 62% 35%, 100% 35%, 69% 58%, 81% 100%, 50% 72%, 19% 100%, 31% 58%, 0 35%, 38% 35%); }
+.skin-visual.star-points { background: transparent; border: 2px solid var(--skin-color); }
+.skin-visual.eclipse { width: 52px; height: 40px; border: 3px solid var(--skin-color); border-radius: 50%; transform: rotate(-17deg); }
+.skin-visual.eclipse::after { position: absolute; inset: -2px 6px -2px 12px; border-right: 3px solid var(--skin-color); border-radius: 50%; content: ""; }
 .skin-visual.line, .skin-visual.line-thin, .skin-visual.line-wide, .skin-visual.double-line { width: 5px; height: 47px; border-radius: 5px; background: var(--skin-color); box-shadow: 0 0 10px var(--skin-color); }
 .skin-visual.line-thin { width: 2px; }
 .skin-visual.line-wide { width: 8px; }
@@ -529,6 +533,35 @@ body[data-quality="minimum"] .rarity-legendary { animation: none; }
 .store-feature p { color: var(--muted); font-size: 7px; line-height: 1.9; }
 .store-feature .neon-button { flex: 0 0 auto; }
 .luck-drop-odds { color: #ffd45c !important; }
+.luck-drop-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.starting-skill-shop { margin: 20px 0 26px; }
+.starting-skill-shop-list { display: grid; gap: 10px; }
+.starting-skill-shop-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 9px 16px; padding: 14px; border: 1px solid rgba(49, 234, 255, .26); background: rgba(8, 7, 20, .5); }
+.starting-skill-shop-card > strong { color: var(--cyan); font-size: 8px; line-height: 1.8; }
+.starting-skill-shop-card > span { grid-column: 1 / -1; color: var(--muted); font-size: 7px; }
+.starting-skill-shop-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.starting-skill-shop-actions button { font-size: 6px; }
+.mission-drop-card { display: grid; gap: 12px; margin: 18px 0; padding: 16px; border: 1px solid rgba(255, 212, 92, .4); background: rgba(255, 212, 92, .04); }
+.mission-drop-card p { margin: 0; color: #ffe6a5; font-size: 8px; }
+.mission-drop-card strong { color: #fff; }
+.collection-tabs { display: flex; gap: 8px; margin: 18px 0; border-bottom: 1px solid var(--line); }
+.collection-tabs button { padding: 11px 12px; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--muted); font: inherit; font-size: 8px; }
+.collection-tabs button[aria-selected="true"] { border-color: var(--cyan); color: var(--cyan); }
+.medal-list { display: grid; gap: 10px; margin: 20px 0; }
+.medal-card { display: flex; align-items: center; gap: 14px; padding: 16px; border: 1px solid rgba(255, 212, 92, .45); background: rgba(8, 7, 20, .55); }
+.medal-card.medal-silver { border-color: rgba(211, 221, 240, .45); }
+.medal-card.medal-bronze { border-color: rgba(208, 133, 87, .5); }
+.medal-icon { font-size: 28px; }
+.medal-card div { display: grid; gap: 8px; }
+.medal-card strong { color: #ffe6a5; font-size: 8px; line-height: 1.8; }
+.medal-silver strong { color: #d3ddf0; }
+.medal-bronze strong { color: #d08557; }
+.medal-card span:not(.medal-icon), .medal-card small, .medal-empty { color: var(--muted); font-size: 7px; line-height: 1.8; }
+.luck-drop-info-list { display: grid; gap: 16px; max-height: 55vh; margin: 16px 0; overflow-y: auto; }
+.luck-drop-info-section { padding: 12px; border: 1px solid var(--line); }
+.luck-drop-info-section h3 { margin: 0 0 10px; color: var(--cyan); font-size: 8px; }
+.luck-drop-info-section ul { display: grid; gap: 8px; margin: 0; padding-left: 18px; color: var(--muted); font-size: 7px; line-height: 1.8; }
+.skin-card-copy .skin-attribute { color: #ffe6a5; }
 .store-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 18px 0 28px; }
 .store-section-title { padding-top: 14px; border-top: 1px solid var(--line); }
 .diamond-package-list { display: grid; gap: 10px; }

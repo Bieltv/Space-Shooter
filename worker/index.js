@@ -455,6 +455,11 @@ async function deleteCurrentUser(request, env, uid) {
 
 async function listLeaderboard(request, env) {
   const url = new URL(request.url);
+  const isWeekly = url.searchParams.get("mode") === "weekly";
+  const weekId = url.searchParams.get("week") || "";
+  if (isWeekly && !/^\d{4}-\d{2}-\d{2}$/.test(weekId)) {
+    return jsonResponse({ players: [] });
+  }
   const isStateScope = url.searchParams.get("scope") === "state";
   const region = (url.searchParams.get("region") || "").trim();
   if (isStateScope && (!region || region.length > 80)) {
@@ -467,15 +472,15 @@ async function listLeaderboard(request, env) {
         op: "EQUAL",
         value: { booleanValue: true }
       }
-    },
-    {
+    }
+  ];
+  if (!isWeekly) filters.push({
       fieldFilter: {
         field: { fieldPath: "bestScore" },
         op: "GREATER_THAN",
         value: { integerValue: "0" }
       }
-    }
-  ];
+  });
   if (isStateScope) {
     filters.push({
       fieldFilter: {
@@ -497,14 +502,31 @@ async function listLeaderboard(request, env) {
             filters
           }
         },
-        orderBy: [{ field: { fieldPath: "bestScore" }, direction: "DESCENDING" }],
-        limit: 100
+        ...(isWeekly ? {} : {
+          orderBy: [{ field: { fieldPath: "bestScore" }, direction: "DESCENDING" }]
+        }),
+        limit: isWeekly ? 500 : 100
       }
     })
   });
-  const players = result
+  let players = result
     .filter((entry) => entry.document?.fields)
     .map((entry) => fromFirestoreFields(entry.document.fields));
+  if (isWeekly) {
+    players = players.flatMap((profile) => {
+      const state = profile.state && typeof profile.state === "object" ? profile.state : {};
+      const current = state.weeklyCompetition?.weekId === weekId ? state.weeklyCompetition : null;
+      const historical = Array.isArray(state.weeklyHistory)
+        ? state.weeklyHistory.find((week) => week?.weekId === weekId)
+        : null;
+      const score = Number(current?.score ?? historical?.score);
+      return Number.isSafeInteger(score) && score > 0
+        ? [{ ...profile, bestScore: score }]
+        : [];
+    }).sort((left, right) =>
+      right.bestScore - left.bestScore || left.username.localeCompare(right.username)
+    ).slice(0, 100);
+  }
   return jsonResponse({
     players: players.map((profile) => ({
       ...publicProfile(profile),

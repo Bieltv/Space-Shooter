@@ -1,54 +1,49 @@
 {
   "missionSets": [
     {
-      "id": "set-alpha",
+      "id": "daily-missions",
       "missions": [
         {
-          "id": "first-contact",
-          "metric": "kills",
-          "goal": 5,
-          "title": { "pt-BR": "Primeiro contato", "en": "First contact" },
-          "description": { "pt-BR": "Destrua 5 inimigos.", "en": "Destroy 5 enemies." }
-        },
-        {
-          "id": "deep-space",
-          "metric": "survivalSeconds",
-          "goal": 30,
-          "title": { "pt-BR": "Espaço profundo", "en": "Deep space" },
-          "description": { "pt-BR": "Sobreviva por 30 segundos em uma partida.", "en": "Survive for 30 seconds in one run." }
-        },
-        {
-          "id": "stardust",
-          "metric": "score",
-          "goal": 100,
-          "title": { "pt-BR": "Poeira estelar", "en": "Stardust" },
-          "description": { "pt-BR": "Marque 100 pontos.", "en": "Score 100 points." }
-        }
-      ]
-    },
-    {
-      "id": "set-beta",
-      "missions": [
-        {
-          "id": "hunter",
+          "id": "daily-kills-10",
           "metric": "kills",
           "goal": 10,
-          "title": { "pt-BR": "Caçador orbital", "en": "Orbital hunter" },
-          "description": { "pt-BR": "Destrua 10 inimigos.", "en": "Destroy 10 enemies." }
+          "title": { "pt-BR": "Caçador diário", "en": "Daily hunter" },
+          "description": { "pt-BR": "Derrote 10 inimigos.", "en": "Defeat 10 enemies." }
         },
         {
-          "id": "long-haul",
-          "metric": "survivalSeconds",
-          "goal": 45,
-          "title": { "pt-BR": "Viagem longa", "en": "Long haul" },
-          "description": { "pt-BR": "Sobreviva por 45 segundos em uma partida.", "en": "Survive for 45 seconds in one run." }
+          "id": "daily-kills-25",
+          "metric": "kills",
+          "goal": 25,
+          "title": { "pt-BR": "Ameaça do vazio", "en": "Void threat" },
+          "description": { "pt-BR": "Derrote 25 inimigos.", "en": "Defeat 25 enemies." }
         },
         {
-          "id": "high-score",
+          "id": "daily-score",
           "metric": "score",
-          "goal": 200,
-          "title": { "pt-BR": "Pontuação máxima", "en": "High score" },
-          "description": { "pt-BR": "Marque 200 pontos.", "en": "Score 200 points." }
+          "goal": 500,
+          "title": { "pt-BR": "Pontuação orbital", "en": "Orbital score" },
+          "description": { "pt-BR": "Marque 500 pontos em partidas.", "en": "Score 500 points in matches." }
+        },
+        {
+          "id": "daily-survival",
+          "metric": "survivalSeconds",
+          "goal": 120,
+          "title": { "pt-BR": "Sobrevivente", "en": "Survivor" },
+          "description": { "pt-BR": "Sobreviva por 120 segundos em partidas.", "en": "Survive for 120 seconds across matches." }
+        },
+        {
+          "id": "daily-spend-coins",
+          "metric": "coinsSpent",
+          "goal": 500,
+          "title": { "pt-BR": "Investimento estelar", "en": "Stellar investment" },
+          "description": { "pt-BR": "Gaste 500 Neon-moedas na loja ou em melhorias.", "en": "Spend 500 Neon Coins in the store or on upgrades." }
+        },
+        {
+          "id": "daily-boss",
+          "metric": "bossDefeats",
+          "goal": 1,
+          "title": { "pt-BR": "Quebra-planos", "en": "Plan breaker" },
+          "description": { "pt-BR": "Derrote um chefe.", "en": "Defeat one boss." }
         }
       ]
     }

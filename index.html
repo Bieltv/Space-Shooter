@@ -13,8 +13,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=22">
-  <script defer src="js/app.js?v=26"></script>
+  <link rel="stylesheet" href="css/style.css?v=23">
+  <script defer src="js/app.js?v=27"></script>
 </head>
 <body>
   <div class="starfield" aria-hidden="true"></div>
@@ -193,6 +193,10 @@
           <label class="toggle-control"><input id="mission-popups" type="checkbox" checked><span data-i18n="enabled">Ativado</span></label>
         </div>
         <div class="setting-row">
+          <div><h3 data-i18n="soundEffects">Efeitos sonoros</h3><p data-i18n="soundEffectsHint">Ativa os sons dos menus, da roleta e das partidas.</p></div>
+          <label class="toggle-control"><input id="sound-effects" type="checkbox" checked><span data-i18n="enabled">Ativado</span></label>
+        </div>
+        <div class="setting-row">
           <div><h3 data-i18n="faq">FAQ do jogo</h3><p data-i18n="faqSettingsHint">Veja respostas sobre contas locais e moedas virtuais.</p></div>
           <button class="small-button" type="button" data-faq data-i18n="openFaq">Abrir FAQ</button>
         </div>
@@ -275,7 +279,12 @@
         <p class="eyebrow" data-i18n="menuLabel">MENU</p>
         <h2 id="badges-title" data-i18n="badges">Emblemas</h2>
         <p class="section-copy" data-i18n="badgesHint">Colecione emblemas hexagonais e confira como conquistá-los.</p>
+        <div class="collection-tabs" role="tablist" aria-label="Coleções">
+          <button type="button" role="tab" id="collection-badges-tab" aria-controls="badge-grid" aria-selected="true" data-collection-tab="badges" data-i18n="badges">Emblemas</button>
+          <button type="button" role="tab" id="collection-medals-tab" aria-controls="medal-list" aria-selected="false" data-collection-tab="medals" data-i18n="medals">Medalhas</button>
+        </div>
         <div class="badge-grid" id="badge-grid"></div>
+        <div class="medal-list" id="medal-list" hidden></div>
         <button class="neon-button back-button" data-screen="home" data-i18n="back">Voltar</button>
       </div>
     </section>
@@ -335,8 +344,16 @@
             <p data-i18n="luckDropHint">Abra uma caixa para receber uma skin ou Neon-moedas. Sem duplicatas.</p>
             <p class="luck-drop-odds" data-i18n="luckDropOdds">A skin lendária Vazio Neon tem 1,4% de chance.</p>
           </div>
-          <button class="neon-button gold-button" id="buy-luck-drop" type="button" data-i18n="buyLuckDrop">Comprar · 1.000</button>
+          <div class="luck-drop-actions">
+            <button class="small-button" type="button" data-luck-drop-info data-i18n="dropInfo">Informações</button>
+            <button class="neon-button gold-button" id="buy-luck-drop" type="button" data-i18n="buyLuckDrop">Comprar · 1.000</button>
+          </div>
         </article>
+        <section class="starting-skill-shop">
+          <h3 class="store-section-title" data-i18n="startingSkillShop">Cargas de habilidades iniciais</h3>
+          <p class="section-copy" data-i18n="startingSkillShopHint">Compre cargas para escolher uma habilidade antes da partida.</p>
+          <div class="starting-skill-shop-list" id="starting-skill-shop-list"></div>
+        </section>
         <div class="store-actions">
           <button class="neon-button cyan" type="button" data-screen="diamonds" data-i18n="diamondStore">Loja de diamantes</button>
           <button class="neon-button pink" type="button" data-screen="accuracy" data-i18n="accuracyGame">Minigame de acerto</button>
@@ -419,10 +436,16 @@
         <h2 id="leaderboard-title" data-i18n="leaderboard">Ranking</h2>
         <p class="section-copy" data-i18n="leaderboardDisclaimer">Pontuações são verificadas por plausibilidade, mas ainda não há validação antitrapaça autoritativa.</p>
         <p class="section-copy" data-i18n="selectPlayerHint">Clique para selecionar; clique duas vezes ou botão direito para abrir o perfil.</p>
-        <div class="leaderboard-tabs" role="group" aria-label="Categoria do ranking">
+        <div class="leaderboard-tabs" role="group" aria-label="Modalidade da disputa">
+          <button type="button" class="small-button" data-competition-mode="players" aria-pressed="true" data-i18n="peopleCompetition">Pessoas</button>
+          <button type="button" class="small-button" data-competition-mode="ai" aria-pressed="false" data-i18n="aiCompetition">IA</button>
+        </div>
+        <div class="leaderboard-tabs" id="leaderboard-scope-tabs" role="group" aria-label="Categoria do ranking">
           <button type="button" class="small-button" id="leaderboard-national" data-leaderboard-scope="national" aria-pressed="true" data-i18n="national">Local</button>
           <button type="button" class="small-button" id="leaderboard-state-tab" data-leaderboard-scope="state" aria-pressed="false" data-i18n="regional">Estado</button>
         </div>
+        <p class="section-copy" data-i18n="weeklyRewardsHint">Fim da semana: top 1 recebe 15 Luck Drops e 10.000 moedas; top 2, 5 drops e 5.000; top 3, 3 drops e 2.000; top 4 e 5, 1.500 moedas.</p>
+        <p class="section-copy" data-i18n="weeklyPeakHint">A IA tem dois picos diários e pode chegar a cinco vezes seu recorde semanal.</p>
         <p class="inline-status" id="leaderboard-status" role="status" aria-live="polite"></p>
         <ol class="leaderboard-list" id="leaderboard-list"></ol>
         <button class="neon-button back-button" data-screen="home" data-i18n="back">Voltar</button>
@@ -436,6 +459,13 @@
         <p class="section-copy" id="mission-cycle"></p>
         <div class="mission-timer" id="mission-timer" aria-live="polite"></div>
         <div class="mission-list" id="mission-list"></div>
+        <article class="mission-drop-card">
+          <p><span data-i18n="missionDrops">Luck Drops de missão</span>: <strong id="mission-drop-count">0</strong></p>
+          <div class="luck-drop-actions">
+            <button class="small-button" type="button" data-luck-drop-info data-i18n="dropInfo">Informações</button>
+            <button class="neon-button gold-button" id="open-mission-drop" type="button" data-i18n="openMissionDrop" disabled>Abrir Luck Drop</button>
+          </div>
+        </article>
         <button class="neon-button back-button" data-screen="home" data-i18n="back">Voltar</button>
       </div>
     </section>
@@ -599,6 +629,15 @@
         <button type="button" class="neon-button muted" id="close-luck-drop-result" data-i18n="cancel">Cancelar</button>
         <button type="button" class="neon-button gold-button" id="spin-luck-drop" data-i18n="spinLuckDrop">Girar</button>
       </div>
+    </div>
+  </dialog>
+
+  <dialog class="game-dialog" id="luck-drop-info-dialog" aria-labelledby="luck-drop-info-title">
+    <div class="dialog-panel">
+      <p class="eyebrow" data-i18n="luckDropLabel">CAIXA DA SORTE</p>
+      <h2 id="luck-drop-info-title" data-i18n="dropInfoTitle">Conteúdo e chances</h2>
+      <div class="luck-drop-info-list" id="luck-drop-info-list"></div>
+      <button type="button" class="neon-button cyan" id="close-luck-drop-info" data-i18n="close">Fechar</button>
     </div>
   </dialog>
 

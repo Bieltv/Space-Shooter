@@ -72,6 +72,33 @@
       "symbol": "❋",
       "name": { "pt-BR": "Coleção incomum", "en": "Uncommon Collection" },
       "description": { "pt-BR": "Colecione 200 skins incomuns de nave, escudo ou tiro.", "en": "Collect 200 uncommon ship, shield, or shot skins." }
+    },
+    {
+      "id": "fartura",
+      "rarity": "epic",
+      "symbol": "✦",
+      "name": { "pt-BR": "Fartura", "en": "Abundance" },
+      "description": {
+        "pt-BR": "Compre um pacote de 10 cargas de cada habilidade inicial.",
+        "en": "Buy one 10-charge pack for each starting ability."
+      }
+    },
+    {
+      "id": "destroyer-of-plans",
+      "rarity": "common",
+      "symbol": "☄",
+      "name": { "pt-BR": "Destruidor de planos", "en": "Plan Destroyer" },
+      "description": { "pt-BR": "Derrote 10 chefes.", "en": "Defeat 10 bosses." }
+    },
+    {
+      "id": "born-winner",
+      "rarity": "legendary",
+      "symbol": "★",
+      "name": { "pt-BR": "Vencedor Nato!", "en": "Born Winner!" },
+      "description": {
+        "pt-BR": "Fique em 1º lugar cinco vezes nas disputas semanais contra jogadores ou IA.",
+        "en": "Place first five times in weekly competitions against players or AI."
+      }
     }
   ]
 }
