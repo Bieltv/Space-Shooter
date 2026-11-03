@@ -24,6 +24,7 @@ const translations = {
     passNextLevel: "Próximo nível: {level}", passProgress: "{current} / {required} fichas",
     passPremiumLocked: "Desbloqueie Ouro para receber esta recompensa.",
     startingSkills: "Habilidade inicial", startingSkillsHint: "Cada habilidade tem suas próprias cargas. A carga escolhida será consumida ao iniciar.",
+    startWithoutSkill: "Jogar sem habilidade",
     startingSkillShop: "Cargas de habilidades iniciais", startingSkillShopHint: "Compre cargas para escolher uma habilidade antes da partida.",
     buyOneCharge: "Comprar x1", buyTenCharges: "Comprar x10", chargePrice: "{amount} moedas",
     chargesPurchased: "{amount} cargas adicionadas para {ability}.",
@@ -248,6 +249,7 @@ const translations = {
     passNextLevel: "Next level: {level}", passProgress: "{current} / {required} tokens",
     passPremiumLocked: "Unlock Gold to receive this reward.",
     startingSkills: "Starting ability", startingSkillsHint: "Each ability has its own charges. The selected charge is consumed when you start.",
+    startWithoutSkill: "Play without an ability",
     startingSkillShop: "Starting ability charges", startingSkillShopHint: "Buy charges to choose an ability before a match.",
     buyOneCharge: "Buy x1", buyTenCharges: "Buy x10", chargePrice: "{amount} coins",
     chargesPurchased: "Added {amount} charges for {ability}.",
@@ -5683,6 +5685,12 @@ $("#logout-button").addEventListener("click", () => {
 $("#confirm-purchase").addEventListener("click", () => void purchaseWelcomePack());
 $("#cancel-purchase").addEventListener("click", () => $("#purchase-dialog").close());
 $("#cancel-starting-skill-confirm").addEventListener("click", () => $("#starting-skill-dialog").close());
+$("#skip-starting-skill").addEventListener("click", () => {
+  const eventId = pendingStartEventId;
+  pendingStartEventId = null;
+  selectedStartingAbility = null;
+  void startGame(eventId);
+});
 $("#start-with-selected-skill").addEventListener("click", () => {
   const eventId = pendingStartEventId;
   const abilityId = selectedStartingAbility;
