@@ -5872,6 +5872,7 @@ document.addEventListener("click", (event) => {
   if (target.dataset.inboxTab) {
     activeInboxTab = target.dataset.inboxTab;
     renderInbox();
+    if (activeInboxTab === "rewards") void refreshAdminGiftInbox();
   }
   if (target.dataset.claimReward) claimInboxReward(target.dataset.claimReward);
   if (target.dataset.diamondPackage) openDiamondPurchase(target.dataset.diamondPackage);
