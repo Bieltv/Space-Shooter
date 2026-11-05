@@ -32,7 +32,7 @@ Abra `index.html` em um servidor estático, como a extensão Live Server do VS C
 - Esses dados podem ser apagados ao limpar o armazenamento do navegador e podem ser inspecionados ou alterados por quem tem acesso ao navegador. Não use senhas reais neste protótipo.
 - **Excluir conta e dados** exige confirmação de senha e remove permanentemente a conta Firebase, o perfil público, dados sincronizados, a cópia local e o progresso de missões. Configurações gerais permanecem neste navegador.
 - A participação no ranking compartilhado é opcional. O ranking mostra o nome público, recorde e emblemas; o filtro por estado usa apenas a região compartilhada pelo jogador.
-- No modo ADM, clicar em um jogador do ranking permite enviar presentes de moedas/diamantes para a caixa de recompensas, retirá-lo do ranking ou banir/desbanir a conta. O painel ADM lista contas banidas para reativação. A senha ADM é configurada como secret do Worker; uma única sessão fica ativa por vez e expira após 15 minutos sem renovação. O bloqueio impede login/sincronização online; como o jogo é estático, não impede o uso de uma cópia modificada ou offline.
+- No modo ADM, clicar em um jogador do ranking permite enviar presentes de moedas/diamantes para a caixa de recompensas, retirá-lo do ranking ou banir/desbanir a conta. O painel ADM lista contas banidas para reativação. A senha ADM é configurada como secret do Worker; vários dispositivos podem usar o modo ADM ao mesmo tempo, cada um com sua sessão independente, que expira após 15 minutos sem renovação. O bloqueio impede login/sincronização online; como o jogo é estático, não impede o uso de uma cópia modificada ou offline.
 - A loja não aceita pagamentos reais. O Pacote Inicial e Luck Drops usam Neon-moedas; diamantes usam Money-Void, uma moeda virtual obtida no minigame de precisão. Novas contas recebem a oferta do pacote inicial por 45 dias.
 - Um Luck Drop custa 1.000 Neon-moedas. Ao abrir, confirme o custo e pressione **Girar** para iniciar a roleta animada. As chances são: Comum 58,6%, Incomum 25%, Raro 10%, Épico 5% e Lendário 1,4%. Ele concede uma skin ainda bloqueada da raridade sorteada ou moedas como compensação; skins não são duplicadas e skins de passe/evento, além das três do Pacote Inicial, ficam fora do catálogo da loja. As Luck Drops do Passe usam apenas a lista exclusiva configurada para elas. Vazio Neon é uma skin lendária exclusiva para nave.
 - A tela de diamantes troca Money-Void por pacotes de 100, 500, 1.000, 2.500 ou 4.500 diamantes. O saldo Money-Void aparece apenas na loja de diamantes e nas telas de Eventos; os diamantes ficam guardados para conteúdos futuros.
@@ -63,6 +63,7 @@ O Worker valida autenticação, tamanho básico e formato dos dados, mas o jogo 
 
 ## Controles e testes
 
+- Execute `node --test worker\index.test.mjs` para verificar que sessões ADM simultâneas podem ser renovadas e encerradas individualmente.
 - Mover a nave: mouse ou toque dentro da área de jogo.
 - Atirar: automático, a cada 500 ms. Pausar: Esc.
 - Na pausa, abra Configurações e use **Voltar para a partida** para retomar depois.

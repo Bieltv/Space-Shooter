@@ -387,13 +387,13 @@ async function authenticate(request, env) {
   return user.localId;
 }
 
-function adminSessionPath(env) {
-  return `${projectRoot(env)}/adminSessions/current`;
+function adminSessionPath(env, sessionId) {
+  return `${projectRoot(env)}/adminSessions/${sessionId}`;
 }
 
-async function getAdminSession(env, accessToken) {
+async function getAdminSession(env, accessToken, sessionId) {
   try {
-    const document = await firebaseRequest(env, accessToken, "/adminSessions/current");
+    const document = await firebaseRequest(env, accessToken, `/adminSessions/${sessionId}`);
     return { ...fromFirestoreFields(document.fields), updateTime: document.updateTime };
   } catch (error) {
     if (error.status === 404) return null;
@@ -401,13 +401,13 @@ async function getAdminSession(env, accessToken) {
   }
 }
 
-async function writeAdminSession(env, accessToken, session, updateTime = null) {
+async function writeAdminSession(env, accessToken, sessionId, session, updateTime = null) {
   await firebaseRequest(env, accessToken, ":commit", {
     method: "POST",
     body: JSON.stringify({
       writes: [{
         update: {
-          name: adminSessionPath(env),
+          name: adminSessionPath(env, sessionId),
           fields: Object.fromEntries(
             Object.entries(session).filter(([key]) => key !== "updateTime")
               .map(([key, value]) => [key, firestoreValue(value)])
@@ -438,19 +438,16 @@ async function adminLogin(request, env) {
   }
 
   const accessToken = await googleAccessToken(env);
-  const current = await getAdminSession(env, accessToken);
-  if (current && current.expiresAt > Date.now()) {
-    return jsonResponse({ error: "O modo ADM já está ativo em outro dispositivo." }, 409);
-  }
   const token = encodeBase64Url(crypto.getRandomValues(new Uint8Array(32)));
+  const tokenHash = await digestHex(token);
   try {
-    await writeAdminSession(env, accessToken, {
-      tokenHash: await digestHex(token),
+    await writeAdminSession(env, accessToken, tokenHash, {
+      tokenHash,
       expiresAt: Date.now() + ADMIN_SESSION_TTL_MS
-    }, current?.updateTime || null);
+    });
   } catch (error) {
     if (error.status === 409 || error.status === 400) {
-      return jsonResponse({ error: "O modo ADM já está ativo em outro dispositivo." }, 409);
+      throw new Error("Could not create a unique admin session.");
     }
     throw error;
   }
@@ -461,9 +458,10 @@ async function verifyAdminSession(request, env) {
   const token = request.headers.get("x-admin-session");
   if (!token) return null;
   const accessToken = await googleAccessToken(env);
-  const session = await getAdminSession(env, accessToken);
-  if (!session || session.expiresAt <= Date.now() || session.tokenHash !== await digestHex(token)) return null;
-  return { accessToken, session };
+  const tokenHash = await digestHex(token);
+  const session = await getAdminSession(env, accessToken, tokenHash);
+  if (!session || session.expiresAt <= Date.now() || session.tokenHash !== tokenHash) return null;
+  return { accessToken, session: { ...session, sessionId: tokenHash } };
 }
 
 async function renewAdminSession(request, env) {
@@ -471,7 +469,7 @@ async function renewAdminSession(request, env) {
   if (!current) return jsonResponse({ error: "Sessão ADM expirada. Entre novamente." }, 401);
   const expiresAt = Date.now() + ADMIN_SESSION_TTL_MS;
   try {
-    await writeAdminSession(env, current.accessToken, {
+    await writeAdminSession(env, current.accessToken, current.session.sessionId, {
       tokenHash: current.session.tokenHash,
       expiresAt
     }, current.session.updateTime);
@@ -491,7 +489,7 @@ async function logoutAdmin(request, env) {
     method: "POST",
     body: JSON.stringify({
       writes: [{
-        delete: adminSessionPath(env),
+        delete: adminSessionPath(env, current.session.sessionId),
         currentDocument: { updateTime: current.session.updateTime }
       }]
     })
