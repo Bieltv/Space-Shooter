@@ -628,6 +628,19 @@ body[data-quality="minimum"] .rarity-legendary { animation: none; }
 .profile-badge-option strong { color: var(--text); font-size: 7px; line-height: 1.8; }
 .profile-badge-option small { color: var(--badge-color); font-size: 6px; line-height: 1.8; }
 .profile-badge-option.locked { filter: grayscale(1); }
+.admin-panel { max-width: 760px; }
+.admin-banned-list { display: grid; gap: 8px; margin: 18px 0; }
+.admin-banned-entry { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 12px; border: 1px solid var(--line); background: rgba(8, 7, 20, .5); font-size: 7px; }
+.admin-banned-entry strong { color: var(--pink); }
+.admin-banned-entry span { color: var(--muted); }
+.admin-player-actions { display: grid; gap: 12px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); text-align: left; }
+.admin-player-actions h3 { margin: 0; color: var(--pink); font-size: 8px; }
+.admin-gift-form { display: grid; grid-template-columns: 1fr 1fr auto; align-items: end; gap: 10px; }
+.admin-gift-form label { display: grid; gap: 8px; color: var(--muted); font-size: 7px; }
+.admin-gift-form input, .admin-gift-form select { min-width: 0; padding: 10px; border: 1px solid var(--line); background: #090817; color: var(--text); font: inherit; }
+.admin-action-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+.admin-player-actions .inline-status { margin: 0; }
+.admin-player-actions[hidden] { display: none; }
 .leaderboard-entry-badges { display: inline-flex; gap: 4px; margin-left: 8px; color: #d7aaff; font-size: 9px; vertical-align: middle; }
 .leaderboard-entry-badges span { line-height: 1; }
 .event-phase-reward { color: #ffe6a5 !important; }
@@ -885,6 +898,7 @@ body[data-quality="minimum"] .skin-card-layout, body[data-quality="minimum"] .we
   .brand { font-size: 8px; }
   .quick-nav { gap: 4px; }
   .quick-nav-button { width: 30px; height: 30px; font-size: 12px; }
+  .admin-gift-form { grid-template-columns: 1fr; }
   .profile-badge-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .topbar-actions { gap: 4px; }
   .wallet { min-width: 0; gap: 7px; padding: 6px 8px; font-size: 6px; }

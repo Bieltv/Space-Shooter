@@ -13,8 +13,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=23">
-  <script defer src="js/app.js?v=29"></script>
+  <link rel="stylesheet" href="css/style.css?v=24">
+  <script defer src="js/app.js?v=30"></script>
 </head>
 <body>
   <div class="starfield" aria-hidden="true"></div>
@@ -50,6 +50,9 @@
         <button class="quick-nav-button badges-quick-button" type="button" data-screen="badges" data-i18n-aria-label="badges" title="Emblemas" aria-label="Emblemas">
           <span aria-hidden="true">⬡</span>
         </button>
+        <button class="quick-nav-button admin-quick-button" id="admin-quick-button" type="button" data-screen="admin" data-i18n-aria-label="adminMode" title="Modo ADM" hidden>
+          <span aria-hidden="true">◆</span>
+        </button>
       </nav>
     </div>
   </header>
@@ -68,7 +71,7 @@
       </div>
       <form class="auth-form" id="login-form" autocomplete="on">
         <label><span data-i18n="loginIdentifier">E-mail ou nome antigo</span><input name="identity" type="text" required maxlength="254" autocomplete="username"></label>
-        <label><span data-i18n="password">Senha</span><input name="password" type="password" required minlength="10" maxlength="128" autocomplete="current-password"></label>
+        <label><span data-i18n="password">Senha</span><input name="password" type="password" required maxlength="128" autocomplete="current-password"></label>
         <button class="neon-button pink" type="submit" data-i18n="login">Entrar</button>
       </form>
       <form class="account-import" id="backup-import-form">
@@ -309,6 +312,18 @@
           <div class="profile-badge-grid" id="profile-badge-grid"></div>
         </section>
         <button class="neon-button back-button" data-screen="home" data-i18n="back">Voltar</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-admin" aria-labelledby="admin-title" hidden>
+      <div class="panel admin-panel">
+        <p class="eyebrow" data-i18n="adminMode">MODO ADM</p>
+        <h2 id="admin-title" data-i18n="adminPanel">Painel administrativo</h2>
+        <p class="section-copy" data-i18n="adminPanelHint">Contas banidas podem ser reativadas nesta tela.</p>
+        <p class="inline-status" id="admin-status" role="status" aria-live="polite"></p>
+        <div class="admin-banned-list" id="admin-banned-list"></div>
+        <button class="small-button" id="refresh-admin-players" type="button" data-i18n="refreshBanned">Atualizar lista</button>
+        <button class="neon-button back-button" type="button" data-screen="home" data-i18n="back">Voltar</button>
       </div>
     </section>
 
@@ -715,6 +730,24 @@
       <h2 id="player-profile-title"></h2>
       <p id="player-profile-score" class="section-copy"></p>
       <div id="player-profile-badges" class="player-profile-badges"></div>
+      <section class="admin-player-actions" id="admin-player-actions" hidden>
+        <h3 data-i18n="adminPlayerActions">Ações administrativas</h3>
+        <form id="admin-gift-form" class="admin-gift-form">
+          <label><span data-i18n="giftType">Tipo de presente</span>
+            <select name="type">
+              <option value="coins" data-i18n="coins">Neon-moedas</option>
+              <option value="diamonds" data-i18n="diamonds">Diamantes</option>
+            </select>
+          </label>
+          <label><span data-i18n="giftAmount">Quantidade</span><input name="amount" type="number" min="1" max="1000000" required value="100"></label>
+          <button class="small-button" type="submit" data-i18n="sendGift">Enviar presente</button>
+        </form>
+        <p class="inline-status" id="admin-player-status" role="status" aria-live="polite"></p>
+        <div class="admin-action-buttons">
+          <button class="small-button" id="admin-remove-ranking" type="button" data-i18n="removeFromRanking">Remover do ranking</button>
+          <button class="small-button" id="admin-toggle-ban" type="button" data-i18n="banAccount">Banir conta</button>
+        </div>
+      </section>
       <div class="dialog-actions">
         <button type="button" class="neon-button muted" id="close-player-profile" data-i18n="close">Fechar</button>
       </div>

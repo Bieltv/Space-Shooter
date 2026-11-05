@@ -4,6 +4,7 @@ const FIREBASE_TOKEN_URL = "https://securetoken.googleapis.com/v1";
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const GOOGLE_SCOPE = "https://www.googleapis.com/auth/datastore";
 const MAX_ACCOUNT_BYTES = 600_000;
+const ADMIN_SESSION_TTL_MS = 15 * 60 * 1000;
 
 function jsonResponse(body, status = 200, headers = {}) {
   return new Response(JSON.stringify(body), { status, headers: { ...JSON_HEADERS, ...headers } });
@@ -152,14 +153,22 @@ async function firebaseRequest(env, token, path, init = {}) {
   return result;
 }
 
-async function getProfile(env, uid, accessToken) {
+async function getProfileDocument(env, uid, accessToken) {
   try {
     const document = await firebaseRequest(env, accessToken, `/users/${encodeURIComponent(uid)}`);
-    return fromFirestoreFields(document.fields);
+    return {
+      profile: fromFirestoreFields(document.fields),
+      updateTime: document.updateTime
+    };
   } catch (error) {
     if (error.status === 404) return null;
     throw error;
   }
+}
+
+async function getProfile(env, uid, accessToken) {
+  const document = await getProfileDocument(env, uid, accessToken);
+  return document?.profile || null;
 }
 
 function validateUsername(value) {
@@ -208,7 +217,7 @@ function publicProfile(profile) {
   };
 }
 
-async function writeProfile(env, profile, accessToken, create = false) {
+async function writeProfile(env, profile, accessToken, create = false, options = {}) {
   const name = `${projectRoot(env)}/users/${encodeURIComponent(profile.uid)}`;
   await firebaseRequest(env, accessToken, ":commit", {
     method: "POST",
@@ -218,7 +227,9 @@ async function writeProfile(env, profile, accessToken, create = false) {
           name,
           fields: Object.fromEntries(Object.entries(profile).map(([key, value]) => [key, firestoreValue(value)]))
         },
-        ...(create ? { currentDocument: { exists: false } } : {})
+        ...(create ? { currentDocument: { exists: false } } :
+          options.updateTime ? { currentDocument: { updateTime: options.updateTime } } : {}),
+        ...(Array.isArray(options.updateMask) ? { updateMask: { fieldPaths: options.updateMask } } : {})
       }]
     })
   });
@@ -328,6 +339,7 @@ async function login(request, env) {
   const accessToken = await googleAccessToken(env);
   const profile = await getProfile(env, auth.localId, accessToken);
   if (!profile) return jsonResponse({ error: "Perfil de jogo não encontrado; solicite a migração da conta." }, 404);
+  if (profile.banned === true) return jsonResponse({ error: "Esta conta foi banida." }, 403);
   return jsonResponse({
     idToken: auth.idToken,
     refreshToken: auth.refreshToken,
@@ -353,6 +365,7 @@ async function refreshSession(request, env) {
   const accessToken = await googleAccessToken(env);
   const profile = await getProfile(env, auth.user_id, accessToken);
   if (!profile) return jsonResponse({ error: "Perfil de jogo não encontrado." }, 404);
+  if (profile.banned === true) return jsonResponse({ error: "Esta conta foi banida." }, 403);
   return jsonResponse({
     idToken: auth.id_token,
     refreshToken: auth.refresh_token,
@@ -368,40 +381,315 @@ async function authenticate(request, env) {
   const result = await firebaseAuth(env, "lookup", { idToken });
   const user = result.users?.[0];
   if (!user?.localId || user.disabled) return null;
+  const accessToken = await googleAccessToken(env);
+  const profile = await getProfile(env, user.localId, accessToken);
+  if (!profile || profile.banned === true) return null;
   return user.localId;
+}
+
+function adminSessionPath(env) {
+  return `${projectRoot(env)}/adminSessions/current`;
+}
+
+async function getAdminSession(env, accessToken) {
+  try {
+    const document = await firebaseRequest(env, accessToken, "/adminSessions/current");
+    return { ...fromFirestoreFields(document.fields), updateTime: document.updateTime };
+  } catch (error) {
+    if (error.status === 404) return null;
+    throw error;
+  }
+}
+
+async function writeAdminSession(env, accessToken, session, updateTime = null) {
+  await firebaseRequest(env, accessToken, ":commit", {
+    method: "POST",
+    body: JSON.stringify({
+      writes: [{
+        update: {
+          name: adminSessionPath(env),
+          fields: Object.fromEntries(
+            Object.entries(session).filter(([key]) => key !== "updateTime")
+              .map(([key, value]) => [key, firestoreValue(value)])
+          )
+        },
+        currentDocument: updateTime ? { updateTime } : { exists: false }
+      }]
+    })
+  });
+}
+
+async function adminLogin(request, env) {
+  if (typeof env.ADM_PASSWORD !== "string" || !env.ADM_PASSWORD) {
+    return jsonResponse({ error: "Modo ADM não configurado no servidor." }, 503);
+  }
+  const body = await request.json();
+  const username = typeof body.username === "string" ? body.username.trim() : "";
+  const password = typeof body.password === "string" ? body.password : "";
+  const configuredUsername = "NV ADM";
+  const [submittedUsername, expectedUsername, submittedPassword, expectedPassword] = await Promise.all([
+    digestHex(username.toLocaleLowerCase("pt-BR")),
+    digestHex(configuredUsername.toLocaleLowerCase("pt-BR")),
+    digestHex(password),
+    digestHex(env.ADM_PASSWORD)
+  ]);
+  if (submittedUsername !== expectedUsername || submittedPassword !== expectedPassword) {
+    return jsonResponse({ error: "Credenciais inválidas." }, 401);
+  }
+
+  const accessToken = await googleAccessToken(env);
+  const current = await getAdminSession(env, accessToken);
+  if (current && current.expiresAt > Date.now()) {
+    return jsonResponse({ error: "O modo ADM já está ativo em outro dispositivo." }, 409);
+  }
+  const token = encodeBase64Url(crypto.getRandomValues(new Uint8Array(32)));
+  try {
+    await writeAdminSession(env, accessToken, {
+      tokenHash: await digestHex(token),
+      expiresAt: Date.now() + ADMIN_SESSION_TTL_MS
+    }, current?.updateTime || null);
+  } catch (error) {
+    if (error.status === 409 || error.status === 400) {
+      return jsonResponse({ error: "O modo ADM já está ativo em outro dispositivo." }, 409);
+    }
+    throw error;
+  }
+  return jsonResponse({ token, expiresAt: Date.now() + ADMIN_SESSION_TTL_MS });
+}
+
+async function verifyAdminSession(request, env) {
+  const token = request.headers.get("x-admin-session");
+  if (!token) return null;
+  const accessToken = await googleAccessToken(env);
+  const session = await getAdminSession(env, accessToken);
+  if (!session || session.expiresAt <= Date.now() || session.tokenHash !== await digestHex(token)) return null;
+  return { accessToken, session };
+}
+
+async function renewAdminSession(request, env) {
+  const current = await verifyAdminSession(request, env);
+  if (!current) return jsonResponse({ error: "Sessão ADM expirada. Entre novamente." }, 401);
+  const expiresAt = Date.now() + ADMIN_SESSION_TTL_MS;
+  try {
+    await writeAdminSession(env, current.accessToken, {
+      tokenHash: current.session.tokenHash,
+      expiresAt
+    }, current.session.updateTime);
+  } catch (error) {
+    if (error.status === 409 || error.status === 400) {
+      return jsonResponse({ error: "A sessão ADM foi encerrada." }, 401);
+    }
+    throw error;
+  }
+  return jsonResponse({ expiresAt });
+}
+
+async function logoutAdmin(request, env) {
+  const current = await verifyAdminSession(request, env);
+  if (!current) return jsonResponse({ loggedOut: true });
+  await firebaseRequest(env, current.accessToken, ":commit", {
+    method: "POST",
+    body: JSON.stringify({
+      writes: [{
+        delete: adminSessionPath(env),
+        currentDocument: { updateTime: current.session.updateTime }
+      }]
+    })
+  });
+  return jsonResponse({ loggedOut: true });
+}
+
+async function adminTarget(env, accessToken, uid) {
+  if (!/^[A-Za-z0-9_-]{1,128}$/.test(uid)) return { error: jsonResponse({ error: "Jogador inválido." }, 400) };
+  const document = await getProfileDocument(env, uid, accessToken);
+  if (!document) return { error: jsonResponse({ error: "Jogador não encontrado." }, 404) };
+  return document;
+}
+
+async function updateAdminTarget(env, accessToken, uid, updateMask, mutate) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const target = await adminTarget(env, accessToken, uid);
+    if (target.error) return target;
+    const profile = mutate(target.profile);
+    try {
+      await writeProfile(env, profile, accessToken, false, {
+        updateTime: target.updateTime,
+        updateMask
+      });
+      return { profile };
+    } catch (error) {
+      if (error.status !== 409 || attempt === 2) throw error;
+    }
+  }
+  throw new Error("Could not update player after concurrent changes.");
+}
+
+function adminPublicTarget(profile) {
+  return {
+    uid: profile.uid,
+    username: profile.username,
+    bestScore: Number.isSafeInteger(profile.bestScore) ? profile.bestScore : 0,
+    banned: profile.banned === true,
+    leaderboardOptIn: profile.leaderboardOptIn === true,
+    badges: profile.badges && typeof profile.badges === "object" ? profile.badges : {},
+    equippedBadges: Array.isArray(profile.equippedBadges) ? profile.equippedBadges : [],
+    region: typeof profile.region === "string" ? profile.region : ""
+  };
+}
+
+async function listBannedPlayers(env, accessToken) {
+  const result = await firebaseRequest(env, accessToken, ":runQuery", {
+    method: "POST",
+    body: JSON.stringify({
+      structuredQuery: {
+        from: [{ collectionId: "users" }],
+        where: {
+          fieldFilter: {
+            field: { fieldPath: "banned" },
+            op: "EQUAL",
+            value: { booleanValue: true }
+          }
+        },
+        limit: 100
+      }
+    })
+  });
+  return jsonResponse({
+    players: result.filter((entry) => entry.document?.fields)
+      .map((entry) => fromFirestoreFields(entry.document.fields))
+      .map(adminPublicTarget)
+  });
+}
+
+async function giftPlayer(request, env, accessToken, uid) {
+  const body = await request.json();
+  const type = body.type;
+  const amount = body.amount;
+  if (!["coins", "diamonds"].includes(type) ||
+      !Number.isSafeInteger(amount) || amount < 1 || amount > 1_000_000) {
+    return jsonResponse({ error: "Informe um presente válido entre 1 e 1.000.000." }, 400);
+  }
+  const reward = {
+    id: encodeBase64Url(crypto.getRandomValues(new Uint8Array(12))),
+    type,
+    amount,
+    source: "admin",
+    createdAt: Date.now(),
+    claimed: false
+  };
+  const result = await updateAdminTarget(env, accessToken, uid, ["state.inbox.rewards", "updatedAt"], (current) => {
+    const state = current.state && typeof current.state === "object" ? current.state : {};
+    const inbox = state.inbox && typeof state.inbox === "object" ? state.inbox : {};
+    const rewards = Array.isArray(inbox.rewards) ? inbox.rewards : [];
+    return {
+      ...current,
+      state: { ...state, inbox: { ...inbox, rewards: [...rewards, reward].slice(-100) } },
+      updatedAt: Date.now()
+    };
+  });
+  if (result.error) return result.error;
+  return jsonResponse({ profile: adminPublicTarget(result.profile), reward });
+}
+
+async function removePlayerFromLeaderboard(env, accessToken, uid) {
+  const result = await updateAdminTarget(env, accessToken, uid,
+    ["leaderboardOptIn", "state.leaderboardOptIn", "updatedAt"], (current) => {
+      const state = current.state && typeof current.state === "object" ? current.state : {};
+      return {
+        ...current,
+        leaderboardOptIn: false,
+        state: { ...state, leaderboardOptIn: false },
+        updatedAt: Date.now()
+      };
+    });
+  if (result.error) return result.error;
+  return jsonResponse({ profile: adminPublicTarget(result.profile) });
+}
+
+async function setPlayerBan(env, accessToken, uid, banned) {
+  const result = await updateAdminTarget(env, accessToken, uid, ["banned", "updatedAt"], (current) => ({
+    ...current,
+    banned,
+    updatedAt: Date.now()
+  }));
+  if (result.error) return result.error;
+  return jsonResponse({ profile: adminPublicTarget(result.profile) });
 }
 
 async function currentUser(request, env, uid) {
   const accessToken = await googleAccessToken(env);
-  const profile = await getProfile(env, uid, accessToken);
-  if (!profile) return null;
-  return { accessToken, profile };
+  const document = await getProfileDocument(env, uid, accessToken);
+  if (!document || document.profile.banned === true) return null;
+  return { accessToken, ...document };
+}
+
+function mergeAdminGiftRewards(currentState, nextState) {
+  const currentInbox = currentState?.inbox && typeof currentState.inbox === "object"
+    ? currentState.inbox
+    : {};
+  const nextInbox = nextState.inbox && typeof nextState.inbox === "object"
+    ? nextState.inbox
+    : {};
+  const currentGifts = Array.isArray(currentInbox.rewards)
+    ? currentInbox.rewards.filter((reward) => reward?.source === "admin")
+    : [];
+  const incomingRewards = Array.isArray(nextInbox.rewards) ? nextInbox.rewards : [];
+  const incomingById = new Map(incomingRewards
+    .filter((reward) => reward && typeof reward.id === "string")
+    .map((reward) => [reward.id, reward]));
+  const preservedGifts = currentGifts.map((reward) => {
+    const incoming = incomingById.get(reward.id);
+    return incoming?.claimed === true
+      ? {
+        ...reward,
+        claimed: true,
+        claimedAt: Number.isSafeInteger(incoming.claimedAt) ? incoming.claimedAt : Date.now()
+      }
+      : reward;
+  });
+  return {
+    ...nextState,
+    inbox: {
+      ...nextInbox,
+      rewards: [...incomingRewards.filter((reward) => reward?.source !== "admin"), ...preservedGifts].slice(-100)
+    }
+  };
 }
 
 async function saveCurrentUser(request, env, uid) {
-  const { profile: current } = await currentUser(request, env, uid);
-  if (!current) return jsonResponse({ error: "Perfil de jogo não encontrado." }, 404);
   const body = await request.json();
-  const state = sanitizeGameState(body.state);
-  const equippedBadges = Array.isArray(current.equippedBadges) ? current.equippedBadges : [];
-  state.equippedBadges = equippedBadges;
-  const profile = {
-    ...current,
-    bestScore: Math.max(current.bestScore || 0, state.bestScore),
-    badges: { ...(current.badges || {}), ...state.badges },
-    equippedBadges,
-    leaderboardOptIn: state.leaderboardOptIn === true,
-    region: typeof state.region === "string" ? state.region : "",
-    state,
-    updatedAt: Date.now()
-  };
   const accessToken = await googleAccessToken(env);
-  await writeProfile(env, profile, accessToken);
-  return jsonResponse({ profile: publicProfile(profile), state });
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const document = await getProfileDocument(env, uid, accessToken);
+    if (!document || document.profile.banned === true) {
+      return jsonResponse({ error: "Perfil de jogo não encontrado." }, 404);
+    }
+    const current = document.profile;
+    const state = mergeAdminGiftRewards(current.state, sanitizeGameState(body.state));
+    const equippedBadges = Array.isArray(current.equippedBadges) ? current.equippedBadges : [];
+    state.equippedBadges = equippedBadges;
+    const profile = {
+      ...current,
+      bestScore: Math.max(current.bestScore || 0, state.bestScore),
+      badges: { ...(current.badges || {}), ...state.badges },
+      equippedBadges,
+      leaderboardOptIn: state.leaderboardOptIn === true,
+      region: typeof state.region === "string" ? state.region : "",
+      state,
+      updatedAt: Date.now()
+    };
+    try {
+      await writeProfile(env, profile, accessToken, false, { updateTime: document.updateTime });
+      return jsonResponse({ profile: publicProfile(profile), state });
+    } catch (error) {
+      if (error.status !== 409 || attempt === 2) throw error;
+    }
+  }
+  throw new Error("Could not save player data after concurrent changes.");
 }
 
 async function saveEquippedBadges(request, env, uid) {
-  const { accessToken, profile: current } = await currentUser(request, env, uid);
+  const { accessToken, profile: current, updateTime } = await currentUser(request, env, uid);
   if (!current) return jsonResponse({ error: "Perfil de jogo não encontrado." }, 404);
   const body = await request.json();
   if (!Array.isArray(body.equippedBadges) || body.equippedBadges.length > 3 ||
@@ -420,7 +708,10 @@ async function saveEquippedBadges(request, env, uid) {
     equippedBadges
   };
   const profile = { ...current, equippedBadges, state, updatedAt: Date.now() };
-  await writeProfile(env, profile, accessToken);
+  await writeProfile(env, profile, accessToken, false, {
+    updateTime,
+    updateMask: ["equippedBadges", "state.equippedBadges", "updatedAt"]
+  });
   return jsonResponse({ profile: publicProfile(profile), state });
 }
 
@@ -528,7 +819,7 @@ async function listLeaderboard(request, env) {
     ).slice(0, 100);
   }
   return jsonResponse({
-    players: players.map((profile) => ({
+    players: players.filter((profile) => profile.banned !== true).map((profile) => ({
       ...publicProfile(profile),
       uid: profile.uid || profile.name?.split("/").at(-1)
     }))
@@ -539,7 +830,7 @@ async function getPublicProfile(env, uid) {
   if (!/^[A-Za-z0-9_-]{1,128}$/.test(uid)) return jsonResponse({ error: "Perfil inválido." }, 400);
   const accessToken = await googleAccessToken(env);
   const profile = await getProfile(env, uid, accessToken);
-  if (!profile || profile.leaderboardOptIn !== true) return jsonResponse({ error: "Jogador não encontrado." }, 404);
+  if (!profile || profile.banned === true || profile.leaderboardOptIn !== true) return jsonResponse({ error: "Jogador não encontrado." }, 404);
   return jsonResponse({ profile: publicProfile(profile) });
 }
 
@@ -556,7 +847,7 @@ export default {
     const corsHeaders = origin ? {
       "access-control-allow-origin": origin,
       "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
-      "access-control-allow-headers": "authorization, content-type",
+      "access-control-allow-headers": "authorization, content-type, x-admin-session",
       "access-control-max-age": "86400",
       vary: "origin"
     } : {};
@@ -571,6 +862,45 @@ export default {
         response = await register(request, env);
       } else if (request.method === "POST" && url.pathname === "/api/auth/login") {
         response = await login(request, env);
+      } else if (request.method === "POST" && url.pathname === "/api/admin/login") {
+        response = await adminLogin(request, env);
+      } else if (url.pathname === "/api/admin/session" && request.method === "POST") {
+        response = await renewAdminSession(request, env);
+      } else if (url.pathname === "/api/admin/logout" && request.method === "POST") {
+        response = await logoutAdmin(request, env);
+      } else if (url.pathname.startsWith("/api/admin/")) {
+        const admin = await verifyAdminSession(request, env);
+        if (!admin) {
+          response = jsonResponse({ error: "Sessão ADM inválida ou expirada." }, 401);
+        } else if (request.method === "GET" && url.pathname === "/api/admin/banned") {
+          response = await listBannedPlayers(env, admin.accessToken);
+        } else {
+          const match = url.pathname.match(/^\/api\/admin\/players\/([^/]+)(?:\/(gift|ranking|ban))?$/);
+          if (!match) {
+            response = jsonResponse({ error: "Rota não encontrada." }, 404);
+          } else {
+            const uid = decodeURIComponent(match[1]);
+            if (request.method === "GET" && !match[2]) {
+              const target = await adminTarget(env, admin.accessToken, uid);
+              response = target.error
+                ? target.error
+                : jsonResponse({ profile: adminPublicTarget(target.profile) });
+            } else if (request.method === "POST" && match[2] === "gift") {
+              response = await giftPlayer(request, env, admin.accessToken, uid);
+            } else if (request.method === "DELETE" && match[2] === "ranking") {
+              response = await removePlayerFromLeaderboard(env, admin.accessToken, uid);
+            } else if (request.method === "PUT" && match[2] === "ban") {
+              const body = await request.json();
+              if (typeof body.banned !== "boolean") {
+                response = jsonResponse({ error: "Informe um estado de banimento válido." }, 400);
+              } else {
+                response = await setPlayerBan(env, admin.accessToken, uid, body.banned);
+              }
+            } else {
+              response = jsonResponse({ error: "Método não permitido." }, 405);
+            }
+          }
+        }
       } else if (request.method === "POST" && url.pathname === "/api/auth/refresh") {
         response = await refreshSession(request, env);
       } else if (request.method === "GET" && url.pathname === "/api/leaderboard") {
