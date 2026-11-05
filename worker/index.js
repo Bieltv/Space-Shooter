@@ -928,7 +928,16 @@ export default {
       } else if (request.method === "GET" && url.pathname === "/") {
         response = jsonResponse({
           status: "Neon Void API pronta.",
-          endpoints: ["/api/auth/register", "/api/auth/login", "/api/auth/refresh", "/api/leaderboard", "/api/me (GET, PUT, DELETE)", "/api/me/equipped-badges (PUT)", "/api/profiles/:uid"]
+          endpoints: [
+            "/api/auth/register", "/api/auth/login", "/api/auth/refresh",
+            "/api/admin/login", "/api/admin/session", "/api/admin/logout",
+            "/api/admin/banned", "/api/admin/players/:uid (GET)",
+            "/api/admin/players/:uid/gift (POST)",
+            "/api/admin/players/:uid/ranking (DELETE)",
+            "/api/admin/players/:uid/ban (PUT)",
+            "/api/leaderboard", "/api/me (GET, PUT, DELETE)",
+            "/api/me/equipped-badges (PUT)", "/api/profiles/:uid"
+          ]
         });
       } else {
         response = jsonResponse({ error: "Rota não encontrada." }, 404);
