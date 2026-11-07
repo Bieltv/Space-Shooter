@@ -107,6 +107,43 @@ const translations = {
     badges: "Emblemas", badgesHint: "Colecione emblemas hexagonais e confira como conquistá-los.",
     badgeLocked: "Ainda não conquistado", badgeEarned: "Conquistado em {date}",
     profile: "Perfil", profileHint: "Equipe até três emblemas conquistados. A seleção é conferida e salva na conta online.",
+    showResources: "Meus recursos", ownResources: "Recursos da conta",
+    friends: "Amizades", friendsHint: "Adicione amigos pelo ID da conta ou pelo nome de jogador.",
+    friendSearchType: "Encontrar por", friendById: "ID da conta", friendByUsername: "Nome da conta",
+    friendIdentifier: "Nome ou ID", addFriend: "Adicionar amigo", friendRequestSent: "Solicitação de amizade enviada.",
+    friendRequests: "Solicitações de amizade", friendRequestsEmpty: "Nenhuma solicitação pendente.",
+    friendAccept: "Aceitar", friendDecline: "Recusar", friendRequestPending: "Solicitação enviada",
+    friendViewProfile: "Ver perfil", friendRemove: "Remover amigo", friendListEmpty: "Você ainda não tem amigos.",
+    friendInboxRequest: "{username} enviou uma solicitação de amizade.",
+    friendRequestAccepted: "Amizade aceita.", friendRequestDeclined: "Solicitação recusada.",
+    friendRemoved: "Amigo removido.", friendProfileInventory: "Coleção visível para amigos",
+    friendOwnedSkins: "Skins: {amount}", friendPassLevel: "Passe do Néon · nível {level}",
+    friendPassGold: "Trilha Ouro desbloqueada", friendPassSilver: "Trilha Prata",
+    giftBattlePass: "Presentear Passe Neon Ouro", friendGiftOwned: "Passe Ouro já desbloqueado",
+    giftPassCost: "Enviar por 600 diamantes?",
+    giftPassSuccess: "Passe Neon Ouro enviado para seu amigo.", giftPassAlreadyOwn: "Este amigo já possui o Passe Ouro.",
+    friendGiftInsufficient: "Você precisa de 600 diamantes para presentear o Passe.",
+    friendOnly: "Esse perfil e a coleção só ficam disponíveis para amigos.",
+    profileNoSkins: "Nenhuma skin na coleção.",
+    storePackages: "Pacotes", lootBoxes: "Loot Boxes",
+    specialBoxKicker: "CAIXA ESPECIAL · 8 A 24 DE DEZEMBRO",
+    specialBoxTitle: "Inicial Box Especial!",
+    specialBoxDates: "Disponível de 8 a 24 de dezembro de 2026.",
+    specialBoxOdds: "Cada skin especial tem 3,1% de chance. Prêmios em moedas de 100 a 100.000.",
+    spinOne: "Girar x1 · {amount} diamantes", spinTen: "Girar x10 · {amount} diamantes",
+    spinNow: "Girar agora", specialBoxConfirm: "Girar x{amount} e receber as recompensas? Esta ação não pode ser desfeita.",
+    specialBoxInsufficient: "Você não tem diamantes suficientes para este giro.",
+    specialBoxUnavailable: "A Caixa Especial estará disponível de 8 a 24 de dezembro de 2026.",
+    specialBoxResults: "Recompensas recebidas: {amount}.", specialBoxDuplicate: "Skin repetida convertida em 100 moedas.",
+    abilityFlame: "Chama", abilityIce: "Gelo", abilityVoid: "Círculo Negro", abilityExplosive: "Explosiva",
+    abilityUse: "Usar habilidade", abilityReady: "Habilidade pronta · H", abilityCharging: "Carregando habilidade · {seconds}s",
+    abilityWaitBoss: "Derrote dois chefes para liberar esta habilidade.",
+    abilityNotReady: "A habilidade ainda está carregando.", abilityNeedLives: "Você precisa de mais vidas para usar esta habilidade.",
+    iceHullRequirement: "A nave de Gelo exige uma evolução de vida acima de quatro.",
+    abilityFrozen: "Inimigos congelados · {seconds}s", abilityFireUsed: "Chama ativada! Os inimigos foram atingidos.",
+    abilityIceUsed: "Gelo ativado! Inimigos congelados por 50 segundos.",
+    abilityVoidUsed: "Círculo Negro ativado! Você ficará invulnerável por 40 segundos.",
+    abilityExplosiveUsed: "Explosão ativada! Os inimigos foram atingidos.",
     profileChecking: "Verificando emblemas salvos na conta...",
     profileLoaded: "Perfil verificado no banco de dados.",
     profileDatabaseRequired: "Este perfil precisa de uma conta conectada para verificar e salvar os emblemas.",
@@ -345,6 +382,43 @@ const translations = {
     badges: "Badges", badgesHint: "Collect hexagonal badges and see how to earn them.",
     badgeLocked: "Not earned yet", badgeEarned: "Earned on {date}",
     profile: "Profile", profileHint: "Equip up to three earned badges. Your selection is verified and saved to your online account.",
+    showResources: "My resources", ownResources: "Account resources",
+    friends: "Friends", friendsHint: "Add friends by account ID or player name.",
+    friendSearchType: "Find by", friendById: "Account ID", friendByUsername: "Account name",
+    friendIdentifier: "Name or ID", addFriend: "Add friend", friendRequestSent: "Friend request sent.",
+    friendRequests: "Friend requests", friendRequestsEmpty: "No pending requests.",
+    friendAccept: "Accept", friendDecline: "Decline", friendRequestPending: "Request sent",
+    friendViewProfile: "View profile", friendRemove: "Remove friend", friendListEmpty: "You don't have any friends yet.",
+    friendInboxRequest: "{username} sent you a friend request.",
+    friendRequestAccepted: "Friend request accepted.", friendRequestDeclined: "Friend request declined.",
+    friendRemoved: "Friend removed.", friendProfileInventory: "Collection visible to friends",
+    friendOwnedSkins: "Skins: {amount}", friendPassLevel: "Neon Pass · level {level}",
+    friendPassGold: "Gold track unlocked", friendPassSilver: "Silver track",
+    giftBattlePass: "Gift Neon Gold Pass", friendGiftOwned: "Gold Pass already unlocked",
+    giftPassCost: "Send for 600 diamonds?",
+    giftPassSuccess: "Neon Gold Pass sent to your friend.", giftPassAlreadyOwn: "This friend already owns the Gold Pass.",
+    friendGiftInsufficient: "You need 600 diamonds to gift the Pass.",
+    friendOnly: "This profile and collection are only available to friends.",
+    profileNoSkins: "No skins in the collection.",
+    storePackages: "Packages", lootBoxes: "Loot Boxes",
+    specialBoxKicker: "SPECIAL BOX · DECEMBER 8–24",
+    specialBoxTitle: "Initial Special Box!",
+    specialBoxDates: "Available December 8–24, 2026.",
+    specialBoxOdds: "Each special skin has a 3.1% chance. Coin rewards range from 100 to 100,000.",
+    spinOne: "Spin x1 · {amount} diamonds", spinTen: "Spin x10 · {amount} diamonds",
+    spinNow: "Spin now", specialBoxConfirm: "Spin x{amount} and receive the rewards? This cannot be undone.",
+    specialBoxInsufficient: "You don't have enough diamonds for this spin.",
+    specialBoxUnavailable: "The Special Box will be available December 8–24, 2026.",
+    specialBoxResults: "Rewards received: {amount}.", specialBoxDuplicate: "Duplicate skin converted to 100 coins.",
+    abilityFlame: "Flame", abilityIce: "Ice", abilityVoid: "Black Circle", abilityExplosive: "Explosive",
+    abilityUse: "Use ability", abilityReady: "Ability ready · H", abilityCharging: "Charging ability · {seconds}s",
+    abilityWaitBoss: "Defeat two bosses to unlock this ability.",
+    abilityNotReady: "The ability is still charging.", abilityNeedLives: "You need more lives to use this ability.",
+    iceHullRequirement: "The Ice ship requires a hull upgrade above four.",
+    abilityFrozen: "Enemies frozen · {seconds}s", abilityFireUsed: "Flame activated! Enemies were hit.",
+    abilityIceUsed: "Ice activated! Enemies are frozen for 50 seconds.",
+    abilityVoidUsed: "Black Circle activated! You are invulnerable for 40 seconds.",
+    abilityExplosiveUsed: "Explosion activated! Enemies were hit.",
     profileChecking: "Checking badges saved to your account...",
     profileLoaded: "Profile verified in the database.",
     profileDatabaseRequired: "This profile needs a connected account to verify and save badges.",
@@ -509,6 +583,12 @@ const STARTING_ABILITIES = [
   { id: "shield", title: "abilityShield", description: "abilityShieldHint", duration: 45 },
   { id: "extra-lives", title: "abilityExtraLives", description: "abilityExtraLivesHint", duration: 120 }
 ];
+const SPECIAL_SHIP_ABILITIES = {
+  "ship-special-flame": { id: "flame", duration: 190, cost: 4, icon: "🔥", color: "#ff7138" },
+  "ship-special-ice": { id: "ice", duration: 120, cost: 0, icon: "❄️", color: "#a7edff" },
+  "ship-special-void": { id: "void", duration: 30, cost: 2, icon: "◉", color: "#d27bff" },
+  "ship-special-explosive": { id: "explosive", duration: 200, cost: 1, icon: "💥", color: "#ff6747" }
+};
 const LIGHTS_MODES = ["off", "fast", "slow", "steady"];
 const qualityLevels = ["minimum", "medium", "high"];
 const skinCategories = ["ship", "shield", "shot"];
@@ -527,6 +607,9 @@ let selectedSkins = { ...defaultSkins };
 let ownedSkins = new Set(Object.values(defaultSkins));
 let account = null;
 let cloudSession = null;
+let friendsData = { friends: [], incoming: [], outgoing: [] };
+let friendsOwnerUid = null;
+let friendsLoadInProgress = false;
 let adminSessionToken = null;
 let activeAdminProfileUid = null;
 let activeAdminProfileBanned = false;
@@ -552,6 +635,10 @@ let activeCollectionTab = "badges";
 let leaderboardRequestId = 0;
 let profileRequestId = 0;
 let activeInboxTab = "messages";
+let activePublicProfile = null;
+let activeFriendGiftUid = null;
+let pendingSpecialLootQuantity = 0;
+let specialLootSpinInProgress = false;
 let pendingDiamondPackageId = null;
 let pendingStartEventId = null;
 let selectedStartingAbility = null;
@@ -912,7 +999,7 @@ function cacheCloudAccount(nextAccount) {
 function normalizeCloudAccount(session, email, passwordSalt, passwordHash) {
   const serverState = session.state && typeof session.state === "object" ? session.state : {};
   const profile = session.profile;
-  return normalizeAccount({
+  let normalized = normalizeAccount({
     ...serverState,
     id: profile.uid,
     cloudUid: profile.uid,
@@ -927,6 +1014,43 @@ function normalizeCloudAccount(session, email, passwordSalt, passwordHash) {
     badges: { ...(profile.badges || {}), ...(serverState.badges || {}) },
     equippedBadges: profile.equippedBadges || serverState.equippedBadges || []
   });
+  if (normalized.battlePass.premium && battlePassData?.levels?.length) {
+    normalized = grantBattlePassRewardsThrough(normalized, "premium", normalized.battlePass.level);
+  }
+  return normalized;
+}
+
+function mergeCloudFriendGiftState(localAccount, serverState) {
+  if (!serverState || typeof serverState !== "object") return localAccount;
+  const serverGiftCount = Number.isSafeInteger(serverState.friendPassGiftCount)
+    ? serverState.friendPassGiftCount
+    : 0;
+  const localGiftCount = localAccount.friendPassGiftCount || 0;
+  let merged = { ...localAccount };
+  if (serverGiftCount > localGiftCount) {
+    merged.friendPassGiftCount = serverGiftCount;
+    if (Number.isSafeInteger(serverState.diamonds) && serverState.diamonds >= 0) {
+      merged.diamonds = serverState.diamonds;
+    }
+  }
+  if (serverState.battlePass?.premium === true && !merged.battlePass.premium) {
+    merged = grantBattlePassRewardsThrough({
+      ...merged,
+      battlePass: { ...merged.battlePass, premium: true }
+    }, "premium", merged.battlePass.level);
+  }
+  const serverGiftMessages = Array.isArray(serverState.inbox?.messages)
+    ? serverState.inbox.messages.filter((message) => message?.source === "friend-pass-gift")
+    : [];
+  if (serverGiftMessages.length) {
+    const messages = new Map(merged.inbox.messages.map((message) => [message.id, message]));
+    for (const message of serverGiftMessages) {
+      const current = messages.get(message.id);
+      messages.set(message.id, current?.read ? current : message);
+    }
+    merged.inbox = { ...merged.inbox, messages: [...messages.values()].slice(-100) };
+  }
+  return merged;
 }
 
 function scheduleCloudSync() {
@@ -953,7 +1077,11 @@ async function flushCloudSync() {
       delete state.id;
       delete state.playerId;
       state.missionState = missionState;
-      await cloudRequest("/api/me", { method: "PUT", body: { state } });
+      const response = await cloudRequest("/api/me", { method: "PUT", body: { state } });
+      if (account?.cloudUid === cloudSession?.uid && response.state) {
+        const merged = mergeCloudFriendGiftState(account, response.state);
+        if (JSON.stringify(merged) !== JSON.stringify(account)) updateAccount(merged);
+      }
     } while (cloudSyncPending);
   } catch (error) {
     showToast(error.message);
@@ -1138,6 +1266,9 @@ function normalizeAccount(nextAccount) {
     debugEnabled: nextAccount.debugEnabled === true,
     coins: Number.isSafeInteger(nextAccount.coins) && nextAccount.coins >= 0 ? nextAccount.coins : 0,
     diamonds: Number.isSafeInteger(nextAccount.diamonds) && nextAccount.diamonds >= 0 ? nextAccount.diamonds : 0,
+    friendPassGiftCount: Number.isSafeInteger(nextAccount.friendPassGiftCount) && nextAccount.friendPassGiftCount >= 0
+      ? nextAccount.friendPassGiftCount
+      : 0,
     moneyVoid: Number.isSafeInteger(nextAccount.moneyVoid) && nextAccount.moneyVoid >= 0 ? nextAccount.moneyVoid : 0,
     eventProgress,
     badges,
@@ -1440,6 +1571,11 @@ function updateAccount(nextAccount) {
     }
   }
   account = normalizedAccount;
+  if (friendsOwnerUid !== (account.cloudUid || null)) {
+    friendsOwnerUid = account.cloudUid || null;
+    friendsData = { friends: [], incoming: [], outgoing: [] };
+    if (account.cloudUid) void loadFriends({ silent: true });
+  }
   $("#leaderboard-button").hidden = false;
   $("#leaderboard-settings").hidden = false;
   $("#leaderboard-region").value = account.region || "";
@@ -1462,6 +1598,7 @@ function updateAccount(nextAccount) {
   $("#auth-gate").hidden = true;
   $("#logout-button").hidden = false;
   $("#admin-quick-button").hidden = !account.adminMode || !adminSessionToken;
+  $("#friends-quick-button").hidden = !account.cloudUid;
   $("#admin-player-actions").hidden = !account.adminMode || !activeAdminProfileUid;
   $("#debug-toggle").hidden = !account.debugEnabled;
   if (!account.debugEnabled) {
@@ -1592,6 +1729,38 @@ function renderBossHud() {
   $("#boss-hud").classList.toggle("boss-vulnerable", boss.phase === "vulnerable");
 }
 
+function selectedSpecialAbility() {
+  return SPECIAL_SHIP_ABILITIES[selectedSkins.ship] || null;
+}
+
+function updateSpecialAbilityStatus() {
+  const button = $("#special-ability-button");
+  if (!button) return;
+  const ability = selectedSpecialAbility();
+  button.hidden = !ability || !game.running;
+  if (!ability || button.hidden) return;
+
+  const waitingForBosses = ability.id === "void" && game.bossesDefeated < 2;
+  const readyAt = game.specialAbilityReadyAt;
+  const remaining = waitingForBosses || !Number.isFinite(readyAt) ? 0 : Math.max(0, readyAt - game.elapsed);
+  const ready = !waitingForBosses && remaining <= 0;
+  const canPayLifeCost = game.lives > ability.cost;
+  const progress = ready ? 100 : ability.id === "void" && waitingForBosses
+    ? 0
+    : Math.max(0, Math.min(100, 100 * (1 - remaining / ability.duration)));
+  $("#special-ability-icon").textContent = ability.icon;
+  button.style.setProperty("--ability-progress", `${progress}%`);
+  button.style.setProperty("--ability-color", ability.color);
+  button.classList.toggle("ready", ready && canPayLifeCost);
+  button.disabled = !ready || !canPayLifeCost;
+  button.title = waitingForBosses
+    ? t("abilityWaitBoss")
+    : ready
+      ? canPayLifeCost ? t("abilityReady") : t("abilityNeedLives")
+      : t("abilityCharging").replace("{seconds}", String(Math.ceil(remaining)));
+  button.setAttribute("aria-label", button.title);
+}
+
 function showBossAlert() {
   const alert = $("#boss-alert");
   alert.textContent = t("bossAlert");
@@ -1663,8 +1832,13 @@ function nextBossSpawnAt(defeatedAt) {
 function finishBoss() {
   const eventBoss = game.boss?.eventBoss;
   game.boss = null;
+  game.bossesDefeated += 1;
   game.enemyBullets = [];
   game.nextBossAt = nextBossSpawnAt(game.elapsed);
+  if (selectedSpecialAbility()?.id === "void" && game.bossesDefeated >= 2 &&
+      !Number.isFinite(game.specialAbilityReadyAt)) {
+    game.specialAbilityReadyAt = game.elapsed;
+  }
   $("#boss-hud").hidden = true;
   if (eventBoss) {
     awardScore(eventBoss.bossScoreBonus);
@@ -1680,9 +1854,11 @@ function finishBoss() {
     }
     showToast(t("bossDefeated"));
   }
+  updateSpecialAbilityStatus();
 }
 
 function damagePlayer() {
+  if (game.iceFrozenUntil > game.elapsed) return;
   if (game.invulnerableUntil > game.elapsed) return;
   if (game.damageCooldown > 0) return;
   game.damageCooldown = 0.65;
@@ -1696,11 +1872,81 @@ function damagePlayer() {
   }
   burst(game.player.x, game.player.y);
   updatePowerupStatus();
+  updateSpecialAbilityStatus();
+}
+
+function useSpecialAbility() {
+  const ability = selectedSpecialAbility();
+  if (!game.running || !ability) return;
+  if (ability.id === "void" && game.bossesDefeated < 2) {
+    showToast(t("abilityWaitBoss"));
+    return;
+  }
+  if (game.elapsed < game.specialAbilityReadyAt) {
+    showToast(t("abilityNotReady"));
+    return;
+  }
+  if (game.lives <= ability.cost) {
+    showToast(t("abilityNeedLives"));
+    return;
+  }
+
+  game.lives -= ability.cost;
+  renderLives();
+  game.specialAbilityReadyAt = game.elapsed + ability.duration;
+  if (ability.id === "flame") {
+    game.abilityFlashUntil = game.elapsed + 0.18;
+    if (game.boss) {
+      game.boss.guards = [];
+      game.boss.phase = "vulnerable";
+      game.boss.health -= game.boss.maxHealth * 0.75;
+      if (game.boss.health <= 0) finishBoss();
+      else renderBossHud();
+    } else {
+      const defeated = game.enemies.splice(0, 100);
+      game.kills += defeated.length;
+      awardScore(defeated.length * ENEMY_SCORE);
+      if (gameUsesStandardRules()) {
+        stageMissionMetric("kills", defeated.length);
+        stageMissionMetric("score", defeated.length * ENEMY_SCORE);
+      }
+      defeated.forEach((enemy) => burst(enemy.x, enemy.y));
+    }
+    showToast(t("abilityFireUsed"));
+  } else if (ability.id === "ice") {
+    game.iceFrozenUntil = game.elapsed + 50;
+    game.enemyBullets = [];
+    showToast(t("abilityIceUsed"));
+  } else if (ability.id === "void") {
+    game.invulnerableUntil = Math.max(game.invulnerableUntil, game.elapsed + 40);
+    showToast(t("abilityVoidUsed"));
+  } else {
+    if (game.boss) {
+      game.boss.guards = [];
+      game.boss.phase = "vulnerable";
+      game.boss.health -= game.boss.maxHealth * 0.5;
+      if (game.boss.health <= 0) finishBoss();
+      else renderBossHud();
+    } else {
+      const defeated = game.enemies.splice(0, 100);
+      game.kills += defeated.length;
+      awardScore(defeated.length * ENEMY_SCORE);
+      if (gameUsesStandardRules()) {
+        stageMissionMetric("kills", defeated.length);
+        stageMissionMetric("score", defeated.length * ENEMY_SCORE);
+      }
+      defeated.forEach((enemy) => burst(enemy.x, enemy.y));
+    }
+    showToast(t("abilityExplosiveUsed"));
+  }
+  updatePowerupStatus();
+  updateSpecialAbilityStatus();
 }
 
 function renderStore() {
   if (!storeData || !account) return;
   renderStartingSkillShop();
+  renderSpecialLootBox();
   $("#buy-luck-drop").textContent = `${t("buy")} · ${storeData.luckDrop.priceCoins.toLocaleString(language)}`;
   $("#buy-luck-drop").disabled = coins < storeData.luckDrop.priceCoins;
   const offer = account.welcomeOffer;
@@ -1734,6 +1980,45 @@ function renderStore() {
     return reward;
   }));
   renderOfferCountdown();
+}
+
+function specialBoxIsActive() {
+  const box = storeData?.specialLootBox;
+  return Boolean(box && Date.now() >= Date.parse(box.startsAt) && Date.now() < Date.parse(box.endsAt));
+}
+
+function renderSpecialLootBox() {
+  const box = storeData?.specialLootBox;
+  const lineup = $("#special-skin-lineup");
+  if (!box || !lineup || !skinData) return;
+  lineup.replaceChildren(...box.skinIds.map((skinId) => {
+    const skin = findSkin(skinId);
+    if (!skin) throw new Error(`Skin especial não encontrada: ${skinId}.`);
+    const card = document.createElement("div");
+    card.className = "special-skin-card";
+    const visual = document.createElement("span");
+    visual.className = `skin-visual ${skin.shape}`;
+    visual.style.setProperty("--skin-color", skin.color);
+    visual.style.setProperty("--accent-color", skin.accentColor || skin.color);
+    visual.setAttribute("aria-hidden", "true");
+    const name = document.createElement("strong");
+    name.textContent = localizedText(skin.name);
+    const rarity = document.createElement("small");
+    rarity.textContent = localizedText(skinData.rarities.special);
+    card.append(visual, name, rarity);
+    return card;
+  }));
+  $("#special-box-dates").textContent = t("specialBoxDates");
+  const active = specialBoxIsActive();
+  $$("[data-special-box-spin]").forEach((button) => {
+    const quantity = Number(button.dataset.specialBoxSpin);
+    const price = box.priceDiamonds * quantity;
+    button.textContent = t(quantity === 1 ? "spinOne" : "spinTen")
+      .replace("{amount}", price.toLocaleString(language));
+    button.disabled = !account || !active;
+    button.title = !active ? t("specialBoxUnavailable") : "";
+  });
+  $("#special-box-status").textContent = active ? "" : t("specialBoxUnavailable");
 }
 
 const STARTING_ABILITY_PRICES = { "extra-lives": 500, shield: 400, triple: 300 };
@@ -1812,7 +2097,8 @@ function updateInboxBadge() {
     ? account.inbox.messages.filter((message) => !message.read).length +
       account.inbox.rewards.filter((reward) =>
         ["promo-code", "admin"].includes(reward.source) && !reward.claimed
-      ).length
+      ).length +
+      friendsData.incoming.length
     : 0;
   const badge = $("#home-inbox-count");
   badge.textContent = count > 99 ? "99+" : String(count);
@@ -2007,6 +2293,7 @@ function renderOwnProfile() {
   $("#own-profile-player-id").textContent = account.playerId;
   $("#own-profile-score").textContent = t("playerProfileScore")
     .replace("{score}", Number(account.bestScore || 0).toLocaleString(language));
+  renderOwnResources();
 
   const equippedBadges = Array.isArray(account.equippedBadges) ? account.equippedBadges : [];
   $("#profile-equipped-badges").replaceChildren(...(equippedBadges.length
@@ -2048,6 +2335,183 @@ function renderOwnProfile() {
     button.addEventListener("click", () => void toggleEquippedBadge(badge.id));
     return button;
   }));
+}
+
+function renderOwnResources() {
+  const resources = $("#own-profile-resources");
+  if (!resources || !account) return;
+  const entries = [
+    [t("coins"), account.coins.toLocaleString(language)],
+    [t("diamonds"), account.diamonds.toLocaleString(language)],
+    [t("skins"), account.ownedSkins.length.toLocaleString(language)],
+    [t("battlePass"), `${account.battlePass.level}/30 · ${account.battlePass.premium ? t("friendPassGold") : t("friendPassSilver")}`]
+  ];
+  resources.replaceChildren(...entries.map(([label, value]) => {
+    const item = document.createElement("div");
+    item.className = "profile-resource-item";
+    const amount = document.createElement("strong");
+    amount.textContent = value;
+    const title = document.createElement("span");
+    title.textContent = label;
+    item.append(amount, title);
+    return item;
+  }));
+}
+
+async function loadFriends(options = {}) {
+  const ownerUid = account?.cloudUid;
+  if (!ownerUid) {
+    friendsOwnerUid = null;
+    friendsData = { friends: [], incoming: [], outgoing: [] };
+    updateInboxBadge();
+    renderFriends();
+    return;
+  }
+  if (friendsLoadInProgress) return;
+  friendsLoadInProgress = true;
+  try {
+    const response = await cloudRequest("/api/friends");
+    if (account?.cloudUid !== ownerUid) return;
+    friendsOwnerUid = ownerUid;
+    friendsData = {
+      friends: Array.isArray(response.friends) ? response.friends : [],
+      incoming: Array.isArray(response.incoming) ? response.incoming : [],
+      outgoing: Array.isArray(response.outgoing) ? response.outgoing : []
+    };
+    $("#friends-status").textContent = "";
+    renderFriends();
+    updateInboxBadge();
+    if (!$("#screen-inbox").hidden) renderInbox();
+  } catch (error) {
+    if (account?.cloudUid === ownerUid) {
+      $("#friends-status").textContent = error.message;
+      if (!options.silent || !$("#screen-friends").hidden) showToast(error.message);
+    }
+  } finally {
+    friendsLoadInProgress = false;
+  }
+}
+
+function renderFriends() {
+  const friendList = $("#friends-list");
+  const requestList = $("#friend-requests-list");
+  if (!friendList || !requestList) return;
+  if (!friendsData.friends.length) {
+    const empty = document.createElement("p");
+    empty.className = "inbox-empty";
+    empty.textContent = t("friendListEmpty");
+    friendList.replaceChildren(empty);
+  } else {
+    friendList.replaceChildren(...friendsData.friends.map((friend) => {
+      const card = document.createElement("article");
+      card.className = "friend-entry";
+      const copy = document.createElement("div");
+      copy.className = "friend-entry-copy";
+      const name = document.createElement("strong");
+      name.textContent = friend.username;
+      const score = document.createElement("small");
+      score.textContent = `${t("playerProfileScore").replace("{score}", Number(friend.bestScore || 0).toLocaleString(language))} · ${friend.uid}`;
+      copy.append(name, score);
+      const actions = document.createElement("div");
+      actions.className = "friend-entry-actions";
+      const view = document.createElement("button");
+      view.className = "small-button";
+      view.type = "button";
+      view.dataset.friendProfile = friend.uid;
+      view.textContent = t("friendViewProfile");
+      const remove = document.createElement("button");
+      remove.className = "small-button";
+      remove.type = "button";
+      remove.dataset.removeFriend = friend.uid;
+      remove.textContent = t("friendRemove");
+      actions.append(view, remove);
+      card.append(copy, actions);
+      return card;
+    }));
+  }
+  if (!friendsData.incoming.length) {
+    const empty = document.createElement("p");
+    empty.className = "inbox-empty";
+    empty.textContent = t("friendRequestsEmpty");
+    requestList.replaceChildren(empty);
+  } else {
+    requestList.replaceChildren(...friendsData.incoming.map((request) =>
+      createFriendRequestCard(request, true)));
+  }
+}
+
+function createFriendRequestCard(request, withActions = false) {
+  const card = document.createElement("article");
+  card.className = "friend-entry";
+  const copy = document.createElement("div");
+  copy.className = "friend-entry-copy";
+  const name = document.createElement("strong");
+  name.textContent = request.username;
+  const description = document.createElement("small");
+  description.textContent = t("friendInboxRequest").replace("{username}", request.username);
+  copy.append(name, description);
+  card.append(copy);
+  if (withActions) {
+    const actions = document.createElement("div");
+    actions.className = "friend-entry-actions";
+    for (const action of ["accept", "decline"]) {
+      const button = document.createElement("button");
+      button.className = "small-button";
+      button.type = "button";
+      button.dataset.friendRequestAction = action;
+      button.dataset.friendRequestId = request.id;
+      button.textContent = t(action === "accept" ? "friendAccept" : "friendDecline");
+      actions.append(button);
+    }
+    card.append(actions);
+  }
+  return card;
+}
+
+async function submitFriendSearch(event) {
+  event.preventDefault();
+  if (!account?.cloudUid) {
+    $("#friends-status").textContent = t("cloudApiUnavailable");
+    return;
+  }
+  const form = event.currentTarget;
+  const data = new FormData(form);
+  const button = form.querySelector('button[type="submit"]');
+  button.disabled = true;
+  $("#friends-status").textContent = "";
+  try {
+    await cloudRequest("/api/friends/requests", {
+      method: "POST",
+      body: { identifierType: data.get("identifierType"), identifier: data.get("identifier") }
+    });
+    form.reset();
+    $("#friends-status").textContent = t("friendRequestSent");
+    await loadFriends({ silent: true });
+  } catch (error) {
+    $("#friends-status").textContent = error.message;
+  } finally {
+    button.disabled = false;
+  }
+}
+
+async function answerFriendRequestFromUi(requestId, action) {
+  try {
+    await cloudRequest(`/api/friends/requests/${encodeURIComponent(requestId)}/${action}`, { method: "POST" });
+    await loadFriends({ silent: true });
+    showToast(t(action === "accept" ? "friendRequestAccepted" : "friendRequestDeclined"));
+  } catch (error) {
+    $("#friends-status").textContent = error.message;
+  }
+}
+
+async function removeFriendFromUi(friendUid) {
+  try {
+    await cloudRequest(`/api/friends/${encodeURIComponent(friendUid)}`, { method: "DELETE" });
+    await loadFriends({ silent: true });
+    showToast(t("friendRemoved"));
+  } catch (error) {
+    $("#friends-status").textContent = error.message;
+  }
 }
 
 function createProfileBadge(badge, earnedAt, showDate) {
@@ -2250,14 +2714,17 @@ function renderInbox() {
   const entries = activeInboxTab === "messages"
     ? account.inbox.messages
     : account.inbox.rewards.filter((reward) => ["promo-code", "admin"].includes(reward.source));
-  if (!entries.length) {
+  const friendRequests = activeInboxTab === "messages" ? friendsData.incoming : [];
+  if (!entries.length && !friendRequests.length) {
     const empty = document.createElement("p");
     empty.className = "inbox-empty";
     empty.textContent = t(activeInboxTab === "messages" ? "inboxMessagesEmpty" : "inboxRewardsEmpty");
     list.replaceChildren(empty);
     return;
   }
-  list.replaceChildren(...entries.slice().reverse().map((entry) => {
+  const requestCards = friendRequests.slice().reverse()
+    .map((request) => createFriendRequestCard(request, true));
+  const messageCards = entries.slice().reverse().map((entry) => {
     const card = document.createElement("article");
     card.className = `inbox-entry${activeInboxTab === "messages" && !entry.read ? " unread" : ""}`;
     const title = document.createElement("h3");
@@ -2309,7 +2776,8 @@ function renderInbox() {
       card.append(claim);
     }
     return card;
-  }));
+  });
+  list.replaceChildren(...requestCards, ...messageCards);
 }
 
 function renderDiamondPackages() {
@@ -2409,6 +2877,113 @@ function rollLuckDropReward() {
     rarity,
     source: "luck-drop"
   };
+}
+
+function rollSpecialLootBoxReward(owned) {
+  const box = storeData.specialLootBox;
+  const roll = crypto.getRandomValues(new Uint32Array(1))[0] / 0x100000000 * 100;
+  let cumulative = 0;
+  for (const skinId of box.skinIds) {
+    cumulative += box.skinOdds;
+    if (roll < cumulative) {
+      if (owned.has(skinId)) {
+        return { type: "coins", amount: 100, duplicateSkinId: skinId };
+      }
+      owned.add(skinId);
+      return { type: "skin", skinId };
+    }
+  }
+  for (const reward of box.coinRewards) {
+    cumulative += reward.odds;
+    if (roll < cumulative) return { type: "coins", amount: reward.amount };
+  }
+  throw new Error("As chances da Caixa Especial não incluem o resultado sorteado.");
+}
+
+function openSpecialLootSpin(quantity) {
+  if (!account || !Number.isSafeInteger(quantity) || ![1, 10].includes(quantity)) return;
+  if (!specialBoxIsActive()) {
+    showToast(t("specialBoxUnavailable"));
+    return;
+  }
+  pendingSpecialLootQuantity = quantity;
+  const price = storeData.specialLootBox.priceDiamonds * quantity;
+  $("#special-loot-confirm-copy").textContent = t("specialBoxConfirm")
+    .replace("{amount}", String(quantity));
+  $("#special-loot-balance").textContent = `${account.diamonds.toLocaleString(language)} ${t("diamonds")}`;
+  $("#special-loot-cost").textContent = `${price.toLocaleString(language)} ${t("diamonds")}`;
+  $("#special-loot-after").textContent = `${Math.max(0, account.diamonds - price).toLocaleString(language)} ${t("diamonds")}`;
+  $("#special-loot-error").textContent = account.diamonds < price ? t("specialBoxInsufficient") : "";
+  $("#confirm-special-loot").disabled = account.diamonds < price;
+  $("#special-loot-confirmation").hidden = false;
+  $("#special-loot-reveal").hidden = true;
+  specialLootSpinInProgress = false;
+  $("#special-loot-dialog").showModal();
+}
+
+function createSpecialLootResult(reward, index) {
+  const card = document.createElement("article");
+  card.className = "special-loot-result";
+  card.style.animationDelay = `${index * 100}ms`;
+  const visual = document.createElement("span");
+  if (reward.type === "skin") {
+    const skin = findSkin(reward.skinId);
+    visual.className = `skin-visual ${skin.shape}`;
+    visual.style.setProperty("--skin-color", skin.color);
+    visual.style.setProperty("--accent-color", skin.accentColor || skin.color);
+  } else {
+    visual.className = "luck-spin-coin";
+    visual.textContent = "N";
+  }
+  const name = document.createElement("strong");
+  name.textContent = reward.type === "skin"
+    ? localizedText(findSkin(reward.skinId).name)
+    : `${reward.amount.toLocaleString(language)} ${t("coins")}`;
+  const rarity = document.createElement("small");
+  rarity.textContent = reward.type === "skin"
+    ? localizedText(skinData.rarities.special)
+    : reward.duplicateSkinId ? t("specialBoxDuplicate") : t("rewards");
+  card.append(visual, name, rarity);
+  return card;
+}
+
+function confirmSpecialLootSpin() {
+  const quantity = pendingSpecialLootQuantity;
+  const price = storeData.specialLootBox.priceDiamonds * quantity;
+  if (!account || !specialBoxIsActive() || account.diamonds < price || specialLootSpinInProgress) return;
+  const button = $("#confirm-special-loot");
+  button.disabled = true;
+  specialLootSpinInProgress = true;
+  $("#special-loot-error").textContent = "";
+  try {
+    const owned = new Set(account.ownedSkins);
+    const rewards = Array.from({ length: quantity }, () => rollSpecialLootBoxReward(owned));
+    const coinReward = rewards.reduce((sum, reward) =>
+      sum + (reward.type === "coins" ? reward.amount : 0), 0);
+    const nextAccount = {
+      ...account,
+      diamonds: account.diamonds - price,
+      coins: account.coins + coinReward,
+      ownedSkins: [...owned],
+      luckDropsOpened: account.luckDropsOpened + quantity
+    };
+    if (!Number.isSafeInteger(nextAccount.coins)) throw new Error(t("rewardBalanceError"));
+    persistAccount(recordBadge(nextAccount, "first-diamond-purchase"));
+    $("#special-loot-confirmation").hidden = true;
+    $("#special-loot-reveal").hidden = false;
+    $("#special-loot-results").replaceChildren();
+    $("#special-loot-result-copy").textContent = t("luckDropSpinning");
+    setTimeout(() => {
+      $("#special-loot-results").replaceChildren(...rewards.map(createSpecialLootResult));
+      $("#special-loot-result-copy").textContent = t("specialBoxResults").replace("{amount}", String(quantity));
+      specialLootSpinInProgress = false;
+      $("#close-special-loot").focus();
+    }, 1200);
+  } catch (error) {
+    specialLootSpinInProgress = false;
+    $("#special-loot-error").textContent = error.message;
+    button.disabled = account?.diamonds < price;
+  }
 }
 
 function rollMissionLuckDropReward() {
@@ -3118,7 +3693,7 @@ function validateSkinData(data) {
     }
     for (const skin of data.categories[category]) {
       const validShapes = {
-        ship: ["triangle", "triangle-wide", "diamond", "void-neon", "christmas-ornament", "white-neon", "christmas-tree", "star"],
+        ship: ["triangle", "triangle-wide", "diamond", "void-neon", "christmas-ornament", "white-neon", "christmas-tree", "star", "fire-orb", "ice-crystal", "void-orb", "explosive-orb"],
         shield: ["circle", "double-circle", "hexagon", "petal-ring", "gold-pulse", "christmas-lights", "star-points", "eclipse"],
         shot: ["line", "line-thin", "line-wide", "double-line", "star", "candy-cane"]
       };
@@ -3346,6 +3921,7 @@ function validatePromoCodeData(data, skinCatalog) {
 
 function validateStoreData(data, skinCatalog) {
   const luckDrop = data?.luckDrop;
+  const specialLootBox = data?.specialLootBox;
   const rarityOrder = ["common", "uncommon", "rare", "epic", "legendary"];
   if (!data?.welcomePackage?.items?.length || !luckDrop ||
       !Number.isSafeInteger(luckDrop.priceCoins) || luckDrop.priceCoins <= 0 ||
@@ -3364,6 +3940,32 @@ function validateStoreData(data, skinCatalog) {
   }, 0);
   if (Math.abs(totalOdds - 100) > 0.000001 || luckDrop.rarityOdds.legendary !== 1.4) {
     throw new Error("As chances do Luck Drop devem totalizar 100%, com 1,4% para a raridade lendária.");
+  }
+  const specialSkinOdds = specialLootBox?.skinIds?.length * specialLootBox?.skinOdds;
+  const specialCoinOdds = Array.isArray(specialLootBox?.coinRewards)
+    ? specialLootBox.coinRewards.reduce((total, reward) => total + reward.odds, 0)
+    : 0;
+  const specialStart = Date.parse(specialLootBox?.startsAt);
+  const specialEnd = Date.parse(specialLootBox?.endsAt);
+  if (!specialLootBox || specialLootBox.title?.["pt-BR"] !== "Inicial Box Especial!" ||
+      !Number.isSafeInteger(specialLootBox.priceDiamonds) || specialLootBox.priceDiamonds !== 1000 ||
+      !Array.isArray(specialLootBox.skinIds) || specialLootBox.skinIds.length !== 4 ||
+      new Set(specialLootBox.skinIds).size !== 4 || specialLootBox.skinOdds !== 3.1 ||
+      Math.abs(specialSkinOdds + specialCoinOdds - 100) > 0.000001 ||
+      !Number.isFinite(specialStart) || !Number.isFinite(specialEnd) ||
+      new Date(specialStart).toISOString() !== "2026-12-08T03:00:00.000Z" ||
+      new Date(specialEnd).toISOString() !== "2026-12-25T03:00:00.000Z" ||
+      !Array.isArray(specialLootBox.coinRewards) ||
+      ![100, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000].every((amount) =>
+        specialLootBox.coinRewards.some((reward) => reward.amount === amount &&
+          Number.isFinite(reward.odds) && reward.odds >= 0)) ||
+      specialLootBox.coinRewards.some((reward) =>
+        !Number.isSafeInteger(reward.amount) || reward.amount <= 0 ||
+        !Number.isFinite(reward.odds) || reward.odds < 0) ||
+      specialLootBox.coinRewards.find((reward) => reward.amount === 100000)?.odds !== 0.3 ||
+      specialLootBox.skinIds.some((skinId) => !skinCatalog.categories.ship.some((skin) =>
+        skin.id === skinId && skin.rarity === "special"))) {
+    throw new Error("A Caixa Especial deve ter as quatro skins, datas, preço e chances configurados corretamente.");
   }
   const missionDrop = data.missionLuckDrop;
   const missionOdds = [
@@ -3695,6 +4297,7 @@ function renderSkins() {
   grid.innerHTML = list.map((skin) => {
     const selected = selectedSkins[activeSkinCategory] === skin.id;
     const owned = ownedSkins.has(skin.id);
+    const eligible = skin.id !== "ship-special-ice" || upgradeValue("hull") > 4;
     const rarity = skinData.rarities[skin.rarity];
     const ornament = skin.evolutive === true;
     const ornamentStage = ornament ? christmasOrnamentStage(currentChristmasScore()) : 0;
@@ -3715,10 +4318,10 @@ function renderSkins() {
       : skin.id === "shield-christmas-lights"
         ? ` data-lights-mode="${account.battlePass.lightsMode}"`
         : "";
-    return `<button class="skin-card skin-card-layout rarity-${skin.rarity}${selected ? " selected" : ""}${skin.id === "ship-void-neon" ? " skin-card-void-neon" : ""}" type="button" data-skin-id="${escapeHtml(skin.id)}" style="--rarity-color:${escapeHtml(rarity.color)};--skin-color:${escapeHtml(skinColor)};--accent-color:${escapeHtml(skin.accentColor || skinColor)}" aria-pressed="${selected}"${owned ? "" : " disabled"}>
+    return `<button class="skin-card skin-card-layout rarity-${skin.rarity}${selected ? " selected" : ""}${skin.id === "ship-void-neon" ? " skin-card-void-neon" : ""}" type="button" data-skin-id="${escapeHtml(skin.id)}" style="--rarity-color:${escapeHtml(rarity.color)};--skin-color:${escapeHtml(skinColor)};--accent-color:${escapeHtml(skin.accentColor || skinColor)}" aria-pressed="${selected}"${owned && eligible ? "" : " disabled"}>
       <span class="skin-card-copy"><strong>${escapeHtml(skin.name[language])}</strong><span>${escapeHtml(skin.description[language])}</span><small>${escapeHtml(t("rarity"))}: ${escapeHtml(rarity[language])}</small>${attributeCopy}${ornamentCopy}</span>
       <span class="skin-visual ${escapeHtml(skin.shape)}"${visualData} aria-hidden="true"></span>
-      <span class="skin-card-action">${!owned ? escapeHtml(t("luckDropExclusive")) : selected ? escapeHtml(t("equipped")) : escapeHtml(t("equip"))}</span>
+      <span class="skin-card-action">${!owned ? escapeHtml(t("luckDropExclusive")) : !eligible ? escapeHtml(t("iceHullRequirement")) : selected ? escapeHtml(t("equipped")) : escapeHtml(t("equip"))}</span>
     </button>`;
   }).join("") + activeEvents.map((event) => {
     const skin = event.skin;
@@ -3888,6 +4491,10 @@ function escapeHtml(value) {
 
 function showScreen(name) {
   if (name === "admin" && (!account?.adminMode || !adminSessionToken)) return;
+  if (name === "friends" && !account?.cloudUid) {
+    showToast(t("cloudApiUnavailable"));
+    return;
+  }
   if (name === "battle-pass" && battlePassData && Date.now() < battlePassData.visibleFrom) {
     showToast(t("battlePassUnavailable"));
     return;
@@ -3914,10 +4521,15 @@ function showScreen(name) {
     renderOwnProfile();
     void loadOwnProfile();
   }
+  if (name === "friends") {
+    renderFriends();
+    void loadFriends();
+  }
   if (name === "admin") void loadBannedPlayers();
   if (name === "battle-pass") renderBattlePass();
   if (name === "starting-skills") renderStartingSkills();
   if (name === "inbox") {
+    void loadFriends({ silent: true });
     void refreshAdminGiftInbox();
     const unreadMessages = account?.inbox.messages.some((message) => !message.read);
     if (unreadMessages) {
@@ -3944,41 +4556,181 @@ async function openPublicProfile(uid) {
   const requestId = ++profileRequestId;
   const dialog = $("#player-profile-dialog");
   activeAdminProfileUid = uid;
+  activePublicProfile = null;
   activeAdminProfileBanned = false;
   $("#admin-player-actions").hidden = !account?.adminMode;
+  $("#player-profile-inventory").hidden = true;
+  $("#player-profile-inventory").replaceChildren();
+  $("#friend-profile-action").hidden = true;
   $("#admin-player-status").textContent = "";
   $("#player-profile-title").textContent = t("playerProfile");
   $("#player-profile-score").textContent = t("leaderboardLoading");
   $("#player-profile-badges").replaceChildren();
   if (!dialog.open) dialog.showModal();
   try {
-    const response = account?.adminMode
-      ? await adminRequest(`/api/admin/players/${encodeURIComponent(uid)}`)
-      : await cloudRequest(`/api/profiles/${encodeURIComponent(uid)}`, { auth: false });
+    let response;
+    let isFriend = false;
+    if (account?.adminMode) {
+      response = await adminRequest(`/api/admin/players/${encodeURIComponent(uid)}`);
+    } else if (account?.cloudUid) {
+      const social = await cloudRequest("/api/friends");
+      if (requestId !== profileRequestId) return;
+      friendsData = {
+        friends: Array.isArray(social.friends) ? social.friends : [],
+        incoming: Array.isArray(social.incoming) ? social.incoming : [],
+        outgoing: Array.isArray(social.outgoing) ? social.outgoing : []
+      };
+      isFriend = friendsData.friends.some((friend) => friend.uid === uid);
+      activePublicProfile = {
+        isFriend,
+        isPending: friendsData.outgoing.some((request) => request.uid === uid),
+        requestFromUid: friendsData.incoming.find((request) => request.uid === uid)?.id || ""
+      };
+      response = isFriend
+        ? await cloudRequest(`/api/friends/${encodeURIComponent(uid)}/profile`)
+        : await cloudRequest(`/api/profiles/${encodeURIComponent(uid)}`, { auth: false });
+    } else {
+      response = await cloudRequest(`/api/profiles/${encodeURIComponent(uid)}`, { auth: false });
+    }
     if (requestId !== profileRequestId) return;
     const profile = response.profile;
+    activePublicProfile = { ...activePublicProfile, ...profile, isFriend };
     activeAdminProfileBanned = profile.banned === true;
     $("#admin-player-actions").hidden = !account?.adminMode;
     $("#admin-toggle-ban").textContent = t(activeAdminProfileBanned ? "unbanAccount" : "banAccount");
     $("#player-profile-title").textContent = profile.username;
     $("#player-profile-score").textContent = t("playerProfileScore")
       .replace("{score}", Number(profile.bestScore || 0).toLocaleString(language));
+    if (isFriend) {
+      renderFriendProfileInventory(profile);
+      $("#player-profile-inventory").hidden = false;
+    }
+    const friendAction = $("#friend-profile-action");
+    const canManageFriend = Boolean(account?.cloudUid && !account.adminMode && profile.uid !== account.cloudUid);
+    friendAction.hidden = !canManageFriend;
+    delete friendAction.dataset.friendAction;
+    delete friendAction.dataset.friendUid;
+    delete friendAction.dataset.friendRequestId;
+    if (canManageFriend) {
+      if (isFriend && profile.battlePass?.premium === true) {
+        friendAction.textContent = t("friendGiftOwned");
+        friendAction.disabled = true;
+      } else if (activePublicProfile.requestFromUid) {
+        friendAction.textContent = t("friendAccept");
+        friendAction.disabled = false;
+        friendAction.dataset.friendAction = "accept";
+        friendAction.dataset.friendRequestId = activePublicProfile.requestFromUid;
+      } else if (activePublicProfile.isPending) {
+        friendAction.textContent = t("friendRequestPending");
+        friendAction.disabled = true;
+      } else {
+        friendAction.disabled = isFriend && account.diamonds < 600;
+        friendAction.textContent = isFriend ? t("giftBattlePass") : t("addFriend");
+        friendAction.dataset.friendAction = isFriend ? "gift" : "add";
+        friendAction.dataset.friendUid = profile.uid;
+      }
+    }
     const equippedBadges = (Array.isArray(profile.equippedBadges) ? profile.equippedBadges : [])
       .map((badgeId) => [badgeId, profile.badges?.[badgeId]])
       .filter(([badgeId, earnedAt]) => badgeData?.badges.some((badge) => badge.id === badgeId) &&
         Number.isSafeInteger(earnedAt) && earnedAt > 0);
     if (!equippedBadges.length) {
       $("#player-profile-badges").textContent = t("playerProfileNoBadges");
-      return;
+    } else {
+      $("#player-profile-badges").replaceChildren(...equippedBadges.map(([badgeId, earnedAt]) => {
+        const badge = badgeData.badges.find((entry) => entry.id === badgeId);
+        return createProfileBadge(badge, earnedAt, true);
+      }));
     }
-    $("#player-profile-badges").replaceChildren(...equippedBadges.map(([badgeId, earnedAt]) => {
-      const badge = badgeData.badges.find((entry) => entry.id === badgeId);
-      return createProfileBadge(badge, earnedAt, true);
-    }));
   } catch (error) {
     if (requestId === profileRequestId) {
       $("#player-profile-score").textContent = error.message || t("playerNotFound");
     }
+  }
+}
+
+function renderFriendProfileInventory(profile) {
+  const section = $("#player-profile-inventory");
+  const heading = document.createElement("strong");
+  heading.textContent = t("friendProfileInventory");
+  const skinNames = (Array.isArray(profile.ownedSkins) ? profile.ownedSkins : [])
+    .map((skinId) => findSkin(skinId))
+    .filter(Boolean)
+    .map((skin) => localizedText(skin.name));
+  const skins = document.createElement("span");
+  skins.textContent = t("friendOwnedSkins").replace("{amount}", String(skinNames.length));
+  const collection = document.createElement("span");
+  collection.textContent = skinNames.length ? skinNames.join(", ") : t("profileNoSkins");
+  const pass = document.createElement("span");
+  const battlePass = profile.battlePass || {};
+  pass.textContent = `${t("friendPassLevel").replace("{level}", String(battlePass.level || 1))} · ${
+    battlePass.premium ? t("friendPassGold") : t("friendPassSilver")}`;
+  section.replaceChildren(heading, skins, collection, pass);
+}
+
+function openFriendGiftDialog(friendUid) {
+  if (!account?.cloudUid || !friendsData.friends.some((friend) => friend.uid === friendUid)) return;
+  activeFriendGiftUid = friendUid;
+  const cost = 600;
+  $("#friend-gift-balance").textContent = account.diamonds.toLocaleString(language);
+  $("#friend-gift-cost").textContent = `${cost.toLocaleString(language)} ${t("diamonds")}`;
+  $("#friend-gift-after").textContent = `${Math.max(0, account.diamonds - cost).toLocaleString(language)} ${t("diamonds")}`;
+  $("#friend-gift-error").textContent = account.diamonds < cost ? t("friendGiftInsufficient") : "";
+  $("#confirm-friend-gift").disabled = account.diamonds < cost;
+  $("#friend-gift-dialog").showModal();
+}
+
+async function sendFriendRequestFromProfile(friendUid, button) {
+  if (!account?.cloudUid || !friendUid) return;
+  button.disabled = true;
+  try {
+    await cloudRequest("/api/friends/requests", {
+      method: "POST",
+      body: { identifierType: "id", identifier: friendUid }
+    });
+    button.textContent = t("friendRequestPending");
+    delete button.dataset.friendAction;
+    await loadFriends({ silent: true });
+    showToast(t("friendRequestSent"));
+  } catch (error) {
+    $("#player-profile-score").textContent = error.message;
+    button.disabled = false;
+  }
+}
+
+async function confirmFriendGift() {
+  const friendUid = activeFriendGiftUid;
+  const button = $("#confirm-friend-gift");
+  if (!friendUid || !account || button.disabled) return;
+  const senderUid = account.cloudUid;
+  button.disabled = true;
+  $("#friend-gift-error").textContent = "";
+  try {
+    const receipt = await cloudRequest(`/api/friends/${encodeURIComponent(friendUid)}/gift-pass`, {
+      method: "POST",
+      body: {}
+    });
+    if (!Number.isSafeInteger(receipt.diamonds) || !Number.isSafeInteger(receipt.friendPassGiftCount)) {
+      throw new Error(t("cloudApiUnavailable"));
+    }
+    if (account?.cloudUid === senderUid) {
+      persistAccount({
+        ...account,
+        diamonds: receipt.diamonds,
+        friendPassGiftCount: receipt.friendPassGiftCount
+      });
+    }
+    if (activePublicProfile?.uid === friendUid) {
+      activePublicProfile.battlePass = { ...(activePublicProfile.battlePass || {}), premium: true };
+      $("#friend-profile-action").textContent = t("friendGiftOwned");
+      $("#friend-profile-action").disabled = true;
+    }
+    $("#friend-gift-dialog").close();
+    activeFriendGiftUid = null;
+    showToast(t("giftPassSuccess"));
+  } catch (error) {
+    $("#friend-gift-error").textContent = error.message;
+    button.disabled = account?.diamonds < 600;
   }
 }
 
@@ -4320,6 +5072,7 @@ const game = {
   spawnElapsed: 0, shotElapsed: 0, score: 0, runStartingScore: 0, lives: 3, kills: 0, missionSeconds: 0,
   nextBossAt: BOSS_INTERVAL_SECONDS, shieldHits: 0, tripleShotUntil: 0, finalized: false, runMissionProgress: {},
   eventId: null, invulnerableUntil: 0, extraLivesUntil: 0, passTokenElapsed: 0,
+  specialAbilityReadyAt: 0, bossesDefeated: 0, iceFrozenUntil: 0, abilityFlashUntil: 0,
   player: { x: canvas.width / 2, y: canvas.height - 78 },
   bullets: [], enemies: [], enemyBullets: [], boss: null, damageCooldown: 0,
   powerUps: [], particles: [], stars: []
@@ -4413,6 +5166,11 @@ async function startGame(eventId = null, startingAbilityId = null) {
   const startingAbility = startingAbilityId
     ? STARTING_ABILITIES.find((ability) => ability.id === startingAbilityId)
     : null;
+  const specialAbility = selectedSpecialAbility();
+  if (specialAbility?.id === "ice" && upgradeValue("hull") <= 4) {
+    showToast(t("abilityNeedLives"));
+    return;
+  }
   if (startingAbilityId && (!startingAbility || !hasStartingAbilityCharges(startingAbilityId))) {
     showToast(t("startingSkillNoCharges"));
     return;
@@ -4459,10 +5217,17 @@ async function startGame(eventId = null, startingAbilityId = null) {
     ? Math.min(account.eventProgress[game.eventId] || 0, eventScoreLimit(selectedEvent))
     : 0;
   game.runStartingScore = game.score;
-  game.lives = upgradeValue("hull") + (startingAbility?.id === "extra-lives" ? 2 : 0);
+  const hullLives = upgradeValue("hull");
+  const specialLifePenalty = specialAbility?.id === "flame" ? 1 :
+    specialAbility?.id === "ice" ? 4 : 0;
+  game.lives = hullLives - specialLifePenalty + (startingAbility?.id === "extra-lives" ? 2 : 0);
   game.kills = 0;
   game.missionSeconds = 0;
   game.nextBossAt = BOSS_INTERVAL_SECONDS;
+  game.bossesDefeated = 0;
+  game.specialAbilityReadyAt = specialAbility?.id === "void" ? Infinity : (specialAbility?.duration || 0);
+  game.iceFrozenUntil = 0;
+  game.abilityFlashUntil = 0;
   game.shieldHits = 0;
   game.tripleShotUntil = startingAbility?.id === "triple" ? 30 : 0;
   game.invulnerableUntil = startingAbility?.id === "shield" ? 45 : 0;
@@ -4485,6 +5250,7 @@ async function startGame(eventId = null, startingAbilityId = null) {
   renderScore(false);
   renderLives();
   updatePowerupStatus();
+  updateSpecialAbilityStatus();
   $("#game-overlay").hidden = true;
   showScreen("game");
   drawGame();
@@ -4493,6 +5259,10 @@ async function startGame(eventId = null, startingAbilityId = null) {
 
 function updatePowerupStatus() {
   const status = [];
+  const iceRemaining = Math.max(0, game.iceFrozenUntil - game.elapsed);
+  if (iceRemaining > 0) {
+    status.push(t("abilityFrozen").replace("{seconds}", String(Math.ceil(iceRemaining))));
+  }
   if (game.shieldHits > 0) status.push(`${t("shieldActive")} ${game.shieldHits}`);
   const shieldRemaining = Math.max(0, game.invulnerableUntil - game.elapsed);
   if (shieldRemaining > 0) {
@@ -4527,6 +5297,7 @@ function showGameOverlay(mode) {
   $("#pause-settings-button").hidden = mode !== "paused";
   if (mode === "over" && !game.finalized) finishRun();
   game.running = false;
+  updateSpecialAbilityStatus();
   cancelAnimationFrame(game.animationId);
 }
 
@@ -4537,6 +5308,7 @@ function togglePause() {
     game.previousTime = 0;
     $("#game-overlay").hidden = true;
     $("#pause-missions-wrap").hidden = true;
+    updateSpecialAbilityStatus();
     game.animationId = requestAnimationFrame(gameFrame);
   } else if (game.running) {
     showGameOverlay("paused");
@@ -4618,6 +5390,10 @@ function gameFrame(timestamp) {
 function updateBoss(delta) {
   const boss = game.boss;
   if (!boss) return;
+  if (game.iceFrozenUntil > game.elapsed) {
+    renderBossHud();
+    return;
+  }
   if (boss.phase === "arriving") {
     boss.y = Math.min(boss.targetY, boss.y + 92 * delta);
     if (boss.y >= boss.targetY) {
@@ -4695,7 +5471,8 @@ function updateGame(delta) {
           x: game.player.x + lane,
           y: game.player.y - 17,
           speed: 460,
-          damage: (upgradeValue("damage") + (selectedSkins.shot === "shot-double-gold" ? 1 : 0)) *
+          damage: (upgradeValue("damage") + (selectedSkins.shot === "shot-double-gold" ? 1 : 0) +
+            (selectedSkins.ship === "ship-special-ice" ? 3 : 0)) *
             (1 + ornamentStage / 100)
         });
       }
@@ -4715,7 +5492,9 @@ function updateGame(delta) {
     }
   }
   game.bullets = game.bullets.filter((bullet) => (bullet.y -= bullet.speed * delta) > -10);
-  game.enemies.forEach((enemy) => { enemy.y += enemy.speed * delta; });
+  if (game.iceFrozenUntil <= game.elapsed) {
+    game.enemies.forEach((enemy) => { enemy.y += enemy.speed * delta; });
+  }
   game.enemyBullets = game.enemyBullets.filter((bullet) => {
     bullet.x += bullet.vx * delta;
     bullet.y += bullet.vy * delta;
@@ -4837,6 +5616,7 @@ function updateGame(delta) {
     particle.life -= delta;
     return particle.life > 0 && particleLimit > 0;
   });
+  updateSpecialAbilityStatus();
 }
 
 function drawGame() {
@@ -4866,6 +5646,65 @@ function drawGame() {
     context.moveTo(game.player.x - 12, game.player.y - 3);
     context.lineTo(game.player.x + 12, game.player.y - 3);
     context.stroke();
+  } else if (shipSkin.shape === "fire-orb") {
+    const flicker = settings.quality === "minimum" ? 0 : Math.sin(game.elapsed * 16) * 2;
+    context.fillStyle = shipSkin.color;
+    context.beginPath();
+    context.arc(game.player.x, game.player.y, 12, 0, Math.PI * 2);
+    context.fill();
+    context.strokeStyle = shipSkin.accentColor;
+    context.stroke();
+    context.fillStyle = "#fff2a1";
+    context.beginPath();
+    context.moveTo(game.player.x, game.player.y - 20 - flicker);
+    context.lineTo(game.player.x + 6, game.player.y - 8);
+    context.lineTo(game.player.x - 6, game.player.y - 8);
+    context.closePath();
+    context.fill();
+  } else if (shipSkin.shape === "ice-crystal") {
+    context.fillStyle = shipSkin.color;
+    context.beginPath();
+    context.moveTo(game.player.x, game.player.y - 18);
+    context.lineTo(game.player.x + 13, game.player.y - 3);
+    context.lineTo(game.player.x + 8, game.player.y + 13);
+    context.lineTo(game.player.x - 8, game.player.y + 13);
+    context.lineTo(game.player.x - 13, game.player.y - 3);
+    context.closePath();
+    context.fill();
+    context.strokeStyle = shipSkin.accentColor;
+    context.stroke();
+    context.beginPath();
+    context.moveTo(game.player.x, game.player.y - 12);
+    context.lineTo(game.player.x, game.player.y + 9);
+    context.moveTo(game.player.x - 8, game.player.y - 3);
+    context.lineTo(game.player.x + 8, game.player.y + 5);
+    context.stroke();
+  } else if (shipSkin.shape === "void-orb") {
+    context.fillStyle = shipSkin.color;
+    context.beginPath();
+    context.arc(game.player.x, game.player.y, 13, 0, Math.PI * 2);
+    context.fill();
+    context.strokeStyle = shipSkin.accentColor;
+    context.lineWidth = 3;
+    context.stroke();
+    context.beginPath();
+    context.arc(game.player.x, game.player.y, 7, 0, Math.PI * 2);
+    context.stroke();
+  } else if (shipSkin.shape === "explosive-orb") {
+    const pulse = settings.quality === "minimum" ? 0 : (1 + Math.sin(game.elapsed * 18)) / 2;
+    context.fillStyle = shipSkin.color;
+    context.shadowColor = shipSkin.accentColor;
+    context.shadowBlur = settings.quality === "minimum" ? 0 : 7 + pulse * 17;
+    context.beginPath();
+    context.arc(game.player.x, game.player.y, 10 + pulse * 3, 0, Math.PI * 2);
+    context.fill();
+    context.strokeStyle = shipSkin.accentColor;
+    context.lineWidth = 2;
+    context.stroke();
+    context.fillStyle = "#fff3c4";
+    context.beginPath();
+    context.arc(game.player.x, game.player.y, 3 + pulse * 2, 0, Math.PI * 2);
+    context.fill();
   } else if (shipSkin.shape === "void-neon") {
     const pulse = settings.quality === "minimum" ? 0 : (1 + Math.sin(game.elapsed * 1.3)) / 2;
     context.shadowColor = "#ffd45c";
@@ -4965,6 +5804,14 @@ function drawGame() {
   }
   if (game.shieldHits > 0 || game.invulnerableUntil > game.elapsed) drawShield();
   context.restore();
+
+  if (game.iceFrozenUntil > game.elapsed) {
+    const remaining = (game.iceFrozenUntil - game.elapsed) / 50;
+    context.fillStyle = "rgba(167, 237, 255, .3)";
+    context.fillRect(game.player.x - 24, game.player.y + 21, 48, 4);
+    context.fillStyle = "#a7edff";
+    context.fillRect(game.player.x - 24, game.player.y + 21, 48 * remaining, 4);
+  }
 
   const shotSkin = selectedSkin("shot");
   context.save();
@@ -5122,6 +5969,12 @@ function drawGame() {
       context.fillStyle = particle.color;
       context.fillRect(particle.x, particle.y, 3, 3);
     }
+    context.globalAlpha = 1;
+  }
+  if (game.abilityFlashUntil > game.elapsed) {
+    context.globalAlpha = Math.min(1, (game.abilityFlashUntil - game.elapsed) / 0.18);
+    context.fillStyle = "#fff";
+    context.fillRect(0, 0, canvas.width, canvas.height);
     context.globalAlpha = 1;
   }
 }
@@ -5308,6 +6161,11 @@ function runDebugChecks() {
   const expectedLuckDropOdds = { common: 58.6, uncommon: 25, rare: 10, epic: 5, legendary: 1.4 };
   const expectedLuckDropCoins = { common: 100, uncommon: 250, rare: 500, epic: 1000, legendary: 2500 };
   const expectedDiamondPackages = [[100, 1000], [500, 4500], [1000, 8000], [2500, 18000], [4500, 30000]];
+  const specialBox = storeData?.specialLootBox;
+  const specialBoxOdds = Array.isArray(specialBox?.skinIds) && Array.isArray(specialBox?.coinRewards)
+    ? specialBox.skinIds.length * specialBox.skinOdds +
+      specialBox.coinRewards.reduce((sum, reward) => sum + reward.odds, 0)
+    : 0;
   const checks = [
     ["Canvas inicializado", Boolean(context)],
     ["Canvas vertical 360 x 640", canvas.width === 360 && canvas.height === 640],
@@ -5361,6 +6219,18 @@ function runDebugChecks() {
     ["Melhorias limitadas ao nível 10", MAX_UPGRADE_LEVEL === 10],
     ["Preço inicial de melhoria é 100 moedas", ["damage", "hull", "shield"].every((type) => newUpgradePrices()[type] === 100)],
     ["Luck Drop custa 1.000 Neon-moedas", storeData?.luckDrop?.priceCoins === 1000],
+    ["Caixa Especial tem quatro skins e chances de 100%",
+      specialBox?.skinIds?.length === 4 && specialBox.skinOdds === 3.1 &&
+      Math.abs(specialBoxOdds - 100) < 0.000001 &&
+      specialBox?.coinRewards?.find((reward) => reward.amount === 100000)?.odds === 0.3],
+    ["Habilidades das naves especiais têm tempos e custos configurados",
+      SPECIAL_SHIP_ABILITIES["ship-special-flame"].duration === 190 &&
+      SPECIAL_SHIP_ABILITIES["ship-special-flame"].cost === 4 &&
+      SPECIAL_SHIP_ABILITIES["ship-special-ice"].duration === 120 &&
+      SPECIAL_SHIP_ABILITIES["ship-special-void"].duration === 30 &&
+      SPECIAL_SHIP_ABILITIES["ship-special-void"].cost === 2 &&
+      SPECIAL_SHIP_ABILITIES["ship-special-explosive"].duration === 200 &&
+      SPECIAL_SHIP_ABILITIES["ship-special-explosive"].cost === 1],
     ["Chances do Luck Drop totalizam 100%, com 1,4% lendária",
       Boolean(storeData?.luckDrop) &&
       Math.abs(Object.values(storeData.luckDrop.rarityOdds).reduce((sum, odds) => sum + odds, 0) - 100) < 0.000001 &&
@@ -5453,7 +6323,11 @@ async function initialize() {
       }
     }, 10 * 60 * 1000);
     setInterval(() => void refreshAdminGiftInbox(), 60 * 1000);
+    setInterval(() => {
+      if (account?.cloudUid) void loadFriends({ silent: true });
+    }, 60 * 1000);
     setInterval(renderEvents, 60000);
+    setInterval(renderSpecialLootBox, 60000);
     setInterval(updateBattlePassVisibility, 60000);
     offerTimer = setInterval(renderOfferCountdown, 1000);
   } catch (error) {
@@ -5835,6 +6709,25 @@ document.addEventListener("click", (event) => {
   if (target.hasAttribute("data-faq")) openFaq();
   if (target.dataset.badgeId) openBadgeDetails(target.dataset.badgeId);
   if (target.hasAttribute("data-luck-drop-info")) openLuckDropInfo();
+  if (target.dataset.storeTab) {
+    $$("[data-store-tab]").forEach((tab) =>
+      tab.setAttribute("aria-selected", String(tab === target)));
+    $("#store-standard-items").hidden = target.dataset.storeTab !== "standard";
+    $("#store-loot-boxes").hidden = target.dataset.storeTab !== "loot-boxes";
+  }
+  if (target.dataset.specialBoxSpin) openSpecialLootSpin(Number(target.dataset.specialBoxSpin));
+  if (target.dataset.friendProfile) void openPublicProfile(target.dataset.friendProfile);
+  if (target.dataset.removeFriend) void removeFriendFromUi(target.dataset.removeFriend);
+  if (target.dataset.friendRequestAction) {
+    void answerFriendRequestFromUi(target.dataset.friendRequestId, target.dataset.friendRequestAction);
+  }
+  if (target.dataset.friendAction === "add") {
+    void sendFriendRequestFromProfile(target.dataset.friendUid, target);
+  }
+  if (target.dataset.friendAction === "accept") {
+    void answerFriendRequestFromUi(target.dataset.friendRequestId, "accept");
+  }
+  if (target.dataset.friendAction === "gift") openFriendGiftDialog(target.dataset.friendUid);
   if (target.dataset.collectionTab) {
     activeCollectionTab = target.dataset.collectionTab;
     renderBadges();
@@ -5930,6 +6823,12 @@ $("#promo-code-form").addEventListener("submit", (event) => {
   event.preventDefault();
   redeemPromoCode($("#promo-code-input").value);
 });
+$("#friend-search-form").addEventListener("submit", (event) => void submitFriendSearch(event));
+$("#profile-resources-button").addEventListener("click", (event) => {
+  const expanded = event.currentTarget.getAttribute("aria-expanded") !== "true";
+  event.currentTarget.setAttribute("aria-expanded", String(expanded));
+  $("#own-profile-resources").hidden = !expanded;
+});
 $("#login-form").addEventListener("submit", (event) => {
   event.preventDefault();
   void submitAuthForm(event.currentTarget, "login");
@@ -5946,7 +6845,27 @@ $("#cancel-cloud-migration").addEventListener("click", () => $("#cloud-migration
 $("#close-player-profile").addEventListener("click", () => {
   $("#player-profile-dialog").close();
   activeAdminProfileUid = null;
+  activePublicProfile = null;
   $("#admin-player-actions").hidden = true;
+});
+$("#confirm-special-loot").addEventListener("click", confirmSpecialLootSpin);
+$("#cancel-special-loot").addEventListener("click", () => {
+  if (!specialLootSpinInProgress) {
+    pendingSpecialLootQuantity = 0;
+    $("#special-loot-dialog").close();
+  }
+});
+$("#close-special-loot").addEventListener("click", () => {
+  pendingSpecialLootQuantity = 0;
+  $("#special-loot-dialog").close();
+});
+$("#special-loot-dialog").addEventListener("cancel", (event) => {
+  if (specialLootSpinInProgress) event.preventDefault();
+});
+$("#confirm-friend-gift").addEventListener("click", () => void confirmFriendGift());
+$("#cancel-friend-gift").addEventListener("click", () => {
+  activeFriendGiftUid = null;
+  $("#friend-gift-dialog").close();
 });
 $("#admin-gift-form").addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -6221,6 +7140,14 @@ $("#reset-progress").addEventListener("click", () => {
 });
 
 document.addEventListener("keydown", (event) => {
+  if (event.code === "KeyH" && game.running) {
+    const target = event.target;
+    if (target instanceof HTMLElement &&
+        (target.isContentEditable || target.matches("input, textarea, select, [role='textbox']"))) return;
+    event.preventDefault();
+    useSpecialAbility();
+    return;
+  }
   if (event.code === "F3") {
     if (!account?.debugEnabled) return;
     event.preventDefault();
@@ -6235,6 +7162,8 @@ document.addEventListener("keydown", (event) => {
     if (!$("#screen-game").hidden) togglePause();
   }
 });
+
+$("#special-ability-button").addEventListener("click", useSpecialAbility);
 
 function movePlayerToPointer(event) {
   if (!game.running) return;

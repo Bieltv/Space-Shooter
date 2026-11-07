@@ -44,6 +44,33 @@
     },
     "exclusiveSkinId": "ship-void-neon"
   },
+  "specialLootBox": {
+    "title": {
+      "pt-BR": "Inicial Box Especial!",
+      "en": "Initial Special Box!"
+    },
+    "startsAt": "2026-12-08T00:00:00-03:00",
+    "endsAt": "2026-12-25T00:00:00-03:00",
+    "priceDiamonds": 1000,
+    "skinOdds": 3.1,
+    "skinIds": [
+      "ship-special-flame",
+      "ship-special-ice",
+      "ship-special-void",
+      "ship-special-explosive"
+    ],
+    "coinRewards": [
+      { "amount": 100, "odds": 25 },
+      { "amount": 500, "odds": 20 },
+      { "amount": 1000, "odds": 15 },
+      { "amount": 2500, "odds": 10 },
+      { "amount": 5000, "odds": 7 },
+      { "amount": 10000, "odds": 5 },
+      { "amount": 25000, "odds": 3 },
+      { "amount": 50000, "odds": 2.3 },
+      { "amount": 100000, "odds": 0.3 }
+    ]
+  },
   "missionLuckDrop": {
     "chargeOdds": { "1": 48, "3": 24, "5": 8, "7": 0.4 },
     "coinRewards": [

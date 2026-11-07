@@ -13,8 +13,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=24">
-  <script defer src="js/app.js?v=31"></script>
+  <link rel="stylesheet" href="css/style.css?v=25">
+  <script defer src="js/app.js?v=32"></script>
 </head>
 <body>
   <div class="starfield" aria-hidden="true"></div>
@@ -40,6 +40,9 @@
         </button>
         <button class="quick-nav-button" type="button" data-screen="inbox" data-i18n-aria-label="inbox" title="Caixa de entrada">
           <span aria-hidden="true">✉</span><span class="quick-nav-badge inbox-badge" id="home-inbox-count" hidden></span>
+        </button>
+        <button class="quick-nav-button friends-quick-button" id="friends-quick-button" type="button" data-screen="friends" data-i18n-aria-label="friends" title="Amizades">
+          <span aria-hidden="true">♙</span>
         </button>
         <button class="quick-nav-button event-quick-button" type="button" data-screen="events" data-i18n-aria-label="events" title="Eventos">
           <span aria-hidden="true">✦</span><span class="quick-nav-badge inbox-badge" id="home-event-count" hidden></span>
@@ -303,6 +306,8 @@
           <span id="own-profile-score"></span>
         </div>
         <p class="profile-database-status inline-status" id="profile-database-status" role="status" aria-live="polite"></p>
+        <button class="small-button" id="profile-resources-button" type="button" aria-expanded="false" data-i18n="showResources">Meus recursos</button>
+        <section class="profile-resources" id="own-profile-resources" aria-label="Recursos da conta" hidden></section>
         <section class="profile-badge-section" aria-labelledby="profile-badges-title">
           <h3 id="profile-badges-title" data-i18n="profileBadges">Emblemas equipados</h3>
           <div class="profile-equipped-list" id="profile-equipped-badges"></div>
@@ -310,6 +315,34 @@
         <section class="profile-badge-section" aria-labelledby="profile-collection-title">
           <h3 id="profile-collection-title" data-i18n="profileBadgeCollection">Emblemas conquistados</h3>
           <div class="profile-badge-grid" id="profile-badge-grid"></div>
+        </section>
+        <button class="neon-button back-button" data-screen="home" data-i18n="back">Voltar</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-friends" aria-labelledby="friends-title" hidden>
+      <div class="panel friends-panel">
+        <p class="eyebrow" data-i18n="menuLabel">MENU</p>
+        <h2 id="friends-title" data-i18n="friends">Amizades</h2>
+        <p class="section-copy" data-i18n="friendsHint">Adicione amigos pelo ID da conta ou pelo nome de jogador.</p>
+        <form class="friend-search-form" id="friend-search-form">
+          <label><span data-i18n="friendSearchType">Encontrar por</span>
+            <select name="identifierType">
+              <option value="username" data-i18n="friendByUsername">Nome da conta</option>
+              <option value="id" data-i18n="friendById">ID da conta</option>
+            </select>
+          </label>
+          <label><span data-i18n="friendIdentifier">Nome ou ID</span><input name="identifier" type="text" maxlength="128" required autocomplete="off"></label>
+          <button class="neon-button cyan" type="submit" data-i18n="addFriend">Adicionar amigo</button>
+        </form>
+        <p class="inline-status" id="friends-status" role="status" aria-live="polite"></p>
+        <section class="friends-section" aria-labelledby="friend-requests-title">
+          <h3 id="friend-requests-title" data-i18n="friendRequests">Solicitações de amizade</h3>
+          <div class="friends-list" id="friend-requests-list"></div>
+        </section>
+        <section class="friends-section" aria-labelledby="friends-list-title">
+          <h3 id="friends-list-title" data-i18n="friends">Amizades</h3>
+          <div class="friends-list" id="friends-list"></div>
         </section>
         <button class="neon-button back-button" data-screen="home" data-i18n="back">Voltar</button>
       </div>
@@ -352,6 +385,11 @@
           <span data-i18n="yourBalance">Seus saldos</span>
           <strong><span id="store-coin-value">0</span> <span data-i18n="coins">Neon-moedas</span> · <span id="store-diamond-value">0</span> <span data-i18n="diamonds">Diamantes</span></strong>
         </div>
+        <div class="store-tabs" role="tablist" aria-label="Seções da loja">
+          <button type="button" role="tab" aria-selected="true" data-store-tab="standard" data-i18n="storePackages">Pacotes</button>
+          <button type="button" role="tab" aria-selected="false" data-store-tab="loot-boxes" data-i18n="lootBoxes">Loot Boxes</button>
+        </div>
+        <div id="store-standard-items">
         <article class="store-feature luck-drop-card">
           <div>
             <span class="banner-kicker" data-i18n="luckDropLabel">CAIXA DA SORTE</span>
@@ -391,6 +429,23 @@
           <span class="store-empty-icon" aria-hidden="true">◇</span>
           <p data-i18n="noOffers">Nenhum pacote especial disponível para esta conta no momento.</p>
         </div>
+        </div>
+        <section class="special-loot-boxes" id="store-loot-boxes" role="tabpanel" hidden>
+          <article class="special-box-card">
+            <div class="special-box-heading">
+              <span class="banner-kicker" data-i18n="specialBoxKicker">CAIXA DE NATAL · 8 A 24 DE DEZEMBRO</span>
+              <h3 data-i18n="specialBoxTitle">Inicial Box Especial!</h3>
+              <p class="special-box-dates" id="special-box-dates"></p>
+            </div>
+            <div class="special-skin-lineup" id="special-skin-lineup" aria-label="Skins especiais"></div>
+            <p class="special-box-odds" data-i18n="specialBoxOdds">Cada skin especial tem 3,1% de chance. Prêmios em moedas de 100 a 100.000.</p>
+            <p class="special-box-status" id="special-box-status" role="status" aria-live="polite"></p>
+            <div class="special-box-actions">
+              <button class="neon-button gold-button" type="button" data-special-box-spin="1" data-i18n="spinOne">Girar x1 · 1.000 diamantes</button>
+              <button class="neon-button pink" type="button" data-special-box-spin="10" data-i18n="spinTen">Girar x10 · 10.000 diamantes</button>
+            </div>
+          </article>
+        </section>
         <button class="neon-button back-button" data-screen="home" data-i18n="back">Voltar</button>
       </div>
     </section>
@@ -521,6 +576,9 @@
       </div>
       <div class="game-stage">
         <canvas id="game-canvas" width="360" height="640" aria-label="Jogo vertical de nave espacial"></canvas>
+        <button class="special-ability-button" id="special-ability-button" type="button" aria-label="Habilidade especial" hidden>
+          <span id="special-ability-icon" aria-hidden="true">🔥</span><small>H</small>
+        </button>
         <div class="boss-alert" id="boss-alert" role="status" aria-live="polite" hidden></div>
         <div class="boss-hud" id="boss-hud" hidden>
           <span id="boss-hud-label">VIDA DO CHEFE</span>
@@ -603,6 +661,48 @@
       <div class="dialog-actions">
         <button type="button" class="neon-button muted" id="cancel-battle-pass-purchase" data-i18n="cancel">Cancelar</button>
         <button type="button" class="neon-button gold-button" id="confirm-battle-pass-purchase" data-i18n="buy">Comprar</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="game-dialog" id="special-loot-dialog" aria-labelledby="special-loot-title">
+    <div class="dialog-panel special-loot-dialog-panel">
+      <p class="eyebrow" data-i18n="specialBoxKicker">CAIXA DE NATAL</p>
+      <h2 id="special-loot-title" data-i18n="specialBoxTitle">Inicial Box Especial!</h2>
+      <section id="special-loot-confirmation">
+        <p class="section-copy" id="special-loot-confirm-copy"></p>
+        <div class="purchase-breakdown">
+          <p><span data-i18n="yourBalance">Seu saldo</span><strong id="special-loot-balance">0</strong></p>
+          <p><span data-i18n="packageCost">Custo</span><strong id="special-loot-cost">0</strong></p>
+          <p class="purchase-remaining"><span data-i18n="balanceAfter">Saldo após comprar</span><strong id="special-loot-after">0</strong></p>
+        </div>
+        <p id="special-loot-error" class="dialog-error" role="status"></p>
+        <div class="dialog-actions">
+          <button type="button" class="neon-button muted" id="cancel-special-loot" data-i18n="cancel">Cancelar</button>
+          <button type="button" class="neon-button gold-button" id="confirm-special-loot" data-i18n="spinNow">Girar agora</button>
+        </div>
+      </section>
+      <section id="special-loot-reveal" hidden>
+        <div class="special-loot-results" id="special-loot-results"></div>
+        <p class="inline-status" id="special-loot-result-copy" role="status" aria-live="polite"></p>
+        <button type="button" class="neon-button muted" id="close-special-loot" data-i18n="close">Fechar</button>
+      </section>
+    </div>
+  </dialog>
+
+  <dialog class="game-dialog" id="friend-gift-dialog" aria-labelledby="friend-gift-title">
+    <div class="dialog-panel">
+      <p class="eyebrow" data-i18n="purchaseConfirmation">CONFIRMAR PRESENTE</p>
+      <h2 id="friend-gift-title" data-i18n="giftBattlePass">Presentear Passe Neon Ouro</h2>
+      <div class="purchase-breakdown">
+        <p><span data-i18n="yourBalance">Seu saldo</span><strong id="friend-gift-balance">0</strong></p>
+        <p><span data-i18n="packageCost">Custo</span><strong id="friend-gift-cost">600</strong></p>
+        <p class="purchase-remaining"><span data-i18n="balanceAfter">Saldo após comprar</span><strong id="friend-gift-after">0</strong></p>
+      </div>
+      <p class="dialog-error" id="friend-gift-error" role="status"></p>
+      <div class="dialog-actions">
+        <button type="button" class="neon-button muted" id="cancel-friend-gift" data-i18n="cancel">Cancelar</button>
+        <button type="button" class="neon-button gold-button" id="confirm-friend-gift" data-i18n="sendGift">Enviar presente</button>
       </div>
     </div>
   </dialog>
@@ -730,6 +830,8 @@
       <h2 id="player-profile-title"></h2>
       <p id="player-profile-score" class="section-copy"></p>
       <div id="player-profile-badges" class="player-profile-badges"></div>
+      <section class="friend-profile-inventory" id="player-profile-inventory" hidden></section>
+      <button class="small-button" id="friend-profile-action" type="button" hidden></button>
       <section class="admin-player-actions" id="admin-player-actions" hidden>
         <h3 data-i18n="adminPlayerActions">Ações administrativas</h3>
         <form id="admin-gift-form" class="admin-gift-form">

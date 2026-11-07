@@ -20,7 +20,7 @@ Abra `index.html` em um servidor estático, como a extensão Live Server do VS C
 - `data/battle-pass.json`: níveis, fichas, recompensas e custos de evolução do Passe do Néon.
 - `data/badges.json`: catálogo traduzido de emblemas, raridades e descrições.
 - `data/promo-codes.json`: códigos promocionais, prazos opcionais e recompensas.
-- `data/store.json`: Pacote Inicial, Luck Drop, chances/recompensas e pacotes de diamantes.
+- `data/store.json`: Pacote Inicial, Luck Drops, Caixa Especial, chances/recompensas e pacotes de diamantes.
 - `manifest.webmanifest`, `sw.js` e `icons/`: instalação PWA, suporte offline e ícones do aplicativo.
 
 ## Contas e dados
@@ -33,6 +33,8 @@ Abra `index.html` em um servidor estático, como a extensão Live Server do VS C
 - **Excluir conta e dados** exige confirmação de senha e remove permanentemente a conta Firebase, o perfil público, dados sincronizados, a cópia local e o progresso de missões. Configurações gerais permanecem neste navegador.
 - A participação no ranking compartilhado é opcional. O ranking mostra o nome público, recorde e emblemas; o filtro por estado usa apenas a região compartilhada pelo jogador.
 - No modo ADM, clicar em um jogador do ranking permite enviar presentes de moedas/diamantes para a caixa de recompensas, retirá-lo do ranking ou banir/desbanir a conta. O painel ADM lista contas banidas para reativação. A senha ADM é configurada como secret do Worker; vários dispositivos podem usar o modo ADM ao mesmo tempo, cada um com sua sessão independente, que expira após 15 minutos sem renovação. O bloqueio impede login/sincronização online; como o jogo é estático, não impede o uso de uma cópia modificada ou offline.
+- Contas conectadas podem enviar e aceitar/recusar pedidos de amizade por ID ou nome. Amigos podem ver skins e status do Passe; saldos permanecem privados. O presente do Passe Neon Ouro custa 600 diamantes.
+- A loja tem a Caixa Especial de 8 a 24 de dezembro de 2026: 1.000 diamantes por giro ou 10.000 por dez giros. Cada skin especial tem 3,1% de chance; as recompensas de moedas configuradas totalizam 87,6%. Repetições de skin são convertidas em 100 moedas.
 - A loja não aceita pagamentos reais. O Pacote Inicial e Luck Drops usam Neon-moedas; diamantes usam Money-Void, uma moeda virtual obtida no minigame de precisão. Novas contas recebem a oferta do pacote inicial por 45 dias.
 - Um Luck Drop custa 1.000 Neon-moedas. Ao abrir, confirme o custo e pressione **Girar** para iniciar a roleta animada. As chances são: Comum 58,6%, Incomum 25%, Raro 10%, Épico 5% e Lendário 1,4%. Ele concede uma skin ainda bloqueada da raridade sorteada ou moedas como compensação; skins não são duplicadas e skins de passe/evento, além das três do Pacote Inicial, ficam fora do catálogo da loja. As Luck Drops do Passe usam apenas a lista exclusiva configurada para elas. Vazio Neon é uma skin lendária exclusiva para nave.
 - A tela de diamantes troca Money-Void por pacotes de 100, 500, 1.000, 2.500 ou 4.500 diamantes. O saldo Money-Void aparece apenas na loja de diamantes e nas telas de Eventos; os diamantes ficam guardados para conteúdos futuros.
@@ -66,6 +68,7 @@ O Worker valida autenticação, tamanho básico e formato dos dados, mas o jogo 
 - Execute `node --test worker\index.test.mjs` para verificar que sessões ADM simultâneas podem ser renovadas e encerradas individualmente.
 - Mover a nave: mouse ou toque dentro da área de jogo.
 - Atirar: automático, a cada 500 ms. Pausar: Esc.
+- Ative a habilidade das skins especiais pelo botão na tela ou pela tecla H. Chama: começa com uma vida a menos; após 190 s, custa quatro vidas e atinge até 100 inimigos ou causa 75% da vida máxima do chefe. Gelo: começa com quatro vidas a menos, adiciona três de dano e congela inimigos/chefe por 50 s após carregar por 120 s; requer evolução de vida acima de quatro. Círculo Negro: disponível após dois chefes, custa duas vidas, concede 40 s de invulnerabilidade e recarrega em 30 s. Explosiva: após 200 s, custa uma vida e atinge até 100 inimigos ou causa 50% da vida máxima do chefe; a quantidade de usos depende das vidas restantes, sem limite artificial por partida.
 - Na pausa, abra Configurações e use **Voltar para a partida** para retomar depois.
 - A partida tem três vidas, inimigos quadrados que valem 50 pontos e power-ups de escudo e tiro triplo.
 - Em desktop, selecione **Tela cheia (PC)** nas configurações para iniciar a partida em tela cheia. Em telas pequenas, o jogo permanece em janela responsiva.

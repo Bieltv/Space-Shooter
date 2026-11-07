@@ -654,6 +654,54 @@ function mergeAdminGiftRewards(currentState, nextState) {
   };
 }
 
+function mergeFriendGiftState(currentState, nextState) {
+  const state = { ...nextState };
+  const giftCount = Number.isSafeInteger(currentState?.friendPassGiftCount) &&
+    currentState.friendPassGiftCount >= 0
+    ? currentState.friendPassGiftCount
+    : 0;
+  const acknowledgedGiftCount = Number.isSafeInteger(nextState.friendPassGiftCount) &&
+    nextState.friendPassGiftCount >= 0
+    ? nextState.friendPassGiftCount
+    : 0;
+  const pendingGiftCount = Math.max(0, giftCount - acknowledgedGiftCount);
+  if (pendingGiftCount) {
+    const diamonds = Number.isSafeInteger(state.diamonds) && state.diamonds >= 0 ? state.diamonds : 0;
+    state.diamonds = Math.max(0, diamonds - pendingGiftCount * 600);
+  }
+  state.friendPassGiftCount = giftCount;
+
+  const currentPass = currentState?.battlePass && typeof currentState.battlePass === "object"
+    ? currentState.battlePass
+    : {};
+  const nextPass = nextState.battlePass && typeof nextState.battlePass === "object"
+    ? nextState.battlePass
+    : {};
+  if (currentPass.premium === true) {
+    state.battlePass = { ...nextPass, premium: true };
+  }
+
+  const currentMessages = Array.isArray(currentState?.inbox?.messages)
+    ? currentState.inbox.messages.filter((message) => message?.source === "friend-pass-gift")
+    : [];
+  if (currentMessages.length) {
+    const incomingMessages = Array.isArray(nextState.inbox?.messages) ? nextState.inbox.messages : [];
+    const incomingById = new Map(incomingMessages
+      .filter((message) => message && typeof message.id === "string")
+      .map((message) => [message.id, message]));
+    const preservedMessages = currentMessages.map((message) => ({
+      ...message,
+      read: incomingById.get(message.id)?.read === true
+    }));
+    const preservedIds = new Set(preservedMessages.map((message) => message.id));
+    state.inbox = {
+      ...(nextState.inbox && typeof nextState.inbox === "object" ? nextState.inbox : {}),
+      messages: [...incomingMessages.filter((message) => !preservedIds.has(message?.id)), ...preservedMessages].slice(-100)
+    };
+  }
+  return state;
+}
+
 async function saveCurrentUser(request, env, uid) {
   const body = await request.json();
   const accessToken = await googleAccessToken(env);
@@ -663,7 +711,10 @@ async function saveCurrentUser(request, env, uid) {
       return jsonResponse({ error: "Perfil de jogo não encontrado." }, 404);
     }
     const current = document.profile;
-    const state = mergeAdminGiftRewards(current.state, sanitizeGameState(body.state));
+    const state = mergeFriendGiftState(
+      current.state,
+      mergeAdminGiftRewards(current.state, sanitizeGameState(body.state))
+    );
     const equippedBadges = Array.isArray(current.equippedBadges) ? current.equippedBadges : [];
     state.equippedBadges = equippedBadges;
     const profile = {
@@ -832,6 +883,280 @@ async function getPublicProfile(env, uid) {
   return jsonResponse({ profile: publicProfile(profile) });
 }
 
+function profileArray(profile, key) {
+  return Array.isArray(profile[key]) ? profile[key] : [];
+}
+
+async function findProfileByUsername(env, accessToken, username) {
+  const normalizedName = username.toLocaleLowerCase("pt-BR");
+  const result = await firebaseRequest(env, accessToken, ":runQuery", {
+    method: "POST",
+    body: JSON.stringify({
+      structuredQuery: {
+        from: [{ collectionId: "users" }],
+        where: {
+          fieldFilter: {
+            field: { fieldPath: "normalizedName" },
+            op: "EQUAL",
+            value: firestoreValue(normalizedName)
+          }
+        },
+        limit: 1
+      }
+    })
+  });
+  const document = result.find((entry) => entry.document?.fields)?.document;
+  return document ? {
+    profile: fromFirestoreFields(document.fields),
+    updateTime: document.updateTime
+  } : null;
+}
+
+async function writeSocialProfiles(env, accessToken, documents) {
+  await firebaseRequest(env, accessToken, ":commit", {
+    method: "POST",
+    body: JSON.stringify({
+      writes: documents.map(({ profile, updateTime }) => ({
+        update: {
+          name: `${projectRoot(env)}/users/${encodeURIComponent(profile.uid)}`,
+          fields: Object.fromEntries(
+            Object.entries(profile).map(([key, value]) => [key, firestoreValue(value)])
+          )
+        },
+        currentDocument: { updateTime }
+      }))
+    })
+  });
+}
+
+async function mutateFriendProfiles(env, accessToken, firstUid, secondUid, mutate) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const [first, second] = await Promise.all([
+      getProfileDocument(env, firstUid, accessToken),
+      getProfileDocument(env, secondUid, accessToken)
+    ]);
+    if (!first || !second || first.profile.banned === true || second.profile.banned === true) {
+      return jsonResponse({ error: "Jogador não encontrado." }, 404);
+    }
+    const updated = mutate(first.profile, second.profile);
+    if (updated instanceof Response) return updated;
+    try {
+      await writeSocialProfiles(env, accessToken, [
+        { profile: { ...first.profile, ...updated.first }, updateTime: first.updateTime },
+        { profile: { ...second.profile, ...updated.second }, updateTime: second.updateTime }
+      ]);
+      return null;
+    } catch (error) {
+      if (error.status !== 409 || attempt === 2) throw error;
+    }
+  }
+  throw new Error("Could not update friends after concurrent changes.");
+}
+
+async function listFriends(env, uid) {
+  const accessToken = await googleAccessToken(env);
+  const current = await getProfileDocument(env, uid, accessToken);
+  if (!current) return jsonResponse({ error: "Perfil de jogo não encontrado." }, 404);
+  const friendUids = profileArray(current.profile, "friends");
+  const friends = (await Promise.all(friendUids.map((friendUid) => getProfile(env, friendUid, accessToken))))
+    .filter((profile) => profile && profile.banned !== true)
+    .map((profile) => ({ uid: profile.uid, username: profile.username, bestScore: profile.bestScore || 0 }));
+  return jsonResponse({
+    friends,
+    incoming: profileArray(current.profile, "friendRequestsReceived"),
+    outgoing: profileArray(current.profile, "friendRequestsSent")
+  });
+}
+
+async function sendFriendRequest(request, env, uid) {
+  const body = await request.json();
+  if (!["id", "username"].includes(body.identifierType) || typeof body.identifier !== "string") {
+    return jsonResponse({ error: "Informe um ID ou nome de conta válido." }, 400);
+  }
+  const identifier = body.identifier.trim();
+  if (!identifier || identifier.length > 128 ||
+      (body.identifierType === "username" && !validateUsername(identifier))) {
+    return jsonResponse({ error: "Informe um ID ou nome de conta válido." }, 400);
+  }
+  const accessToken = await googleAccessToken(env);
+  const target = body.identifierType === "id"
+    ? await getProfileDocument(env, identifier, accessToken)
+    : await findProfileByUsername(env, accessToken, identifier);
+  if (!target || target.profile.banned === true) {
+    return jsonResponse({ error: "Jogador não encontrado." }, 404);
+  }
+  const targetUid = target.profile.uid;
+  if (!targetUid || targetUid === uid) return jsonResponse({ error: "Não é possível adicionar a própria conta." }, 400);
+  const requestId = encodeBase64Url(crypto.getRandomValues(new Uint8Array(16)));
+  const createdAt = Date.now();
+  const incoming = { id: requestId, uid, username: "", createdAt };
+  const outgoing = { id: requestId, uid: targetUid, username: target.profile.username, createdAt };
+  const result = await mutateFriendProfiles(env, accessToken, uid, targetUid, (sender, recipient) => {
+    if (profileArray(sender, "friends").includes(targetUid)) {
+      return jsonResponse({ error: "Essa conta já está na sua lista de amigos." }, 409);
+    }
+    const sentRequests = profileArray(sender, "friendRequestsSent");
+    const receivedRequests = profileArray(recipient, "friendRequestsReceived");
+    if (sentRequests.some((entry) => entry.uid === targetUid) ||
+        receivedRequests.some((entry) => entry.uid === uid) ||
+        profileArray(recipient, "friendRequestsSent").some((entry) => entry.uid === uid)) {
+      return jsonResponse({ error: "Já existe uma solicitação de amizade entre essas contas." }, 409);
+    }
+    incoming.username = sender.username;
+    return {
+      first: { friendRequestsSent: [...sentRequests, outgoing] },
+      second: { friendRequestsReceived: [...receivedRequests, incoming] }
+    };
+  });
+  if (result) return result;
+  return jsonResponse({ request: outgoing }, 201);
+}
+
+async function answerFriendRequest(env, uid, requestId, accept) {
+  if (!/^[A-Za-z0-9_-]{1,64}$/.test(requestId)) {
+    return jsonResponse({ error: "Solicitação inválida." }, 400);
+  }
+  const accessToken = await googleAccessToken(env);
+  const current = await getProfileDocument(env, uid, accessToken);
+  const incoming = profileArray(current?.profile || {}, "friendRequestsReceived")
+    .find((entry) => entry.id === requestId);
+  if (!current || !incoming?.uid) return jsonResponse({ error: "Solicitação não encontrada." }, 404);
+  const senderUid = incoming.uid;
+  const result = await mutateFriendProfiles(env, accessToken, uid, senderUid, (recipient, sender) => {
+    const pending = profileArray(recipient, "friendRequestsReceived")
+      .find((entry) => entry.id === requestId && entry.uid === senderUid);
+    const sent = profileArray(sender, "friendRequestsSent")
+      .find((entry) => entry.id === requestId && entry.uid === uid);
+    if (!pending || !sent) return jsonResponse({ error: "A solicitação não está mais disponível." }, 409);
+    const recipientFields = {
+      friendRequestsReceived: profileArray(recipient, "friendRequestsReceived")
+        .filter((entry) => entry.id !== requestId)
+    };
+    const senderFields = {
+      friendRequestsSent: profileArray(sender, "friendRequestsSent")
+        .filter((entry) => entry.id !== requestId)
+    };
+    if (accept) {
+      recipientFields.friends = [...new Set([...profileArray(recipient, "friends"), senderUid])];
+      senderFields.friends = [...new Set([...profileArray(sender, "friends"), uid])];
+    }
+    return { first: recipientFields, second: senderFields };
+  });
+  if (result) return result;
+  return jsonResponse({ accepted: accept });
+}
+
+async function removeFriend(env, uid, friendUid) {
+  if (!/^[A-Za-z0-9_-]{1,128}$/.test(friendUid) || friendUid === uid) {
+    return jsonResponse({ error: "Amigo inválido." }, 400);
+  }
+  const accessToken = await googleAccessToken(env);
+  const result = await mutateFriendProfiles(env, accessToken, uid, friendUid, (current, friend) => {
+    if (!profileArray(current, "friends").includes(friendUid)) {
+      return jsonResponse({ error: "Essa conta não está na sua lista de amigos." }, 404);
+    }
+    return {
+      first: { friends: profileArray(current, "friends").filter((entry) => entry !== friendUid) },
+      second: { friends: profileArray(friend, "friends").filter((entry) => entry !== uid) }
+    };
+  });
+  if (result) return result;
+  return jsonResponse({ removed: true });
+}
+
+async function friendProfile(env, uid, friendUid) {
+  if (!/^[A-Za-z0-9_-]{1,128}$/.test(friendUid)) return jsonResponse({ error: "Perfil inválido." }, 400);
+  const accessToken = await googleAccessToken(env);
+  const current = await getProfile(env, uid, accessToken);
+  if (!profileArray(current || {}, "friends").includes(friendUid)) {
+    return jsonResponse({ error: "Esse perfil está disponível apenas para amigos." }, 403);
+  }
+  const friend = await getProfile(env, friendUid, accessToken);
+  if (!friend || friend.banned === true) return jsonResponse({ error: "Jogador não encontrado." }, 404);
+  const state = friend.state && typeof friend.state === "object" ? friend.state : {};
+  const battlePass = state.battlePass && typeof state.battlePass === "object" ? state.battlePass : {};
+  return jsonResponse({
+    profile: {
+      ...publicProfile(friend),
+      ownedSkins: Array.isArray(state.ownedSkins) ? state.ownedSkins : [],
+      equippedSkins: state.equippedSkins && typeof state.equippedSkins === "object" ? state.equippedSkins : {},
+      battlePass: {
+        level: Number.isSafeInteger(battlePass.level) ? battlePass.level : 1,
+        premium: battlePass.premium === true
+      }
+    }
+  });
+}
+
+async function giftBattlePass(request, env, uid, friendUid) {
+  if (!/^[A-Za-z0-9_-]{1,128}$/.test(friendUid) || friendUid === uid) {
+    return jsonResponse({ error: "Amigo inválido." }, 400);
+  }
+  const accessToken = await googleAccessToken(env);
+  let giftReceipt;
+  const result = await mutateFriendProfiles(env, accessToken, uid, friendUid, (sender, recipient) => {
+    if (!profileArray(sender, "friends").includes(friendUid) ||
+        !profileArray(recipient, "friends").includes(uid)) {
+      return jsonResponse({ error: "Só é possível enviar presentes a um amigo." }, 403);
+    }
+    const senderState = sender.state && typeof sender.state === "object" ? sender.state : {};
+    const senderDiamonds = Number.isSafeInteger(senderState.diamonds) ? senderState.diamonds : 0;
+    if (senderDiamonds < 600) return jsonResponse({ error: "Você precisa de 600 diamantes para presentear o Passe." }, 409);
+    const friendPassGiftCount = Number.isSafeInteger(senderState.friendPassGiftCount) &&
+      senderState.friendPassGiftCount >= 0
+      ? senderState.friendPassGiftCount + 1
+      : 1;
+    const recipientState = recipient.state && typeof recipient.state === "object" ? recipient.state : {};
+    const recipientPass = recipientState.battlePass && typeof recipientState.battlePass === "object"
+      ? recipientState.battlePass
+      : {};
+    if (recipientPass.premium === true) {
+      return jsonResponse({ error: "Seu amigo já possui o Passe Neon Ouro." }, 409);
+    }
+    const senderInbox = senderState.inbox && typeof senderState.inbox === "object" ? senderState.inbox : {};
+    const recipientInbox = recipientState.inbox && typeof recipientState.inbox === "object"
+      ? recipientState.inbox
+      : {};
+    const now = Date.now();
+    const giftMessage = {
+      id: encodeBase64Url(crypto.getRandomValues(new Uint8Array(12))),
+      title: { "pt-BR": "Passe Neon Ouro recebido!", en: "Neon Gold Pass received!" },
+      body: {
+        "pt-BR": `Você recebeu o Passe Neon Ouro de ${sender.username}.`,
+        en: `You received the Neon Gold Pass from ${sender.username}.`
+      },
+      createdAt: now,
+      read: false,
+      source: "friend-pass-gift"
+    };
+    giftReceipt = { diamonds: senderDiamonds - 600, friendPassGiftCount };
+    return {
+      first: {
+        state: {
+          ...senderState,
+          diamonds: senderDiamonds - 600,
+          friendPassGiftCount,
+          inbox: { ...senderInbox }
+        },
+        updatedAt: now
+      },
+      second: {
+        state: {
+          ...recipientState,
+          battlePass: { ...recipientPass, premium: true },
+          inbox: {
+            ...recipientInbox,
+            messages: [...(Array.isArray(recipientInbox.messages) ? recipientInbox.messages : []), giftMessage].slice(-100)
+          }
+        },
+        updatedAt: now
+      }
+    };
+  });
+  if (result) return result;
+  return jsonResponse({ gifted: true, cost: 600, ...giftReceipt });
+}
+
 function allowedOrigin(request, env) {
   const origin = request.headers.get("origin");
   const allowList = (env.ALLOWED_ORIGINS || "").split(",").map((value) => value.trim()).filter(Boolean);
@@ -899,6 +1224,34 @@ export default {
             }
           }
         }
+      } else if (url.pathname.startsWith("/api/friends")) {
+        const uid = await authenticate(request, env);
+        if (!uid) {
+          response = jsonResponse({ error: "Autenticação necessária." }, 401);
+        } else if (request.method === "GET" && url.pathname === "/api/friends") {
+          response = await listFriends(env, uid);
+        } else if (request.method === "POST" && url.pathname === "/api/friends/requests") {
+          response = await sendFriendRequest(request, env, uid);
+        } else {
+          const actionMatch = url.pathname.match(/^\/api\/friends\/requests\/([^/]+)\/(accept|decline)$/);
+          const friendMatch = url.pathname.match(/^\/api\/friends\/([^/]+)(?:\/(profile|gift-pass))?$/);
+          if (actionMatch && request.method === "POST") {
+            response = await answerFriendRequest(
+              env, uid, decodeURIComponent(actionMatch[1]), actionMatch[2] === "accept"
+            );
+          } else if (friendMatch && friendMatch[1] !== "requests" &&
+              request.method === "GET" && friendMatch[2] === "profile") {
+            response = await friendProfile(env, uid, decodeURIComponent(friendMatch[1]));
+          } else if (friendMatch && friendMatch[1] !== "requests" &&
+              request.method === "POST" && friendMatch[2] === "gift-pass") {
+            response = await giftBattlePass(request, env, uid, decodeURIComponent(friendMatch[1]));
+          } else if (friendMatch && friendMatch[1] !== "requests" &&
+              request.method === "DELETE" && !friendMatch[2]) {
+            response = await removeFriend(env, uid, decodeURIComponent(friendMatch[1]));
+          } else {
+            response = jsonResponse({ error: "Rota não encontrada." }, 404);
+          }
+        }
       } else if (request.method === "POST" && url.pathname === "/api/auth/refresh") {
         response = await refreshSession(request, env);
       } else if (request.method === "GET" && url.pathname === "/api/leaderboard") {
@@ -933,6 +1286,10 @@ export default {
             "/api/admin/players/:uid/gift (POST)",
             "/api/admin/players/:uid/ranking (DELETE)",
             "/api/admin/players/:uid/ban (PUT)",
+            "/api/friends (GET)", "/api/friends/requests (POST)",
+            "/api/friends/requests/:id/accept|decline (POST)",
+            "/api/friends/:uid/profile (GET)", "/api/friends/:uid/gift-pass (POST)",
+            "/api/friends/:uid (DELETE)",
             "/api/leaderboard", "/api/me (GET, PUT, DELETE)",
             "/api/me/equipped-badges (PUT)", "/api/profiles/:uid"
           ]

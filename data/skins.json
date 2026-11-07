@@ -4,7 +4,8 @@
     "common": { "pt-BR": "Comum", "en": "Common", "color": "#54dfff" },
     "rare": { "pt-BR": "Raro", "en": "Rare", "color": "#ffd45c" },
     "epic": { "pt-BR": "Épico", "en": "Epic", "color": "#bf72ff" },
-    "legendary": { "pt-BR": "Lendária", "en": "Legendary", "color": "#ff536b" }
+    "legendary": { "pt-BR": "Lendária", "en": "Legendary", "color": "#ff536b" },
+    "special": { "pt-BR": "Especial", "en": "Special", "color": "#f8fbff" }
   },
   "categories": {
     "ship": [
@@ -14,6 +15,10 @@
       { "id": "ship-epic", "rarity": "epic", "color": "#bf72ff", "shape": "triangle-wide", "name": { "pt-BR": "Nebulosa", "en": "Nebula" }, "description": { "pt-BR": "Nascida entre estrelas violetas.", "en": "Born among violet stars." } },
       { "id": "ship-legendary", "rarity": "legendary", "color": "#ff536b", "shape": "triangle", "name": { "pt-BR": "Supernova", "en": "Supernova" }, "description": { "pt-BR": "Uma lenda que deixa seu rastro.", "en": "A legend that leaves its mark." } },
       { "id": "ship-void-neon", "rarity": "legendary", "color": "#080714", "accentColor": "#bf72ff", "shape": "void-neon", "name": { "pt-BR": "Vazio Neon", "en": "Neon Void" }, "description": { "pt-BR": "Uma esfera negra atravessada por um raio violeta.", "en": "A black sphere pierced by a violet lightning bolt." } },
+      { "id": "ship-special-flame", "rarity": "special", "color": "#ff7138", "accentColor": "#fff2a1", "shape": "fire-orb", "name": { "pt-BR": "Chama", "en": "Flame" }, "description": { "pt-BR": "Começa com uma vida a menos. Após carregar por 190 segundos, consome quatro vidas e elimina os inimigos visíveis ou causa 75% do dano máximo ao chefe.", "en": "Starts with one less life. After charging for 190 seconds, consumes four lives and destroys visible enemies or deals 75% of the boss's maximum health." } },
+      { "id": "ship-special-ice", "rarity": "special", "color": "#a7edff", "accentColor": "#f4fdff", "shape": "ice-crystal", "name": { "pt-BR": "Gelo", "en": "Ice" }, "description": { "pt-BR": "Exige mais de quatro vidas na evolução, aumenta o dano dos tiros em três e congela inimigos por 50 segundos após carregar por 120 segundos.", "en": "Requires more than four upgraded lives, adds three damage to shots, and freezes enemies for 50 seconds after charging for 120 seconds." } },
+      { "id": "ship-special-void", "rarity": "special", "color": "#110b20", "accentColor": "#d27bff", "shape": "void-orb", "name": { "pt-BR": "Círculo Negro", "en": "Black Circle" }, "description": { "pt-BR": "Após derrotar o segundo chefe, consome duas vidas para bloquear dano por 40 segundos. Recarrega em 30 segundos.", "en": "After defeating the second boss, consumes two lives to block damage for 40 seconds. Recharges in 30 seconds." } },
+      { "id": "ship-special-explosive", "rarity": "special", "color": "#ff6747", "accentColor": "#fff3c4", "shape": "explosive-orb", "name": { "pt-BR": "Explosiva", "en": "Explosive" }, "description": { "pt-BR": "Após carregar por 200 segundos, consome uma vida e elimina os inimigos visíveis ou causa 50% do dano máximo ao chefe.", "en": "After charging for 200 seconds, consumes one life and destroys visible enemies or deals 50% of the boss's maximum health." } },
       { "id": "ship-christmas-ornament", "rarity": "epic", "color": "#ef3340", "shape": "christmas-ornament", "evolutive": true, "name": { "pt-BR": "Bola de Natal", "en": "Christmas Ornament" }, "description": { "pt-BR": "Uma bola natalina neon que evolui e fortalece os disparos.", "en": "A neon Christmas ornament that evolves and strengthens shots." } },
       { "id": "ship-pass-ruby", "rarity": "common", "color": "#ff536b", "shape": "triangle", "name": { "pt-BR": "Rubra", "en": "Ruby" }, "description": { "pt-BR": "Uma nave simples em vermelho natalino.", "en": "A simple ship in Christmas red." } },
       { "id": "ship-pass-emerald", "rarity": "uncommon", "color": "#35d56a", "shape": "triangle-wide", "name": { "pt-BR": "Esmeralda", "en": "Emerald" }, "description": { "pt-BR": "Uma nave verde de brilho festivo.", "en": "A festive green ship." } },
