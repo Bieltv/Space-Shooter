@@ -39,6 +39,16 @@ test("the December Special Box catalog has valid exact odds and rewards", () => 
   }
 });
 
+test("the four-skin Special Box stays hidden outside its December 8–24 window", () => {
+  const renderSpecialLootBox = app.slice(
+    app.indexOf("function renderSpecialLootBox()"),
+    app.indexOf("function STARTING_ABILITY_PRICES")
+  );
+
+  assert.match(html, /<article class="special-box-card" id="special-box-card" hidden>/);
+  assert.match(renderSpecialLootBox, /const active = specialBoxIsActive\(\);\s*\$\("#special-box-card"\)\.hidden = !active;/);
+});
+
 test("special ship abilities are wired to the game and expose the H control", () => {
   const requiredIds = [
     "ship-special-flame",

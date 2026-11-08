@@ -2010,6 +2010,7 @@ function renderSpecialLootBox() {
   }));
   $("#special-box-dates").textContent = t("specialBoxDates");
   const active = specialBoxIsActive();
+  $("#special-box-card").hidden = !active;
   $$("[data-special-box-spin]").forEach((button) => {
     const quantity = Number(button.dataset.specialBoxSpin);
     const price = box.priceDiamonds * quantity;
