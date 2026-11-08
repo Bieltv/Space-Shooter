@@ -13,8 +13,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=25">
-  <script defer src="js/app.js?v=32"></script>
+  <link rel="stylesheet" href="css/style.css?v=26">
+  <script defer src="js/config.js"></script>
+  <script defer src="js/app.js?v=33"></script>
 </head>
 <body>
   <div class="starfield" aria-hidden="true"></div>
@@ -160,6 +161,7 @@
         <div class="setting-row" id="cloud-migration-row">
           <div><h3 data-i18n="cloudMigration">Migrar conta local</h3><p data-i18n="cloudMigrationHint">Vincule esta conta local ao Firebase e sincronize seu progresso.</p></div>
           <button class="small-button" id="open-cloud-migration" type="button" data-i18n="cloudMigrationButton">Migrar para a nuvem</button>
+          <p class="inline-status migration-deadline-notice" id="cloud-migration-notice" hidden></p>
         </div>
         <div class="setting-row">
           <div><h3 data-i18n="evolution">Evolução</h3><p data-i18n="evolutionsHint">Melhore sua nave até o nível 10 usando moedas.</p></div>
@@ -491,6 +493,8 @@
           <p class="inline-status" id="promo-code-status" role="status" aria-live="polite"></p>
           <small class="promo-code-notice" data-i18n="promoCodePublicNotice">Os códigos deste protótipo ficam visíveis no JSON do jogo.</small>
         </form>
+        <button class="small-button" id="open-admin-request-site" type="button" data-i18n="adminRequestSite">Solicitar acesso ADM</button>
+        <button class="small-button" id="open-admin-request-site" type="button">Solicitar acesso ADM</button>
         <div class="inbox-tabs" role="tablist" aria-label="Caixa de entrada">
           <button type="button" role="tab" id="inbox-messages-tab" aria-controls="inbox-list" aria-selected="true" data-inbox-tab="messages" data-i18n="messages">Mensagens</button>
           <button type="button" role="tab" id="inbox-rewards-tab" aria-controls="inbox-list" aria-selected="false" data-inbox-tab="rewards" data-i18n="rewards">Recompensas</button>
@@ -808,6 +812,12 @@
     <pre id="debug-output" aria-live="polite"></pre>
   </aside>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <dialog class="game-dialog game-site-dialog" id="game-site-dialog" aria-label="Site do jogo">
+    <div class="game-site-frame-wrap">
+      <button class="small-button game-site-close" id="close-game-site" type="button">Fechar site</button>
+      <iframe id="game-site-frame" title="Site interno do jogo" sandbox="allow-forms allow-scripts allow-same-origin"></iframe>
+    </div>
+  </dialog>
   <dialog class="game-dialog" id="cloud-migration-dialog" aria-labelledby="cloud-migration-title">
     <form class="dialog-panel" id="cloud-migration-form">
       <p class="eyebrow" data-i18n="cloudMigration">MIGRAR CONTA</p>

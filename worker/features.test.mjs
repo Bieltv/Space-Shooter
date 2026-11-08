@@ -2,11 +2,14 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const [store, skins, app, html] = await Promise.all([
+const [store, skins, app, html, masterSite, adminRequestSite, worker] = await Promise.all([
   readFile(new URL("../data/store.json", import.meta.url), "utf8").then(JSON.parse),
   readFile(new URL("../data/skins.json", import.meta.url), "utf8").then(JSON.parse),
   readFile(new URL("../js/app.js", import.meta.url), "utf8"),
-  readFile(new URL("../index.html", import.meta.url), "utf8")
+  readFile(new URL("../index.html", import.meta.url), "utf8"),
+  readFile(new URL("../SITES/master.html", import.meta.url), "utf8"),
+  readFile(new URL("../SITES/request-admin.html", import.meta.url), "utf8"),
+  readFile(new URL("./index.js", import.meta.url), "utf8")
 ]);
 
 test("the December Special Box catalog has valid exact odds and rewards", () => {
@@ -77,4 +80,17 @@ test("special ship abilities are wired to the game and expose the H control", ()
   assert.match(app, /game\.bossesDefeated < 2/);
   assert.match(app, /event\.code === "KeyH"/);
   assert.match(html, /id="special-ability-button"/);
+});
+
+test("master access code stays outside promo JSON and admin request pages are embedded", () => {
+  assert.match(app, /\/api\/master\/verify-code/);
+  assert.match(html, /id="game-site-frame"/);
+  assert.match(html, /id="open-admin-request-site"/);
+  assert.match(masterSite, /id="master-password"/);
+  assert.match(adminRequestSite, /id="request-form"/);
+  assert.match(worker, /ACCOUNT_SPECIAL_CODE/);
+  assert.match(worker, /adminApprovedAt \+ 7 \* 24 \* 60 \* 60 \* 1000/);
+  assert.match(worker, /recipients\.size > 5/);
+  assert.match(worker, /now - 24 \* 60 \* 60 \* 1000/);
+  assert.match(app, /LOCAL_MIGRATION_GRACE_MS = 3 \* 24 \* 60 \* 60 \* 1000/);
 });

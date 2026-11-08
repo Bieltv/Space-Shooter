@@ -1,0 +1,7 @@
+.dev.vars
+.env
+.env.*
+!.env.example
+js/config.local.js
+.wrangler/
+node_modules/

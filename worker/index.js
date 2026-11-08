@@ -209,6 +209,8 @@ function publicProfile(profile) {
   return {
     uid: profile.uid,
     username: profile.username,
+    adminRole: ["provisional", "permanent"].includes(profile.adminRole) ? profile.adminRole : null,
+    adminApprovedAt: Number.isSafeInteger(profile.adminApprovedAt) ? profile.adminApprovedAt : null,
     bestScore: Number.isSafeInteger(profile.bestScore) ? profile.bestScore : 0,
     badges: profile.badges && typeof profile.badges === "object" ? profile.badges : {},
     equippedBadges: Array.isArray(profile.equippedBadges) ? profile.equippedBadges : [],
@@ -419,31 +421,17 @@ async function writeAdminSession(env, accessToken, sessionId, session, updateTim
   });
 }
 
-async function adminLogin(request, env) {
-  if (typeof env.ADM_PASSWORD !== "string" || !env.ADM_PASSWORD) {
-    return jsonResponse({ error: "Modo ADM não configurado no servidor." }, 503);
-  }
-  const body = await request.json();
-  const username = typeof body.username === "string" ? body.username.trim() : "";
-  const password = typeof body.password === "string" ? body.password : "";
-  const configuredUsername = "NV ADM";
-  const [submittedUsername, expectedUsername, submittedPassword, expectedPassword] = await Promise.all([
-    digestHex(username.toLocaleLowerCase("pt-BR")),
-    digestHex(configuredUsername.toLocaleLowerCase("pt-BR")),
-    digestHex(password),
-    digestHex(env.ADM_PASSWORD)
-  ]);
-  if (submittedUsername !== expectedUsername || submittedPassword !== expectedPassword) {
-    return jsonResponse({ error: "Credenciais inválidas." }, 401);
-  }
-
+async function createAdminSession(env, role, uid = null) {
   const accessToken = await googleAccessToken(env);
   const token = encodeBase64Url(crypto.getRandomValues(new Uint8Array(32)));
   const tokenHash = await digestHex(token);
+  const expiresAt = Date.now() + ADMIN_SESSION_TTL_MS;
   try {
     await writeAdminSession(env, accessToken, tokenHash, {
       tokenHash,
-      expiresAt: Date.now() + ADMIN_SESSION_TTL_MS
+      role,
+      ...(uid ? { uid } : {}),
+      expiresAt
     });
   } catch (error) {
     if (error.status === 409 || error.status === 400) {
@@ -451,7 +439,63 @@ async function adminLogin(request, env) {
     }
     throw error;
   }
-  return jsonResponse({ token, expiresAt: Date.now() + ADMIN_SESSION_TTL_MS });
+  return jsonResponse({ token, expiresAt, role });
+}
+
+async function verifyMasterCode(request, env) {
+  if (typeof env.ACCOUNT_SPECIAL_CODE !== "string" || !env.ACCOUNT_SPECIAL_CODE ||
+      typeof env.MASTER_PASSWORD !== "string" || !env.MASTER_PASSWORD) {
+    return jsonResponse({ error: "Painel mestre não configurado no Worker." }, 503);
+  }
+  const body = await request.json();
+  const code = typeof body.code === "string" ? body.code.trim() : "";
+  const [submitted, expected] = await Promise.all([
+    digestHex(code.toUpperCase()),
+    digestHex(env.ACCOUNT_SPECIAL_CODE.toUpperCase())
+  ]);
+  if (submitted !== expected) return jsonResponse({ valid: false }, 401);
+  return jsonResponse({ valid: true });
+}
+
+async function masterLogin(request, env) {
+  if (typeof env.ACCOUNT_SPECIAL_CODE !== "string" || !env.ACCOUNT_SPECIAL_CODE ||
+      typeof env.MASTER_PASSWORD !== "string" || !env.MASTER_PASSWORD) {
+    return jsonResponse({ error: "Painel mestre não configurado no Worker." }, 503);
+  }
+  const body = await request.json();
+  const code = typeof body.code === "string" ? body.code.trim() : "";
+  const password = typeof body.password === "string" ? body.password : "";
+  const [submittedCode, expectedCode, submittedPassword, expectedPassword] = await Promise.all([
+    digestHex(code.toUpperCase()),
+    digestHex(env.ACCOUNT_SPECIAL_CODE.toUpperCase()),
+    digestHex(password),
+    digestHex(env.MASTER_PASSWORD)
+  ]);
+  if (submittedCode !== expectedCode || submittedPassword !== expectedPassword) {
+    return jsonResponse({ error: "Credenciais inválidas." }, 401);
+  }
+  return createAdminSession(env, "master");
+}
+
+async function adminLogin(request, env) {
+  const uid = await authenticate(request, env);
+  if (!uid) return jsonResponse({ error: "Autenticação necessária." }, 401);
+  const accessToken = await googleAccessToken(env);
+  const document = await getProfileDocument(env, uid, accessToken);
+  const profile = document?.profile;
+  if (!profile || !["provisional", "permanent"].includes(profile.adminRole)) {
+    return jsonResponse({ error: "Esta conta não possui acesso ADM." }, 403);
+  }
+  let role = profile.adminRole;
+  if (role === "provisional" && Number.isSafeInteger(profile.adminApprovedAt) &&
+      profile.adminApprovedAt + 7 * 24 * 60 * 60 * 1000 <= Date.now()) {
+    role = "permanent";
+    await writeProfile(env, { ...profile, adminRole: role, updatedAt: Date.now() }, accessToken, false, {
+      updateTime: document.updateTime,
+      updateMask: ["adminRole", "updatedAt"]
+    });
+  }
+  return createAdminSession(env, role, uid);
 }
 
 async function verifyAdminSession(request, env) {
@@ -461,25 +505,42 @@ async function verifyAdminSession(request, env) {
   const tokenHash = await digestHex(token);
   const session = await getAdminSession(env, accessToken, tokenHash);
   if (!session || session.expiresAt <= Date.now() || session.tokenHash !== tokenHash) return null;
-  return { accessToken, session: { ...session, sessionId: tokenHash } };
+  if (session.role === "master") {
+    return { accessToken, session: { ...session, sessionId: tokenHash } };
+  }
+  if (!session.uid || !["provisional", "permanent"].includes(session.role)) return null;
+  const document = await getProfileDocument(env, session.uid, accessToken);
+  const profile = document?.profile;
+  if (!profile || profile.banned === true || !["provisional", "permanent"].includes(profile.adminRole)) return null;
+  let role = profile.adminRole;
+  if (role === "provisional" && Number.isSafeInteger(profile.adminApprovedAt) &&
+      profile.adminApprovedAt + 7 * 24 * 60 * 60 * 1000 <= Date.now()) {
+    role = "permanent";
+    await writeProfile(env, { ...profile, adminRole: role, updatedAt: Date.now() }, accessToken, false, {
+      updateTime: document.updateTime,
+      updateMask: ["adminRole", "updatedAt"]
+    });
+  }
+  return { accessToken, session: { ...session, role, sessionId: tokenHash } };
 }
 
 async function renewAdminSession(request, env) {
   const current = await verifyAdminSession(request, env);
   if (!current) return jsonResponse({ error: "Sessão ADM expirada. Entre novamente." }, 401);
   const expiresAt = Date.now() + ADMIN_SESSION_TTL_MS;
+  const { sessionId, updateTime, ...sessionFields } = current.session;
   try {
-    await writeAdminSession(env, current.accessToken, current.session.sessionId, {
-      tokenHash: current.session.tokenHash,
+    await writeAdminSession(env, current.accessToken, sessionId, {
+      ...sessionFields,
       expiresAt
-    }, current.session.updateTime);
+    }, updateTime);
   } catch (error) {
     if (error.status === 409 || error.status === 400) {
       return jsonResponse({ error: "A sessão ADM foi encerrada." }, 401);
     }
     throw error;
   }
-  return jsonResponse({ expiresAt });
+  return jsonResponse({ expiresAt, role: current.session.role });
 }
 
 async function logoutAdmin(request, env) {
@@ -495,6 +556,128 @@ async function logoutAdmin(request, env) {
     })
   });
   return jsonResponse({ loggedOut: true });
+}
+
+async function submitAdminRequest(request, env) {
+  const uid = await authenticate(request, env);
+  if (!uid) return jsonResponse({ error: "Autenticação necessária." }, 401);
+  const body = await request.json();
+  const reason = typeof body.reason === "string" ? body.reason.trim() : "";
+  if (reason.length < 20 || reason.length > 500) {
+    return jsonResponse({ error: "Explique sua solicitação em 20 a 500 caracteres." }, 400);
+  }
+  const accessToken = await googleAccessToken(env);
+  const profile = await getProfile(env, uid, accessToken);
+  if (!profile || profile.adminRole) {
+    return jsonResponse({ error: "Esta conta já possui ou não pode solicitar acesso ADM." }, 409);
+  }
+  const path = `/admRequests/${encodeURIComponent(uid)}`;
+  let existing = null;
+  try {
+    const document = await firebaseRequest(env, accessToken, path);
+    existing = fromFirestoreFields(document.fields);
+  } catch (error) {
+    if (error.status !== 404) throw error;
+  }
+  if (existing?.status === "pending") {
+    return jsonResponse({ error: "Já existe uma solicitação aguardando análise." }, 409);
+  }
+  const createdAt = Date.now();
+  await firebaseRequest(env, accessToken, ":commit", {
+    method: "POST",
+    body: JSON.stringify({
+      writes: [{
+        update: {
+          name: `${projectRoot(env)}/admRequests/${encodeURIComponent(uid)}`,
+          fields: {
+            uid: firestoreValue(uid),
+            username: firestoreValue(profile.username),
+            reason: firestoreValue(reason),
+            status: firestoreValue("pending"),
+            createdAt: firestoreValue(createdAt)
+          }
+        },
+        ...(existing ? {} : { currentDocument: { exists: false } })
+      }]
+    })
+  });
+  return jsonResponse({ status: "pending", createdAt }, 201);
+}
+
+async function listAdminRequests(env, accessToken) {
+  const result = await firebaseRequest(env, accessToken, ":runQuery", {
+    method: "POST",
+    body: JSON.stringify({
+      structuredQuery: {
+        from: [{ collectionId: "admRequests" }],
+        where: {
+          fieldFilter: {
+            field: { fieldPath: "status" },
+            op: "EQUAL",
+            value: { stringValue: "pending" }
+          }
+        },
+        limit: 100
+      }
+    })
+  });
+  return jsonResponse({
+    requests: result.filter((entry) => entry.document?.fields)
+      .map((entry) => fromFirestoreFields(entry.document.fields))
+      .filter((entry) => typeof entry.uid === "string" && typeof entry.username === "string")
+  });
+}
+
+async function reviewAdminRequest(request, env, uid) {
+  if (!/^[A-Za-z0-9_-]{1,128}$/.test(uid)) return jsonResponse({ error: "Solicitação inválida." }, 400);
+  const body = await request.json();
+  if (!["approve", "deny"].includes(body.action)) {
+    return jsonResponse({ error: "Ação de análise inválida." }, 400);
+  }
+  const accessToken = await googleAccessToken(env);
+  const requestPath = `/admRequests/${encodeURIComponent(uid)}`;
+  const [requestDocument, profileDocument] = await Promise.all([
+    firebaseRequest(env, accessToken, requestPath),
+    getProfileDocument(env, uid, accessToken)
+  ]);
+  const admRequest = fromFirestoreFields(requestDocument.fields);
+  if (admRequest.status !== "pending" || !profileDocument) {
+    return jsonResponse({ error: "A solicitação não está mais pendente." }, 409);
+  }
+  const reviewedAt = Date.now();
+  const approved = body.action === "approve";
+  const fields = {
+    status: firestoreValue(approved ? "approved" : "denied"),
+    reviewedAt: firestoreValue(reviewedAt)
+  };
+  const writes = [{
+    update: { name: `${projectRoot(env)}/admRequests/${encodeURIComponent(uid)}`, fields },
+    currentDocument: { updateTime: requestDocument.updateTime },
+    updateMask: { fieldPaths: ["status", "reviewedAt"] }
+  }];
+  if (approved) {
+    const profile = {
+      ...profileDocument.profile,
+      adminRole: "provisional",
+      adminApprovedAt: reviewedAt,
+      adminGiftHistory: [],
+      updatedAt: reviewedAt
+    };
+    writes.push({
+      update: {
+        name: `${projectRoot(env)}/users/${encodeURIComponent(uid)}`,
+        fields: Object.fromEntries(
+          Object.entries(profile).map(([key, value]) => [key, firestoreValue(value)])
+        )
+      },
+      currentDocument: { updateTime: profileDocument.updateTime }
+    });
+  }
+  await firebaseRequest(env, accessToken, ":commit", {
+    method: "POST",
+    body: JSON.stringify({ writes })
+  });
+  return jsonResponse({ status: approved ? "approved" : "denied" });
 }
 
 async function adminTarget(env, accessToken, uid) {
@@ -529,6 +712,7 @@ function adminPublicTarget(profile) {
     bestScore: Number.isSafeInteger(profile.bestScore) ? profile.bestScore : 0,
     banned: profile.banned === true,
     leaderboardOptIn: profile.leaderboardOptIn === true,
+    adminRole: ["provisional", "permanent"].includes(profile.adminRole) ? profile.adminRole : null,
     badges: profile.badges && typeof profile.badges === "object" ? profile.badges : {},
     equippedBadges: Array.isArray(profile.equippedBadges) ? profile.equippedBadges : [],
     region: typeof profile.region === "string" ? profile.region : ""
@@ -559,7 +743,45 @@ async function listBannedPlayers(env, accessToken) {
   });
 }
 
-async function giftPlayer(request, env, accessToken, uid) {
+async function recordAdminGiftRecipient(env, accessToken, adminUid, recipientUid) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const adminDocument = await getProfileDocument(env, adminUid, accessToken);
+    const profile = adminDocument?.profile;
+    if (!profile || profile.adminRole !== "provisional") {
+      return jsonResponse({ error: "A permissão ADM provisória foi revogada." }, 403);
+    }
+    const now = Date.now();
+    const history = (Array.isArray(profile.adminGiftHistory) ? profile.adminGiftHistory : [])
+      .filter((entry) => entry && typeof entry.uid === "string" &&
+        Number.isSafeInteger(entry.createdAt) && entry.createdAt > now - 24 * 60 * 60 * 1000);
+    const recipients = new Set(history.map((entry) => entry.uid));
+    if (!recipients.has(recipientUid)) {
+      recipients.add(recipientUid);
+      history.push({ uid: recipientUid, createdAt: now });
+    }
+    const exceeded = recipients.size > 5;
+    const updated = {
+      ...profile,
+      adminRole: exceeded ? null : "provisional",
+      adminGiftHistory: history,
+      updatedAt: now
+    };
+    try {
+      await writeProfile(env, updated, accessToken, false, {
+        updateTime: adminDocument.updateTime,
+        updateMask: ["adminRole", "adminGiftHistory", "updatedAt"]
+      });
+      return exceeded
+        ? jsonResponse({ error: "A permissão ADM provisória foi removida por exceder 5 destinatários em 24 horas." }, 401)
+        : null;
+    } catch (error) {
+      if (error.status !== 409 || attempt === 2) throw error;
+    }
+  }
+  throw new Error("Could not update provisional administrator gift history.");
+}
+
+async function giftPlayer(request, env, admin, uid) {
   const body = await request.json();
   const type = body.type;
   const amount = body.amount;
@@ -575,7 +797,15 @@ async function giftPlayer(request, env, accessToken, uid) {
     createdAt: Date.now(),
     claimed: false
   };
-  const result = await updateAdminTarget(env, accessToken, uid, ["state.inbox.rewards", "updatedAt"], (current) => {
+  const existingTarget = await adminTarget(env, admin.accessToken, uid);
+  if (existingTarget.error) return existingTarget.error;
+  if (admin.session.role === "provisional") {
+    const quotaError = await recordAdminGiftRecipient(
+      env, admin.accessToken, admin.session.uid, uid
+    );
+    if (quotaError) return quotaError;
+  }
+  const result = await updateAdminTarget(env, admin.accessToken, uid, ["state.inbox.rewards", "updatedAt"], (current) => {
     const state = current.state && typeof current.state === "object" ? current.state : {};
     const inbox = state.inbox && typeof state.inbox === "object" ? state.inbox : {};
     const rewards = Array.isArray(inbox.rewards) ? inbox.rewards : [];
@@ -1185,12 +1415,32 @@ export default {
         response = await register(request, env);
       } else if (request.method === "POST" && url.pathname === "/api/auth/login") {
         response = await login(request, env);
+      } else if (request.method === "POST" && url.pathname === "/api/master/verify-code") {
+        response = await verifyMasterCode(request, env);
+      } else if (request.method === "POST" && url.pathname === "/api/master/login") {
+        response = await masterLogin(request, env);
       } else if (request.method === "POST" && url.pathname === "/api/admin/login") {
         response = await adminLogin(request, env);
       } else if (url.pathname === "/api/admin/session" && request.method === "POST") {
         response = await renewAdminSession(request, env);
       } else if (url.pathname === "/api/admin/logout" && request.method === "POST") {
         response = await logoutAdmin(request, env);
+      } else if (url.pathname === "/api/adm/requests" && request.method === "POST") {
+        response = await submitAdminRequest(request, env);
+      } else if (url.pathname.startsWith("/api/master/")) {
+        const master = await verifyAdminSession(request, env);
+        if (!master || master.session.role !== "master") {
+          response = jsonResponse({ error: "Sessão do painel mestre inválida ou expirada." }, 401);
+        } else if (request.method === "GET" && url.pathname === "/api/master/requests") {
+          response = await listAdminRequests(env, master.accessToken);
+        } else {
+          const match = url.pathname.match(/^\/api\/master\/requests\/([^/]+)$/);
+          if (!match || request.method !== "PUT") {
+            response = jsonResponse({ error: "Rota não encontrada." }, 404);
+          } else {
+            response = await reviewAdminRequest(request, env, decodeURIComponent(match[1]));
+          }
+        }
       } else if (url.pathname.startsWith("/api/admin/")) {
         const admin = await verifyAdminSession(request, env);
         if (!admin) {
@@ -1209,7 +1459,7 @@ export default {
                 ? target.error
                 : jsonResponse({ profile: adminPublicTarget(target.profile) });
             } else if (request.method === "POST" && match[2] === "gift") {
-              response = await giftPlayer(request, env, admin.accessToken, uid);
+              response = await giftPlayer(request, env, admin, uid);
             } else if (request.method === "DELETE" && match[2] === "ranking") {
               response = await removePlayerFromLeaderboard(env, admin.accessToken, uid);
             } else if (request.method === "PUT" && match[2] === "ban") {
@@ -1281,7 +1531,8 @@ export default {
           status: "Neon Void API pronta.",
           endpoints: [
             "/api/auth/register", "/api/auth/login", "/api/auth/refresh",
-            "/api/admin/login", "/api/admin/session", "/api/admin/logout",
+            "/api/master/verify-code", "/api/master/login", "/api/master/requests",
+            "/api/adm/requests", "/api/admin/login", "/api/admin/session", "/api/admin/logout",
             "/api/admin/banned", "/api/admin/players/:uid (GET)",
             "/api/admin/players/:uid/gift (POST)",
             "/api/admin/players/:uid/ranking (DELETE)",

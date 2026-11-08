@@ -10,7 +10,7 @@ const { default: worker } = await import(
   `data:text/javascript;base64,${Buffer.from(source).toString("base64")}`
 );
 
-test("admin sessions can coexist, renew, and log out independently", async () => {
+test("master sessions can coexist, renew, and log out independently", async () => {
   const keyPair = await crypto.subtle.generateKey({
     name: "RSASSA-PKCS1-v1_5",
     modulusLength: 2048,
@@ -60,7 +60,8 @@ test("admin sessions can coexist, renew, and log out independently", async () =>
   };
 
   const env = {
-    ADM_PASSWORD: "test-password",
+    ACCOUNT_SPECIAL_CODE: "test-special-code",
+    MASTER_PASSWORD: "test-password",
     FIREBASE_PROJECT_ID: "test-project",
     FIREBASE_SERVICE_ACCOUNT_EMAIL: "worker@test-project.iam.gserviceaccount.com",
     FIREBASE_PRIVATE_KEY: `-----BEGIN PRIVATE KEY-----\n${privateKey}\n-----END PRIVATE KEY-----`
@@ -75,8 +76,8 @@ test("admin sessions can coexist, renew, and log out independently", async () =>
   }), env);
 
   try {
-    const firstLogin = await send("/api/admin/login", "POST", { username: "NV ADM", password: "test-password" });
-    const secondLogin = await send("/api/admin/login", "POST", { username: "NV ADM", password: "test-password" });
+    const firstLogin = await send("/api/master/login", "POST", { code: "test-special-code", password: "test-password" });
+    const secondLogin = await send("/api/master/login", "POST", { code: "test-special-code", password: "test-password" });
     const first = await firstLogin.json();
     const second = await secondLogin.json();
 
@@ -91,6 +92,177 @@ test("admin sessions can coexist, renew, and log out independently", async () =>
     assert.equal(sessions.size, 1);
     assert.equal((await send("/api/admin/session", "POST", null, first.token)).status, 401);
     assert.equal((await send("/api/admin/session", "POST", null, second.token)).status, 200);
+    const invalidCode = await send("/api/master/login", "POST", { code: "WRONG", password: "test-password" });
+    assert.equal(invalidCode.status, 401);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("master approval grants provisional access and the sixth distinct gift revokes it", async () => {
+  const keyPair = await crypto.subtle.generateKey({
+    name: "RSASSA-PKCS1-v1_5",
+    modulusLength: 2048,
+    publicExponent: new Uint8Array([1, 0, 1]),
+    hash: "SHA-256"
+  }, true, ["sign", "verify"]);
+  const privateKey = Buffer.from(await crypto.subtle.exportKey("pkcs8", keyPair.privateKey)).toString("base64");
+  const encodeValue = (value) => {
+    if (value === null) return { nullValue: null };
+    if (typeof value === "string") return { stringValue: value };
+    if (typeof value === "boolean") return { booleanValue: value };
+    if (typeof value === "number") return { integerValue: String(value) };
+    if (Array.isArray(value)) return { arrayValue: { values: value.map(encodeValue) } };
+    return { mapValue: { fields: Object.fromEntries(
+      Object.entries(value).map(([key, child]) => [key, encodeValue(child)])
+    ) } };
+  };
+  const decodeValue = (value) => {
+    if ("nullValue" in value) return null;
+    if ("stringValue" in value) return value.stringValue;
+    if ("booleanValue" in value) return value.booleanValue;
+    if ("integerValue" in value) return Number(value.integerValue);
+    if ("arrayValue" in value) return (value.arrayValue.values || []).map(decodeValue);
+    if ("mapValue" in value) return decodeFields(value.mapValue.fields || {});
+    return null;
+  };
+  const decodeFields = (fields) => Object.fromEntries(
+    Object.entries(fields).map(([key, value]) => [key, decodeValue(value)])
+  );
+  const profiles = new Map([
+    ["alice", {
+      uid: "alice",
+      username: "Alice",
+      normalizedName: "alice",
+      bestScore: 0,
+      banned: false,
+      state: { inbox: { rewards: [] } }
+    }],
+    ...Array.from({ length: 6 }, (_, index) => {
+      const uid = `recipient-${index + 1}`;
+      return [uid, {
+        uid,
+        username: `Recipient ${index + 1}`,
+        normalizedName: uid,
+        bestScore: 0,
+        banned: false,
+        state: { inbox: { rewards: [] } }
+      }];
+    })
+  ].map(([uid, profile]) => [uid, { profile, updateTime: "1" }]));
+  const requests = new Map();
+  const sessions = new Map();
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (input, init = {}) => {
+    const url = new URL(input);
+    if (url.hostname === "identitytoolkit.googleapis.com") {
+      const { idToken } = JSON.parse(init.body);
+      return Response.json({ users: [{ localId: idToken.split("-")[0] }] });
+    }
+    if (url.hostname === "oauth2.googleapis.com") {
+      return Response.json({ access_token: "test-access-token" });
+    }
+    if (url.hostname !== "firestore.googleapis.com") throw new Error(`Unexpected request: ${url.href}`);
+    const path = url.pathname.split("/documents/")[1] || "";
+    if (url.pathname.endsWith("/documents:runQuery")) {
+      const query = JSON.parse(init.body).structuredQuery;
+      const rows = query.from[0].collectionId === "admRequests" ? [...requests.values()] : [];
+      return Response.json(rows
+        .filter((document) => document.profile.status === "pending")
+        .map((document) => ({ document: { fields: encodeValue(document.profile).mapValue.fields } })));
+    }
+    if (url.pathname.endsWith("/documents:commit")) {
+      const { writes } = JSON.parse(init.body);
+      const updates = writes.map((write) => {
+        const documentPath = (write.update?.name || write.delete).split("/documents/")[1];
+        const [collection, id] = documentPath.split("/");
+        const table = collection === "users" ? profiles : collection === "admRequests" ? requests : sessions;
+        const current = table.get(decodeURIComponent(id));
+        if (write.currentDocument?.exists === false && current) return null;
+        if (write.currentDocument?.updateTime && write.currentDocument.updateTime !== current?.updateTime) return null;
+        return { table, id: decodeURIComponent(id), current, write };
+      });
+      if (updates.some((entry) => !entry)) {
+        return Response.json({ error: { message: "Precondition failed." } }, { status: 409 });
+      }
+      for (const { table, id, current, write } of updates) {
+        if (write.delete) {
+          table.delete(id);
+          continue;
+        }
+        const value = decodeFields(write.update.fields);
+        const profile = write.updateMask?.fieldPaths
+          ? { ...(current?.profile || {}), ...value }
+          : value;
+        table.set(id, { profile, updateTime: String(Number(current?.updateTime || 0) + 1) });
+      }
+      return Response.json({});
+    }
+    const [collection, id] = path.split("/");
+    const table = collection === "users" ? profiles : collection === "admRequests" ? requests : sessions;
+    const document = table.get(decodeURIComponent(id));
+    return document
+      ? Response.json({ fields: Object.fromEntries(
+        Object.entries(document.profile).map(([key, value]) => [key, encodeValue(value)])
+      ), updateTime: document.updateTime })
+      : Response.json({ error: { message: "Not found." } }, { status: 404 });
+  };
+
+  const env = {
+    ACCOUNT_SPECIAL_CODE: "test-special-code",
+    MASTER_PASSWORD: "test-password",
+    FIREBASE_API_KEY: "test-api-key",
+    FIREBASE_PROJECT_ID: "test-project",
+    FIREBASE_SERVICE_ACCOUNT_EMAIL: "worker@test-project.iam.gserviceaccount.com",
+    FIREBASE_PRIVATE_KEY: `-----BEGIN PRIVATE KEY-----\n${privateKey}\n-----END PRIVATE KEY-----`
+  };
+  const send = (path, method, body, { uid, adminToken } = {}) => worker.fetch(new Request(`https://game.test${path}`, {
+    method,
+    headers: {
+      ...(body ? { "content-type": "application/json" } : {}),
+      ...(uid ? { authorization: `Bearer ${uid}-token` } : {}),
+      ...(adminToken ? { "x-admin-session": adminToken } : {})
+    },
+    ...(body ? { body: JSON.stringify(body) } : {})
+  }), env);
+
+  try {
+    const request = await send("/api/adm/requests", "POST", {
+      reason: "Quero ajudar a comunidade e manter as partidas justas."
+    }, { uid: "alice" });
+    assert.equal(request.status, 201);
+
+    const masterLogin = await send("/api/master/login", "POST", {
+      code: "test-special-code",
+      password: "test-password"
+    });
+    const masterToken = (await masterLogin.json()).token;
+    const pending = await send("/api/master/requests", "GET", null, { adminToken: masterToken });
+    assert.equal((await pending.json()).requests[0].uid, "alice");
+    const approval = await send("/api/master/requests/alice", "PUT", { action: "approve" }, {
+      adminToken: masterToken
+    });
+    assert.equal(approval.status, 200);
+    assert.equal(profiles.get("alice").profile.adminRole, "provisional");
+
+    const adminLogin = await send("/api/admin/login", "POST", {}, { uid: "alice" });
+    assert.equal(adminLogin.status, 200);
+    const adminToken = (await adminLogin.json()).token;
+    for (let index = 1; index <= 5; index += 1) {
+      const gift = await send(`/api/admin/players/recipient-${index}/gift`, "POST", {
+        type: "coins",
+        amount: 10
+      }, { adminToken });
+      assert.equal(gift.status, 200);
+    }
+    const abusiveGift = await send("/api/admin/players/recipient-6/gift", "POST", {
+      type: "coins",
+      amount: 10
+    }, { adminToken });
+    assert.equal(abusiveGift.status, 401);
+    assert.equal(profiles.get("alice").profile.adminRole, null);
+    assert.equal(profiles.get("recipient-6").profile.state.inbox.rewards.length, 0);
+    assert.equal((await send("/api/admin/session", "POST", null, { adminToken })).status, 401);
   } finally {
     globalThis.fetch = originalFetch;
   }

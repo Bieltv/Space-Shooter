@@ -13,6 +13,10 @@ Abra `index.html` em um servidor estático, como a extensão Live Server do VS C
 - `js/app.js`: interface, controles, jogo, persistência local e integração com a API de contas.
 - `worker/index.js`: API Cloudflare Worker para Firebase Authentication, perfis, sincronização de conta e ranking.
 - `worker/wrangler.toml`: projeto Firebase, origens CORS e configuração do Wrangler.
+- `worker/package.json` e `worker/package-lock.json`: dependências e comandos locais/publicação do Worker.
+- `worker/.dev.vars.example`: modelo local para secrets do Worker; copie para `worker/.dev.vars` e preencha sem versionar.
+- `js/config.js`: URL pública do Worker. Não coloque senhas, chaves privadas ou outros secrets neste arquivo.
+- `SITES/`: páginas estáticas embutidas no jogo para solicitar acesso ADM e administrar solicitações na conta mestre.
 - `firestore.indexes.json`: índice Firestore usado pelo ranking compartilhado.
 - `data/missions.json`: conjuntos de missões em português brasileiro e inglês.
 - `data/skins.json`: catálogo visual, raridades e futuras skins de eventos.
@@ -27,12 +31,13 @@ Abra `index.html` em um servidor estático, como a extensão Live Server do VS C
 
 - Novas contas usam e-mail/senha no Firebase Authentication e armazenam seus dados de jogo no Firestore via Worker. Uma cópia local permite continuar no aparelho; a sessão é renovada automaticamente quando há conexão.
 - Contas antigas continuam disponíveis pelo nome de jogador e senha locais. Entre na conta antiga e use **Migrar conta local** nas Configurações para transferir os dados para o Firebase; progresso de missões também é migrado.
+- Ao abrir esta versão pela primeira vez, cada conta local sem migração recebe prazo de 3 dias. Se não for migrada, seus dados locais e o progresso separado de missões são removidos ao fim do prazo. Exporte um backup antes de continuar se quiser preservar uma cópia.
 - Configurações permanecem locais. A autenticação do Firebase permite recuperação de senha pelas ferramentas do Firebase, mas o jogo ainda não inclui fluxo próprio de redefinição.
 - Em Configurações, exporte a conta para um JSON criptografado com AES-GCM/PBKDF2. A senha não é gravada no arquivo; a mesma senha é necessária para importar. Proteja o arquivo e guarde a senha: não há recuperação se perder ambos.
 - Esses dados podem ser apagados ao limpar o armazenamento do navegador e podem ser inspecionados ou alterados por quem tem acesso ao navegador. Não use senhas reais neste protótipo.
 - **Excluir conta e dados** exige confirmação de senha e remove permanentemente a conta Firebase, o perfil público, dados sincronizados, a cópia local e o progresso de missões. Configurações gerais permanecem neste navegador.
 - A participação no ranking compartilhado é opcional. O ranking mostra o nome público, recorde e emblemas; o filtro por estado usa apenas a região compartilhada pelo jogador.
-- No modo ADM, clicar em um jogador do ranking permite enviar presentes de moedas/diamantes para a caixa de recompensas, retirá-lo do ranking ou banir/desbanir a conta. O painel ADM lista contas banidas para reativação. A senha ADM é configurada como secret do Worker; vários dispositivos podem usar o modo ADM ao mesmo tempo, cada um com sua sessão independente, que expira após 15 minutos sem renovação. O bloqueio impede login/sincronização online; como o jogo é estático, não impede o uso de uma cópia modificada ou offline.
+- Solicitações ADM ficam na página interna `SITES/request-admin.html` e são analisadas pela conta mestre em `SITES/master.html`. O código especial e a senha mestre são secrets exclusivos do Worker; o código não fica no JSON de promoções. A aprovação concede ADM provisório por 7 dias, que vira permanente se não houver abuso. Mais de 5 destinatários de presentes distintos em 24 horas remove o ADM provisório. Contas ou acessos ADM antigos são revogados sem apagar contas de jogadores. Sessões administrativas expiram após 15 minutos e são renovadas enquanto válidas. A interface do jogo é estática e não impede alterações locais/offline.
 - Contas conectadas podem enviar e aceitar/recusar pedidos de amizade por ID ou nome. Amigos podem ver skins e status do Passe; saldos permanecem privados. O presente do Passe Neon Ouro custa 600 diamantes.
 - A loja tem a Caixa Especial de 8 a 24 de dezembro de 2026: 1.000 diamantes por giro ou 10.000 por dez giros. Cada skin especial tem 3,1% de chance; as recompensas de moedas configuradas totalizam 87,6%. Repetições de skin são convertidas em 100 moedas.
 - A loja não aceita pagamentos reais. O Pacote Inicial e Luck Drops usam Neon-moedas; diamantes usam Money-Void, uma moeda virtual obtida no minigame de precisão. Novas contas recebem a oferta do pacote inicial por 45 dias.
@@ -46,26 +51,24 @@ Abra `index.html` em um servidor estático, como a extensão Live Server do VS C
 - A cada 6 horas, o minigame de precisão permite uma tentativa: clique quando o alvo móvel passar pelo retículo central para ganhar 100 Money-Void diretamente na carteira.
 - A caixa de entrada mantém mensagens e recompensas resgatáveis por códigos promocionais. O exemplo `NEONSTART` concede 250 Neon-moedas e a skin Folha; edite `data/promo-codes.json` para configurar outros códigos, moedas, diamantes ou skins. Códigos resgatados são limitados a uma vez por conta.
 - A tela de Eventos lê `data/events.json`; cada evento tem título, descrição e datas ISO para início e fim. Os atalhos circulares de Eventos e Caixa de entrada ficam abaixo do botão de Depuração.
-- O botão de depuração fica oculto até resgatar `DEPURATIONMODE` na Caixa de entrada. O código é público no JSON, como todo o jogo estático; serve apenas para habilitar ferramentas de teste, não para controle de acesso seguro.
+- O botão de depuração fica oculto até resgatar `DEPURATIONMODE` na Caixa de entrada. O código é público no JSON; serve apenas para habilitar ferramentas de teste, não para controle de acesso seguro.
 - O Passe do Néon fica oculto até 30 de novembro de 2026. O Desafio Neon Cinza começa nesse dia e termina em 25 de dezembro, com metas cumulativas de 150.000, 300.000 e 440.000 pontos. A partida usa inimigos e chefe normais, aceita habilidades iniciais e, na meta final da terceira etapa, libera três skins épicas cinza: nave, escudo e tiro.
 - Para publicar no GitHub Pages, publique a raiz do projeto em HTTPS. O `manifest.webmanifest` e o service worker usam caminhos relativos, por isso funcionam tanto no domínio principal quanto em um repositório de projeto. O shell e os catálogos JSON são armazenados em cache para abertura offline; autenticação e ranking exigem conexão.
-- Como o jogo é estático e roda no navegador, os códigos promocionais ficam públicos nos arquivos JSON e a validação é local; não use códigos ou recompensas que precisem de segurança contra alterações.
+- Como o jogo é estático, códigos promocionais comuns ficam públicos nos JSON e a validação é local. O código do painel mestre é a exceção: validado pelo Worker e protegido também por senha mestre.
 
 ## Configuração da API Firebase
 
-1. Crie o banco Firestore no projeto `space-shooter-14d6a`. O provedor **E-mail/senha** é configurado em `firebase.json` e publicado com `firebase deploy --only auth --project space-shooter-14d6a`.
-2. Crie uma chave nova de service account com acesso ao Firestore. Configure-a somente como secrets do Worker: `npx wrangler secret put FIREBASE_API_KEY --config worker/wrangler.toml`, e repita o comando para `FIREBASE_SERVICE_ACCOUNT_EMAIL` e `FIREBASE_PRIVATE_KEY`. A chave privada deve ser o PEM completo; nunca a coloque no repositório ou no frontend. Se uma chave foi compartilhada anteriormente, revogue-a e gere outra.
-3. Configure `FIREBASE_API_KEY` com a Web API key do Firebase. O ID do projeto já está em `worker/wrangler.toml`.
-4. Confira `ALLOWED_ORIGINS` em `worker/wrangler.toml`: inclua a origem exata do GitHub Pages (`https://bieltv.github.io`, sem o caminho `/Space-Shooter/`) e as origens locais de desenvolvimento.
-5. Configure a senha ADM como secret: `npx wrangler secret put ADM_PASSWORD --config worker/wrangler.toml` e informe a senha quando o Wrangler solicitar. O nome de usuário é `NV ADM`. Antes de publicar o jogo, prefira uma senha longa e exclusiva em vez da senha curta informada no pedido.
-6. Publique a configuração de autenticação, os índices e o Worker a partir da raiz do projeto: `firebase deploy --only auth,firestore:indexes --project space-shooter-14d6a` e `npx wrangler deploy --config worker/wrangler.toml`. O Worker oferece `GET /api/me` para verificar o perfil e `PUT /api/me/equipped-badges` para salvar até três emblemas conquistados. Faça isso com as CLIs autenticadas.
-7. A URL do Worker configurada em `js/app.js` deve apontar para a implantação. As rotas ADM só podem ser testadas após publicar o Worker e configurar os secrets.
+1. Crie o banco Firestore no projeto configurado. O provedor **E-mail/senha** é configurado em `firebase.json`.
+2. Na pasta `worker`, execute `npm install`. Para desenvolvimento local, copie `.dev.vars.example` para `.dev.vars` e preencha as credenciais; `npm run dev` usa automaticamente esse arquivo porque ele fica ao lado de `wrangler.toml`. Para implantação, use `npx wrangler secret put` para configurar `FIREBASE_API_KEY`, `FIREBASE_SERVICE_ACCOUNT_EMAIL`, `FIREBASE_PRIVATE_KEY`, `ACCOUNT_SPECIAL_CODE` e `MASTER_PASSWORD`. Configure o código especial escolhido e uma senha mestre longa e exclusiva. Nunca coloque credenciais no frontend ou no controle de versão.
+3. Configure `FIREBASE_PROJECT_ID` e `ALLOWED_ORIGINS` em `worker/wrangler.toml`. Inclua a origem exata do site publicado e as origens locais de desenvolvimento.
+4. Configure `window.NEON_VOID_CONFIG.apiBaseUrl` em `js/config.js` com a URL pública do Worker. Esse valor é público; o arquivo não deve conter secrets.
+5. Publique autenticação/índices pela Firebase CLI: `firebase deploy --only auth,firestore:indexes --project space-shooter-14d6a`. Publique o Worker com `npm run deploy` executado na pasta `worker` (após configurar os secrets no Cloudflare). O Worker persiste solicitações e funções ADM no Firestore.
 
-O Worker valida autenticação, tamanho básico e formato dos dados, mas o jogo é executado no cliente e não possui validação antitrapaça autoritativa para recordes ou saldos. Não use esses dados para pagamentos ou decisões de confiança.
+Os catálogos de skins, loja, moedas, eventos e missões permanecem nos JSON públicos porque o navegador estático precisa carregá-los; movê-los para `.env` não os tornaria secretos e o navegador não consegue ler esse arquivo com segurança. O Worker mantém no servidor somente secrets e decisões de autorização. O jogo não possui validação antitrapaça autoritativa para recordes ou saldos.
 
 ## Controles e testes
 
-- Execute `node --test worker\index.test.mjs` para verificar que sessões ADM simultâneas podem ser renovadas e encerradas individualmente.
+- Execute `node --test worker\index.test.mjs worker\features.test.mjs` para verificar as sessões administrativas e os fluxos/catálogos relacionados.
 - Mover a nave: mouse ou toque dentro da área de jogo.
 - Atirar: automático, a cada 500 ms. Pausar: Esc.
 - Ative a habilidade das skins especiais pelo botão na tela ou pela tecla H. Chama: começa com uma vida a menos; após 190 s, custa quatro vidas e atinge até 100 inimigos ou causa 75% da vida máxima do chefe. Gelo: começa com quatro vidas a menos, adiciona três de dano e congela inimigos/chefe por 50 s após carregar por 120 s; requer evolução de vida acima de quatro. Círculo Negro: disponível após dois chefes, custa duas vidas, concede 40 s de invulnerabilidade e recarrega em 30 s. Explosiva: após 200 s, custa uma vida e atinge até 100 inimigos ou causa 50% da vida máxima do chefe; a quantidade de usos depende das vidas restantes, sem limite artificial por partida.

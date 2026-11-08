@@ -78,7 +78,9 @@ const translations = {
     missionPopups: "Avisos de missão", missionPopupsHint: "Exibe um aviso quando uma missão for concluída.", enabled: "Ativado",
     coins: "Neon-moedas", diamonds: "Diamantes", moneyVoid: "Money-Void", walletBalance: "CARTEIRA", score: "Pontos", lives: "Vidas", pause: "Pausar", resume: "Continuar",
     inbox: "Caixa de entrada", events: "Eventos", eventsHint: "Confira os eventos ativos e os próximos eventos.",
-    adminMode: "Modo ADM", adminPanel: "Painel administrativo",
+    adminMode: "Modo ADM", adminPanel: "Painel administrativo", adminRequestSite: "Solicitar acesso ADM",
+    localMigrationCountdown: "Migre sua conta para o Firebase nos próximos {time}. Depois do prazo, os dados locais desta conta serão excluídos.",
+    localMigrationExpired: "O prazo de migração terminou; os dados locais desta conta foram removidos.",
     adminPanelHint: "Contas banidas podem ser reativadas nesta tela.",
     adminPlayerActions: "Ações administrativas", giftType: "Tipo de presente",
     giftAmount: "Quantidade", sendGift: "Enviar presente",
@@ -353,7 +355,9 @@ const translations = {
     missionPopups: "Mission notifications", missionPopupsHint: "Show a message when a mission is completed.", enabled: "Enabled",
     coins: "Neon Coins", diamonds: "Diamonds", moneyVoid: "Money-Void", walletBalance: "WALLET", score: "Score", lives: "Lives", pause: "Pause", resume: "Resume",
     inbox: "Inbox", events: "Events", eventsHint: "Browse active and upcoming events.",
-    adminMode: "Admin mode", adminPanel: "Admin panel",
+    adminMode: "Admin mode", adminPanel: "Admin panel", adminRequestSite: "Request admin access",
+    localMigrationCountdown: "Migrate your account to Firebase within {time}. After the deadline, this account's local data will be deleted.",
+    localMigrationExpired: "The migration deadline passed; this account's local data was removed.",
     adminPanelHint: "Banned accounts can be restored from this screen.",
     adminPlayerActions: "Admin actions", giftType: "Gift type",
     giftAmount: "Amount", sendGift: "Send gift",
@@ -559,7 +563,8 @@ const STORAGE_KEYS = {
   cloudSession: "neonVoid.cloudSession",
   adminSession: "neonVoid.adminSession"
 };
-const API_BASE_URL = "https://space-shooter.eugeniogabrielmoreira96.workers.dev";
+const API_BASE_URL = (window.NEON_VOID_CONFIG?.apiBaseUrl || "").replace(/\/+$/, "");
+const LOCAL_MIGRATION_GRACE_MS = 3 * 24 * 60 * 60 * 1000;
 const CYCLE_MS = 24 * 60 * 60 * 1000;
 const ACCURACY_COOLDOWN_MS = 6 * 60 * 60 * 1000;
 const ACCURACY_ATTEMPT_MS = 8000;
@@ -821,6 +826,48 @@ function writeAccounts(accounts) {
   }
 }
 
+function applyLocalMigrationDeadline() {
+  const now = Date.now();
+  const activeId = localStorage.getItem(STORAGE_KEYS.activeAccount);
+  let updated = false;
+  let activeExpired = false;
+  let expiredCount = 0;
+  const accounts = readAccounts().filter((entry) => {
+    if (entry.adminMode && !entry.cloudUid) {
+      updated = true;
+      return false;
+    }
+    if (entry.cloudUid || !entry.id) return true;
+    const deadline = Number.isSafeInteger(entry.migrationDeadlineAt) && entry.migrationDeadlineAt > 0
+      ? entry.migrationDeadlineAt
+      : now + LOCAL_MIGRATION_GRACE_MS;
+    if (deadline !== entry.migrationDeadlineAt) {
+      entry.migrationDeadlineAt = deadline;
+      updated = true;
+    }
+    if (deadline > now) return true;
+    updated = true;
+    expiredCount += 1;
+    activeExpired ||= entry.id === activeId;
+    try {
+      if (entry.playerId) localStorage.removeItem(`${STORAGE_KEYS.missions}.${entry.playerId}`);
+    } catch (error) {
+      throw new Error(`${t("localStorageUnavailable")} ${error.message}`);
+    }
+    return false;
+  });
+  if (updated) writeAccounts(accounts);
+  if (activeExpired) {
+    localStorage.removeItem(STORAGE_KEYS.activeAccount);
+    try {
+      localStorage.removeItem(STORAGE_KEYS.missions);
+    } catch (error) {
+      throw new Error(`${t("localStorageUnavailable")} ${error.message}`);
+    }
+  }
+  return { accounts, activeExpired, expiredCount };
+}
+
 function saveCloudSession(session) {
   cloudSession = {
     uid: session.profile.uid,
@@ -847,6 +894,7 @@ function clearCloudSession() {
 
 async function refreshCloudSession() {
   if (!cloudSession?.refreshToken) throw new Error(t("cloudApiUnavailable"));
+  if (!API_BASE_URL) throw new Error("Configure a URL pública do Worker em js/config.js.");
   const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -864,6 +912,7 @@ async function refreshCloudSession() {
 }
 
 async function cloudRequest(path, options = {}) {
+  if (!API_BASE_URL) throw new Error("Configure a URL pública do Worker em js/config.js.");
   if (options.auth !== false && cloudSession &&
       (!cloudSession.idToken || cloudSession.expiresAt <= Date.now() + 30_000)) {
     await refreshCloudSession();
@@ -949,6 +998,7 @@ function clearAdminSession() {
 
 async function adminRequest(path, options = {}) {
   if (!adminSessionToken) throw new Error(t("cloudApiUnavailable"));
+  if (!API_BASE_URL) throw new Error("Configure a URL pública do Worker em js/config.js.");
   let response;
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
@@ -965,17 +1015,42 @@ async function adminRequest(path, options = {}) {
   }
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
+    const error = new Error(payload.error || t("cloudApiUnavailable"));
+    error.status = response.status;
     if (response.status === 401) {
       clearAdminSession();
-      if (account?.adminMode) requireAuthentication();
+      $("#admin-quick-button").hidden = true;
+      $("#admin-player-actions").hidden = true;
     }
-    throw new Error(payload.error || t("cloudApiUnavailable"));
+    throw error;
   }
   return payload;
 }
 
 async function refreshAdminSession() {
-  await adminRequest("/api/admin/session", { method: "POST" });
+  let session;
+  try {
+    session = await adminRequest("/api/admin/session", { method: "POST" });
+  } catch (error) {
+    if (error.status !== 401 || !cloudSession?.idToken) throw error;
+    session = await cloudRequest("/api/admin/login", { method: "POST", body: {} });
+    saveAdminSession(session.token);
+  }
+  if (session.role && account?.cloudUid) {
+    updateAccount({ ...account, adminRole: session.role, adminMode: true });
+  }
+}
+
+async function startAdminSession(expectedUid = account?.cloudUid) {
+  if (!expectedUid || cloudSession?.uid !== expectedUid) {
+    throw new Error("A sessão Firebase não corresponde à conta ADM.");
+  }
+  const session = await cloudRequest("/api/admin/login", { method: "POST", body: {} });
+  saveAdminSession(session.token);
+  if (account?.cloudUid === expectedUid && session.role) {
+    updateAccount({ ...account, adminRole: session.role, adminMode: true });
+  }
+  return session;
 }
 
 async function endAdminSession() {
@@ -1003,6 +1078,8 @@ function normalizeCloudAccount(session, email, passwordSalt, passwordHash) {
     ...serverState,
     id: profile.uid,
     cloudUid: profile.uid,
+    adminRole: ["provisional", "permanent"].includes(profile.adminRole) ? profile.adminRole : null,
+    adminMode: ["provisional", "permanent"].includes(profile.adminRole),
     username: profile.username,
     normalizedName: profile.username.toLocaleLowerCase("pt-BR"),
     playerId: `NV-${profile.uid.slice(0, 8).toUpperCase()}`,
@@ -1263,6 +1340,11 @@ function normalizeAccount(nextAccount) {
   };
   return {
     ...nextAccount,
+    adminRole: ["provisional", "permanent"].includes(nextAccount.adminRole) ? nextAccount.adminRole : null,
+    adminMode: Boolean(nextAccount.cloudUid && ["provisional", "permanent"].includes(nextAccount.adminRole)),
+    migrationDeadlineAt: Number.isSafeInteger(nextAccount.migrationDeadlineAt)
+      ? nextAccount.migrationDeadlineAt
+      : 0,
     debugEnabled: nextAccount.debugEnabled === true,
     coins: Number.isSafeInteger(nextAccount.coins) && nextAccount.coins >= 0 ? nextAccount.coins : 0,
     diamonds: Number.isSafeInteger(nextAccount.diamonds) && nextAccount.diamonds >= 0 ? nextAccount.diamonds : 0,
@@ -1581,6 +1663,13 @@ function updateAccount(nextAccount) {
   $("#leaderboard-region").value = account.region || "";
   $("#leaderboard-opt-in").checked = account.leaderboardOptIn === true;
   $("#cloud-migration-row").hidden = Boolean(account.cloudUid);
+  const migrationNotice = $("#cloud-migration-notice");
+  migrationNotice.hidden = Boolean(account.cloudUid);
+  if (!account.cloudUid && account.migrationDeadlineAt) {
+    migrationNotice.textContent = t("localMigrationCountdown").replace("{time}", formatDuration(
+      Math.max(0, account.migrationDeadlineAt - Date.now())
+    ));
+  }
   if (missionOwnerId !== account.playerId) {
     const legacyProgress = missionOwnerId === null ? loadStored(STORAGE_KEYS.missions, null) : null;
     missionOwnerId = account.playerId;
@@ -2291,6 +2380,8 @@ function renderOwnProfile() {
   const grid = $("#profile-badge-grid");
   if (!grid || !account || !badgeData || !skinData) return;
   $("#own-profile-username").textContent = account.username;
+  $("#own-profile-username").classList.toggle("admin-gold-name", account.adminRole === "permanent");
+  $("#own-profile-username").classList.toggle("admin-gold-name", account.adminRole === "permanent");
   $("#own-profile-player-id").textContent = account.playerId;
   $("#own-profile-score").textContent = t("playerProfileScore")
     .replace("{score}", Number(account.bestScore || 0).toLocaleString(language));
@@ -3360,7 +3451,14 @@ function claimInboxReward(rewardId) {
   }
 }
 
-function redeemPromoCode(value) {
+function openGameSite(sitePath) {
+  const allowedSites = new Set(["SITES/request-admin.html", "SITES/master.html"]);
+  if (!allowedSites.has(sitePath)) throw new Error("Site interno inválido.");
+  $("#game-site-frame").src = sitePath;
+  $("#game-site-dialog").showModal();
+}
+
+async function redeemPromoCode(value) {
   const status = $("#promo-code-status");
   if (!account || !promoCodeData) {
     status.textContent = t("promoCodeInvalid");
@@ -3369,7 +3467,30 @@ function redeemPromoCode(value) {
   const normalizedCode = value.trim().toUpperCase();
   const promo = promoCodeData.codes.find((entry) => entry.code.toUpperCase() === normalizedCode);
   const now = Date.now();
-  if (!promo || promo.active !== true ||
+  if (!promo) {
+    try {
+      if (!API_BASE_URL) throw new Error("Configure a URL pública do Worker em js/config.js.");
+      const response = await fetch(`${API_BASE_URL}/api/master/verify-code`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ code: normalizedCode })
+      });
+      const result = await response.json();
+      if (response.ok && result.valid === true) {
+        sessionStorage.setItem("neonVoid.masterCode", normalizedCode);
+        $("#promo-code-form").reset();
+        openGameSite("SITES/master.html");
+        return;
+      }
+      if (response.status !== 401) throw new Error(result.error || t("cloudApiUnavailable"));
+    } catch (error) {
+      status.textContent = error.message || t("cloudApiUnavailable");
+      return;
+    }
+    status.textContent = t("promoCodeInvalid");
+    return;
+  }
+  if (promo.active !== true ||
       (promo.startsAt && Date.parse(promo.startsAt) > now) ||
       (promo.endsAt && Date.parse(promo.endsAt) <= now)) {
     status.textContent = t("promoCodeInvalid");
@@ -4600,6 +4721,7 @@ async function openPublicProfile(uid) {
     $("#admin-player-actions").hidden = !account?.adminMode;
     $("#admin-toggle-ban").textContent = t(activeAdminProfileBanned ? "unbanAccount" : "banAccount");
     $("#player-profile-title").textContent = profile.username;
+    $("#player-profile-title").classList.toggle("admin-gold-name", profile.adminRole === "permanent");
     $("#player-profile-score").textContent = t("playerProfileScore")
       .replace("{score}", Number(profile.bestScore || 0).toLocaleString(language));
     if (isFriend) {
@@ -4844,6 +4966,7 @@ async function loadLeaderboard(scope) {
       rank.textContent = `#${index + 1}`;
       const player = document.createElement("span");
       player.className = "leaderboard-entry-name";
+      if (entry.adminRole === "permanent") player.classList.add("admin-gold-name");
       player.textContent = entry.username;
       const equippedBadges = (Array.isArray(entry.equippedBadges) ? entry.equippedBadges : [])
         .map((badgeId) => badgeData?.badges.find((badge) => badge.id === badgeId))
@@ -6327,6 +6450,25 @@ async function initialize() {
     setInterval(() => {
       if (account?.cloudUid) void loadFriends({ silent: true });
     }, 60 * 1000);
+    setInterval(() => {
+      if (account?.cloudUid) return;
+      const notice = $("#cloud-migration-notice");
+      if (account?.migrationDeadlineAt && account.migrationDeadlineAt > Date.now()) {
+        notice.textContent = t("localMigrationCountdown").replace("{time}", formatDuration(
+          account.migrationDeadlineAt - Date.now()
+        ));
+      } else if (account?.migrationDeadlineAt) {
+        try {
+          applyLocalMigrationDeadline();
+          clearTimeout(cloudSyncTimer);
+          localStorage.removeItem(STORAGE_KEYS.activeAccount);
+          requireAuthentication();
+          $("#auth-status").textContent = t("localMigrationExpired");
+        } catch (error) {
+          $("#auth-status").textContent = error.message;
+        }
+      }
+    }, 60 * 1000);
     setInterval(renderEvents, 60000);
     setInterval(renderSpecialLootBox, 60000);
     setInterval(updateBattlePassVisibility, 60000);
@@ -6349,49 +6491,50 @@ async function initialize() {
     const storedCloudSession = localStorage.getItem(STORAGE_KEYS.cloudSession);
     cloudSession = storedCloudSession ? JSON.parse(storedCloudSession) : null;
     adminSessionToken = sessionStorage.getItem(STORAGE_KEYS.adminSession);
+    const migration = applyLocalMigrationDeadline();
+    if (migration.expiredCount > 0) {
+      $("#auth-status").textContent = t("localMigrationExpired");
+    }
     const activeId = localStorage.getItem(STORAGE_KEYS.activeAccount);
-    const activeAccount = activeId ? readAccounts().find((entry) => entry.id === activeId) : null;
+    const activeAccount = activeId ? migration.accounts.find((entry) => entry.id === activeId) : null;
     if (activeAccount) {
-      if (activeAccount.adminMode) {
+      if (activeAccount.cloudUid && cloudSession?.uid === activeAccount.cloudUid && cloudSession.refreshToken) {
         try {
-          if (!adminSessionToken) throw new Error(t("cloudApiUnavailable"));
-          await refreshAdminSession();
-          activateAccount(activeAccount);
-          $("#play-button").disabled = false;
+          const response = await refreshCloudSession();
+          const restoredAccount = normalizeCloudAccount(
+            response,
+            activeAccount.email || "",
+            activeAccount.passwordSalt,
+            activeAccount.passwordHash
+          );
+          cacheCloudAccount(restoredAccount);
+          updateAccount(restoredAccount);
         } catch (error) {
-          writeAccounts(readAccounts().filter((entry) => entry.id !== activeAccount.id));
-          localStorage.removeItem(STORAGE_KEYS.activeAccount);
-          clearAdminSession();
-          requireAuthentication();
+          if (error.status === 403) {
+            writeAccounts(readAccounts().filter((entry) => entry.id !== activeAccount.id));
+            localStorage.removeItem(STORAGE_KEYS.activeAccount);
+            requireAuthentication();
+            throw error;
+          }
+          updateAccount(activeAccount);
           $("#auth-status").textContent = error.message;
         }
       } else {
-        if (activeAccount.cloudUid && cloudSession?.uid === activeAccount.cloudUid && cloudSession.refreshToken) {
-          try {
-            const response = await refreshCloudSession();
-            const restoredAccount = normalizeCloudAccount(
-              response,
-              activeAccount.email || "",
-              activeAccount.passwordSalt,
-              activeAccount.passwordHash
-            );
-            cacheCloudAccount(restoredAccount);
-            updateAccount(restoredAccount);
-          } catch (error) {
-            if (error.status === 403) {
-              writeAccounts(readAccounts().filter((entry) => entry.id !== activeAccount.id));
-              localStorage.removeItem(STORAGE_KEYS.activeAccount);
-              requireAuthentication();
-              throw error;
-            }
-            updateAccount(activeAccount);
-            $("#auth-status").textContent = error.message;
-          }
-        } else {
-          updateAccount(activeAccount);
-        }
-        $("#play-button").disabled = false;
+        updateAccount(activeAccount);
       }
+      if (account?.adminMode) {
+        try {
+          if (adminSessionToken) await refreshAdminSession();
+          else await startAdminSession(account.cloudUid);
+        } catch (error) {
+          clearAdminSession();
+          if (error.status === 403) updateAccount({ ...account, adminRole: null, adminMode: false });
+          $("#admin-status").textContent = error.message;
+        }
+      } else if (adminSessionToken) {
+        await endAdminSession();
+      }
+      $("#play-button").disabled = false;
     } else {
       localStorage.removeItem(STORAGE_KEYS.activeAccount);
       if (adminSessionToken) await endAdminSession();
@@ -6473,34 +6616,7 @@ async function submitAuthForm(form, mode) {
       activeAccount = normalizeCloudAccount(response, email, salt, initialState.passwordHash);
       cacheCloudAccount(activeAccount);
     } else {
-      if (identity.toLocaleLowerCase("pt-BR") === "nv adm") {
-        const session = await cloudRequest("/api/admin/login", {
-          method: "POST",
-          auth: false,
-          body: { username: identity, password }
-        });
-        saveAdminSession(session.token);
-        clearCloudSession();
-        const adminAccount = normalizeAccount({
-          id: `admin-${randomHex(12)}`,
-          adminMode: true,
-          username: "NV ADM",
-          normalizedName: "nv adm",
-          playerId: "NV-ADM",
-          createdAt: Date.now(),
-          ownedSkins: Object.values(defaultSkins),
-          equippedSkins: { ...defaultSkins },
-          upgrades: { damage: 1, hull: 1, shield: 1 },
-          nextUpgradePrices: newUpgradePrices(),
-          inbox: { messages: [], rewards: [] },
-          badges: {},
-          equippedBadges: [],
-          leaderboardOptIn: false,
-          region: ""
-        });
-        writeAccounts([...accounts.filter((entry) => !entry.adminMode), adminAccount]);
-        activateAccount(adminAccount);
-      } else if (identity.includes("@")) {
+      if (identity.includes("@")) {
         const response = await cloudRequest("/api/auth/login", {
           method: "POST",
           auth: false,
@@ -6522,6 +6638,15 @@ async function submitAuthForm(form, mode) {
         activeAccount = existing;
       }
     }
+    if (activeAccount.adminMode) {
+      const session = await startAdminSession(activeAccount.cloudUid);
+      activeAccount = normalizeAccount({
+        ...activeAccount,
+        adminRole: session.role,
+        adminMode: true
+      });
+    }
+    else if (adminSessionToken) await endAdminSession();
     activateAccount(activeAccount);
     $("#play-button").disabled = false;
     form.reset();
@@ -6822,7 +6947,12 @@ document.addEventListener("click", (event) => {
 
 $("#promo-code-form").addEventListener("submit", (event) => {
   event.preventDefault();
-  redeemPromoCode($("#promo-code-input").value);
+  void redeemPromoCode($("#promo-code-input").value);
+});
+$("#open-admin-request-site").addEventListener("click", () => openGameSite("SITES/request-admin.html"));
+$("#close-game-site").addEventListener("click", () => $("#game-site-dialog").close());
+$("#game-site-dialog").addEventListener("close", () => {
+  $("#game-site-frame").removeAttribute("src");
 });
 $("#friend-search-form").addEventListener("submit", (event) => void submitFriendSearch(event));
 $("#profile-resources-button").addEventListener("click", (event) => {
@@ -6914,16 +7044,14 @@ $("#logout-button").addEventListener("click", async () => {
   try {
     if (accuracyAttemptActive) finishAccuracyAttempt(false);
     clearTimeout(cloudSyncTimer);
-    if (account?.adminMode) {
+    if (adminSessionToken) {
       try {
         await endAdminSession();
       } catch (error) {
         showToast(error.message);
       }
-      writeAccounts(readAccounts().filter((entry) => entry.id !== account?.id));
-    } else {
-      clearCloudSession();
-    }
+    } else clearAdminSession();
+    clearCloudSession();
     localStorage.removeItem(STORAGE_KEYS.activeAccount);
     requireAuthentication();
     showToast(t("loggedOut"));
