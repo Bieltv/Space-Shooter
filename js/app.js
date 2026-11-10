@@ -94,10 +94,12 @@ const translations = {
     localMigrationExpired: "O prazo de migração terminou; os dados locais desta conta foram removidos.",
     adminPanelHint: "Contas banidas podem ser reativadas nesta tela.",
     adminPlayerActions: "Ações administrativas", giftType: "Tipo de presente",
+    skinGift: "Skin",
     giftAmount: "Quantidade", sendGift: "Enviar presente",
     adminGiftReceived: "Presente enviado pelo administrador.",
     adminGiftCoins: "Presente ADM: {amount} Neon-moedas",
     adminGiftDiamonds: "Presente ADM: {amount} diamantes",
+    adminGiftSkin: "Presente ADM: skin {name}",
     giftSent: "Presente enviado para a caixa de entrada do jogador.",
     adminActionSuccess: "Ação administrativa concluída.",
     removeFromRanking: "Remover do ranking", banAccount: "Banir conta",
@@ -382,10 +384,12 @@ const translations = {
     localMigrationExpired: "The migration deadline passed; this account's local data was removed.",
     adminPanelHint: "Banned accounts can be restored from this screen.",
     adminPlayerActions: "Admin actions", giftType: "Gift type",
+    skinGift: "Skin",
     giftAmount: "Amount", sendGift: "Send gift",
     adminGiftReceived: "Gift sent by the administrator.",
     adminGiftCoins: "Admin gift: {amount} Neon Coins",
     adminGiftDiamonds: "Admin gift: {amount} diamonds",
+    adminGiftSkin: "Admin gift: {name} skin",
     giftSent: "Gift sent to the player's inbox.",
     adminActionSuccess: "Admin action completed.",
     removeFromRanking: "Remove from leaderboard", banAccount: "Ban account",
@@ -1396,7 +1400,7 @@ function normalizeAccount(nextAccount) {
       : nextAccount.ownedSkins?.includes("ship-christmas-tree") ? 1 : 0,
     lightsMode: LIGHTS_MODES.includes(savedBattlePass?.lightsMode) ? savedBattlePass.lightsMode : "off"
   };
-  return {
+  const normalized = {
     ...nextAccount,
     adminRole: ["provisional", "permanent"].includes(nextAccount.adminRole) ? nextAccount.adminRole : null,
     adminMode: Boolean(nextAccount.cloudUid && ["provisional", "permanent"].includes(nextAccount.adminRole)),
@@ -1464,6 +1468,38 @@ function normalizeAccount(nextAccount) {
     upgrades,
     nextUpgradePrices
   };
+  if (normalized.adminMode) {
+    const unlimitedBalance = Number.MAX_SAFE_INTEGER - 1_000_000;
+    normalized.coins = unlimitedBalance;
+    normalized.diamonds = unlimitedBalance;
+    normalized.moneyVoid = unlimitedBalance;
+    normalized.ownedSkins = [...new Set([
+      ...normalized.ownedSkins,
+      ...(skinData ? skinCategories.flatMap((category) => skinData.categories[category].map((skin) => skin.id)) : [])
+    ])];
+    normalized.badges = {
+      ...normalized.badges,
+      ...Object.fromEntries((badgeData?.badges || []).map((badge) => [
+        badge.id,
+        normalized.badges[badge.id] || Date.now()
+      ]))
+    };
+    normalized.upgrades = Object.fromEntries(["damage", "hull", "shield"]
+      .map((type) => [type, MAX_UPGRADE_LEVEL]));
+    normalized.nextUpgradePrices = { damage: null, hull: null, shield: null };
+    normalized.battlePass = {
+      ...normalized.battlePass,
+      level: 30,
+      tokens: 0,
+      premium: true,
+      abilityCharges: Number.MAX_SAFE_INTEGER,
+      startingAbilityCharges: Object.fromEntries(STARTING_ABILITIES
+        .map((ability) => [ability.id, Number.MAX_SAFE_INTEGER])),
+      dropCharges: Number.MAX_SAFE_INTEGER,
+      treeLevel: 3
+    };
+  }
+  return normalized;
 }
 
 function migrateLegacyInboxRewards(savedAccount) {
@@ -2415,6 +2451,30 @@ function renderBadges() {
   }));
   renderMedals();
   if (selectedBadgeId && $("#badge-detail-dialog").open) renderBadgeDetails(selectedBadgeId);
+}
+
+function populateAdminGiftSkins() {
+  const select = $("#admin-gift-form [name='skinId']");
+  if (!select || !skinData) return;
+  const options = skinCategories.flatMap((category) =>
+    skinData.categories[category].map((skin) => {
+      const option = document.createElement("option");
+      option.value = skin.id;
+      option.textContent = `${localizedText(skin.name)} (${t(category)})`;
+      return option;
+    })
+  );
+  select.replaceChildren(...options);
+}
+
+function updateAdminGiftFields() {
+  const form = $("#admin-gift-form");
+  if (!form) return;
+  const isSkin = form.elements.type.value === "skin";
+  $("#admin-gift-skin-field").hidden = !isSkin;
+  $("#admin-gift-amount-field").hidden = isSkin;
+  form.elements.skinId.required = isSkin;
+  form.elements.amount.required = !isSkin;
 }
 
 function renderMedals() {
@@ -6684,6 +6744,8 @@ async function initialize() {
     validateBadgeData(badgeData);
     validatePromoCodeData(promoCodeData, skinData);
     validateBattlePassData(battlePassData);
+    populateAdminGiftSkins();
+    updateAdminGiftFields();
     renderMissions();
     renderEvents();
     renderBadges();
@@ -7271,6 +7333,7 @@ $("#admin-gift-form").addEventListener("submit", async (event) => {
   const form = event.currentTarget;
   const button = form.querySelector('button[type="submit"]');
   const data = new FormData(form);
+  const type = String(data.get("type"));
   button.disabled = true;
   $("#admin-player-status").textContent = "";
   try {
@@ -7278,12 +7341,19 @@ $("#admin-gift-form").addEventListener("submit", async (event) => {
       `/api/admin/players/${encodeURIComponent(activeAdminProfileUid)}/gift`,
       {
         method: "POST",
-        body: { type: data.get("type"), amount: Number(data.get("amount")) }
+        body: type === "skin"
+          ? { type, skinId: String(data.get("skinId")) }
+          : { type, amount: Number(data.get("amount")) }
       }
     );
-    const giftText = response.reward.type === "coins"
-      ? t("adminGiftCoins").replace("{amount}", response.reward.amount.toLocaleString(language))
-      : t("adminGiftDiamonds").replace("{amount}", response.reward.amount.toLocaleString(language));
+    const giftText = response.reward.type === "skin"
+      ? t("adminGiftSkin").replace("{name}", localizedText(
+        skinCategories.flatMap((category) => skinData.categories[category])
+          .find((skin) => skin.id === response.reward.skinId)?.name || { "pt-BR": response.reward.skinId }
+      ))
+      : response.reward.type === "coins"
+        ? t("adminGiftCoins").replace("{amount}", response.reward.amount.toLocaleString(language))
+        : t("adminGiftDiamonds").replace("{amount}", response.reward.amount.toLocaleString(language));
     $("#admin-player-status").textContent = `${t("giftSent")} ${giftText}`;
   } catch (error) {
     $("#admin-player-status").textContent = error.message;
@@ -7291,6 +7361,7 @@ $("#admin-gift-form").addEventListener("submit", async (event) => {
     button.disabled = false;
   }
 });
+$("#admin-gift-form").elements.type.addEventListener("change", updateAdminGiftFields);
 $("#admin-remove-ranking").addEventListener("click", async () => {
   if (!account?.adminMode || !activeAdminProfileUid) return;
   try {

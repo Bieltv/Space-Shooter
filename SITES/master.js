@@ -5,6 +5,11 @@ const statusElement = document.querySelector("#status");
 const loginForm = document.querySelector("#login-form");
 const panel = document.querySelector("#panel");
 const requestList = document.querySelector("#requests");
+const giftForm = document.querySelector("#master-gift-form");
+const giftType = document.querySelector("#master-gift-type");
+const giftSkin = document.querySelector("#master-gift-skin");
+const giftStatus = document.querySelector("#gift-status");
+const giftSubmit = giftForm.querySelector('button[type="submit"]');
 const storedCode = sessionStorage.getItem(codeKey);
 if (storedCode) {
   document.querySelector("#special-code").value = storedCode;
@@ -30,6 +35,32 @@ async function apiRequest(path, options = {}) {
   return payload;
 }
 
+function updateGiftFields() {
+  const isSkin = giftType.value === "skin";
+  document.querySelector("#master-gift-skin-field").hidden = !isSkin;
+  giftSkin.hidden = !isSkin;
+  const amountField = document.querySelector("#master-gift-amount-field");
+  const amount = document.querySelector("#master-gift-amount");
+  amountField.hidden = isSkin;
+  amount.hidden = isSkin;
+  amount.required = !isSkin;
+  giftSkin.required = isSkin;
+}
+
+async function loadGiftSkins() {
+  const response = await fetch("../data/skins.json");
+  if (!response.ok) throw new Error(`Não foi possível carregar as skins (HTTP ${response.status}).`);
+  const catalog = await response.json();
+  const options = Object.values(catalog.categories).flat().map((skin) => {
+    const option = document.createElement("option");
+    option.value = skin.id;
+    option.textContent = skin.name["pt-BR"] || skin.id;
+    return option;
+  });
+  if (!options.length) throw new Error("O catálogo de skins está vazio.");
+  giftSkin.replaceChildren(...options);
+}
+
 function renderRequests(requests) {
   requestList.replaceChildren();
   if (!requests.length) {
@@ -41,6 +72,8 @@ function renderRequests(requests) {
     card.className = "request-card";
     const title = document.createElement("h2");
     title.textContent = entry.username;
+    const uid = document.createElement("small");
+    uid.textContent = `UID Firebase: ${entry.uid}`;
     const reason = document.createElement("p");
     reason.textContent = entry.reason;
     const created = document.createElement("small");
@@ -58,7 +91,7 @@ function renderRequests(requests) {
       button.addEventListener("click", () => void review(entry.uid, action, button));
       actions.append(button);
     }
-    card.append(title, reason, created, actions);
+    card.append(title, uid, reason, created, actions);
     requestList.append(card);
   }
 }
@@ -111,6 +144,36 @@ loginForm.addEventListener("submit", async (event) => {
 });
 
 document.querySelector("#refresh-requests").addEventListener("click", () => void refreshRequests());
+giftType.addEventListener("change", updateGiftFields);
+updateGiftFields();
+giftSubmit.disabled = true;
+void loadGiftSkins().then(
+  () => { giftSubmit.disabled = false; },
+  (error) => { giftStatus.textContent = error.message; }
+);
+giftForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  giftSubmit.disabled = true;
+  giftStatus.textContent = "";
+  const data = new FormData(giftForm);
+  const type = String(data.get("type"));
+  const body = type === "skin"
+    ? { type, skinId: String(data.get("skinId")) }
+    : { type, amount: Number(data.get("amount")) };
+  try {
+    await apiRequest(`/api/admin/players/${encodeURIComponent(String(data.get("uid")).trim())}/gift`, {
+      method: "POST",
+      body
+    });
+    giftStatus.textContent = "Presente enviado para a caixa de entrada do jogador.";
+    giftForm.reset();
+    updateGiftFields();
+  } catch (error) {
+    giftStatus.textContent = error.message;
+  } finally {
+    giftSubmit.disabled = false;
+  }
+});
 document.querySelector("#logout").addEventListener("click", async () => {
   try {
     await apiRequest("/api/admin/logout", { method: "POST" });

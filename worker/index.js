@@ -785,14 +785,19 @@ async function giftPlayer(request, env, admin, uid) {
   const body = await request.json();
   const type = body.type;
   const amount = body.amount;
-  if (!["coins", "diamonds"].includes(type) ||
+  const skinId = body.skinId;
+  if (type === "skin"
+    ? typeof skinId !== "string" || !/^[a-z0-9-]{1,60}$/i.test(skinId)
+    : !["coins", "diamonds"].includes(type) ||
       !Number.isSafeInteger(amount) || amount < 1 || amount > 1_000_000) {
-    return jsonResponse({ error: "Informe um presente válido entre 1 e 1.000.000." }, 400);
+    return jsonResponse({ error: type === "skin"
+      ? "Informe uma skin válida."
+      : "Informe um presente válido entre 1 e 1.000.000." }, 400);
   }
   const reward = {
     id: encodeBase64Url(crypto.getRandomValues(new Uint8Array(12))),
     type,
-    amount,
+    ...(type === "skin" ? { skinId, fallbackCoins: 100 } : { amount }),
     source: "admin",
     createdAt: Date.now(),
     claimed: false

@@ -135,6 +135,8 @@ test("master access code stays outside promo JSON and admin request pages are em
   assert.match(html, /settings-version[\s\S]*1\.0\.14/);
   assert.match(html, /id="open-master-panel"/);
   assert.match(app, /openGameSite\("SITES\/master\.html"\)/);
+  assert.match(masterSite, /ACCOUNT_SPECIAL_CODE/);
+  assert.match(masterSite, /MASTER_PASSWORD/);
   assert.match(masterSite, /Senha mestre/);
   assert.match(worker, /async function masterLogin/);
   assert.match(worker, /ACCOUNT_SPECIAL_CODE/);
@@ -142,4 +144,16 @@ test("master access code stays outside promo JSON and admin request pages are em
   assert.match(worker, /recipients\.size > 5/);
   assert.match(worker, /now - 24 \* 60 \* 60 \* 1000/);
   assert.match(app, /LOCAL_MIGRATION_GRACE_MS = 3 \* 24 \* 60 \* 60 \* 1000/);
+});
+
+test("admins receive game entitlements and both admin panels can send skins", () => {
+  assert.match(app, /if \(normalized\.adminMode\) \{/);
+  assert.match(app, /normalized\.coins = unlimitedBalance/);
+  assert.match(app, /normalized\.diamonds = unlimitedBalance/);
+  assert.match(app, /normalized\.ownedSkins = \[\.\.\.new Set/);
+  assert.match(app, /normalized\.badges = \{/);
+  assert.match(html, /<option value="skin" data-i18n="skinGift">/);
+  assert.match(masterSite, /id="master-gift-skin"/);
+  assert.match(worker, /type === "skin"/);
+  assert.match(worker, /fallbackCoins: 100/);
 });

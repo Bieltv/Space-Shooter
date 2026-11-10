@@ -241,6 +241,16 @@ test("master approval grants provisional access and the sixth distinct gift revo
       password: "test-password"
     });
     const masterToken = (await masterLogin.json()).token;
+    const masterSkinGift = await send("/api/admin/players/recipient-1/gift", "POST", {
+      type: "skin",
+      skinId: "ship-special-flame"
+    }, { adminToken: masterToken });
+    assert.equal(masterSkinGift.status, 200);
+    const masterReward = profiles.get("recipient-1").profile.state.inbox.rewards[0];
+    assert.equal(masterReward.type, "skin");
+    assert.equal(masterReward.skinId, "ship-special-flame");
+    assert.equal(masterReward.fallbackCoins, 100);
+    assert.equal(masterReward.source, "admin");
     const pending = await send("/api/master/requests", "GET", null, { adminToken: masterToken });
     assert.equal((await pending.json()).requests[0].uid, "alice");
     const approval = await send("/api/master/requests/alice", "PUT", { action: "approve" }, {
@@ -252,6 +262,17 @@ test("master approval grants provisional access and the sixth distinct gift revo
     const adminLogin = await send("/api/admin/login", "POST", {}, { uid: "alice" });
     assert.equal(adminLogin.status, 200);
     const adminToken = (await adminLogin.json()).token;
+    const adminSkinGift = await send("/api/admin/players/recipient-2/gift", "POST", {
+      type: "skin",
+      skinId: "ship-special-ice"
+    }, { adminToken });
+    assert.equal(adminSkinGift.status, 200);
+    assert.equal(adminSkinGift.headers.get("content-type"), "application/json; charset=utf-8");
+    const invalidSkinGift = await send("/api/admin/players/recipient-2/gift", "POST", {
+      type: "skin",
+      skinId: "../unknown"
+    }, { adminToken });
+    assert.equal(invalidSkinGift.status, 400);
     for (let index = 1; index <= 5; index += 1) {
       const gift = await send(`/api/admin/players/recipient-${index}/gift`, "POST", {
         type: "coins",

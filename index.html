@@ -674,11 +674,13 @@
       <h2 id="friend-resource-gift-title" data-i18n="giftCurrency">Presentear moedas/diamantes</h2>
       <label><span data-i18n="giftType">Tipo de presente</span>
         <select name="type">
+          <option value="skin" data-i18n="skinGift">Skin</option>
           <option value="coins" data-i18n="coins">Neon-moedas</option>
           <option value="diamonds" data-i18n="diamonds">Diamantes</option>
         </select>
       </label>
-      <label><span data-i18n="giftAmount">Quantidade</span><input name="amount" type="number" min="1" max="1000000" required value="100"></label>
+      <label id="admin-gift-skin-field"><span data-i18n="skinGift">Skin</span><select name="skinId"></select></label>
+      <label id="admin-gift-amount-field"><span data-i18n="giftAmount">Quantidade</span><input name="amount" type="number" min="1" max="1000000" required value="100"></label>
       <p class="purchase-breakdown"><span data-i18n="yourBalance">Seu saldo</span><strong id="friend-resource-gift-balance">0</strong></p>
       <p class="dialog-error" id="friend-resource-gift-error" role="status"></p>
       <div class="dialog-actions">
