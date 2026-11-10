@@ -51,7 +51,7 @@ document.querySelector("#request-form").addEventListener("submit", async (event)
   try {
     if (!apiBaseUrl) throw new Error("Configure a URL pública do Worker em js/config.js.");
     const session = await getCloudSession();
-    const response = await fetch(`${apiBaseUrl}/api/adm/requests`, {
+    const response = await fetch(`${apiBaseUrl}/api/admin/requests`, {
       method: "POST",
       headers: {
         authorization: `Bearer ${session.idToken}`,

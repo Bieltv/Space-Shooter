@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "neon-void-";
-const CACHE_NAME = `${CACHE_PREFIX}v18`;
+const CACHE_NAME = `${CACHE_PREFIX}v19`;
 const APP_SHELL = [
   "./",
   "./index.html",

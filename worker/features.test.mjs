@@ -128,7 +128,8 @@ test("master access code stays outside promo JSON and admin request pages are em
   assert.match(html, /id="screen-settings"[\s\S]*id="open-admin-request-site"/);
   assert.match(masterSite, /id="master-password"/);
   assert.match(adminRequestSite, /id="request-form"/);
-  assert.match(adminRequestScript, /api\/adm\/requests/);
+  assert.match(adminRequestScript, /api\/admin\/requests/);
+  assert.match(worker, /url\.pathname === "\/api\/admin\/requests" \|\| url\.pathname === "\/api\/adm\/requests"/);
   assert.match(wrangler, /127\.0\.0\.1:8765/);
   assert.match(wrangler, /localhost:5500/);
   assert.match(html, /settings-version[\s\S]*1\.0\.14/);

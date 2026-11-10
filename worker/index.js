@@ -1536,7 +1536,8 @@ export default {
         response = await renewAdminSession(request, env);
       } else if (url.pathname === "/api/admin/logout" && request.method === "POST") {
         response = await logoutAdmin(request, env);
-      } else if (url.pathname === "/api/adm/requests" && request.method === "POST") {
+      } else if ((url.pathname === "/api/admin/requests" || url.pathname === "/api/adm/requests") &&
+          request.method === "POST") {
         response = await submitAdminRequest(request, env);
       } else if (url.pathname.startsWith("/api/master/")) {
         const master = await verifyAdminSession(request, env);
@@ -1646,7 +1647,8 @@ export default {
           endpoints: [
             "/api/auth/register", "/api/auth/login", "/api/auth/refresh",
             "/api/master/verify-code", "/api/master/login", "/api/master/requests",
-            "/api/adm/requests", "/api/admin/login", "/api/admin/session", "/api/admin/logout",
+            "/api/admin/requests", "/api/adm/requests",
+            "/api/admin/login", "/api/admin/session", "/api/admin/logout",
             "/api/admin/banned", "/api/admin/players/:uid (GET)",
             "/api/admin/players/:uid/gift (POST)",
             "/api/admin/players/:uid/ranking (DELETE)",

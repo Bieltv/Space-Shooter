@@ -227,10 +227,14 @@ test("master approval grants provisional access and the sixth distinct gift revo
   }), env);
 
   try {
-    const request = await send("/api/adm/requests", "POST", {
+    const request = await send("/api/admin/requests", "POST", {
       reason: "Quero ajudar a comunidade e manter as partidas justas."
     }, { uid: "alice" });
     assert.equal(request.status, 201);
+    const legacyRequest = await send("/api/adm/requests", "POST", {
+      reason: "Quero ajudar a comunidade e manter as partidas justas."
+    }, { uid: "alice" });
+    assert.equal(legacyRequest.status, 409);
 
     const masterLogin = await send("/api/master/login", "POST", {
       code: "test-special-code",
