@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "neon-void-";
-const CACHE_NAME = `${CACHE_PREFIX}v17`;
+const CACHE_NAME = `${CACHE_PREFIX}v18`;
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -7,9 +7,9 @@ const APP_SHELL = [
   "./icons/neon-void.svg",
   "./icons/neon-void-192.png",
   "./icons/neon-void-512.png",
-  "./css/style.css?v=26",
+  "./css/style.css?v=27",
   "./js/config.js",
-  "./js/app.js?v=33",
+  "./js/app.js?v=34",
   "./SITES/site.css",
   "./SITES/request-admin.html",
   "./SITES/request-admin.js",

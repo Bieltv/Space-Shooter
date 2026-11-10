@@ -153,6 +153,8 @@ main { position: relative; z-index: 1; min-height: 100vh; }
 }
 .panel h2 { margin: 7px 0 30px; font-size: clamp(23px, 5vw, 34px); letter-spacing: 1px; }
 .panel .eyebrow { margin-bottom: 0; }
+.settings-version { display: flex; width: fit-content; align-items: center; gap: 10px; margin: -18px 0 24px; padding: 8px 12px; border: 1px solid rgba(49, 234, 255, .4); color: var(--muted); font-size: 13px; }
+.settings-version strong { color: var(--cyan); font-size: 15px; }
 .setting-row {
   display: flex;
   justify-content: space-between;

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const [store, skins, badges, app, html, masterSite, adminRequestSite, worker] = await Promise.all([
+const [store, skins, badges, app, html, masterSite, adminRequestSite, adminRequestScript, worker, wrangler] = await Promise.all([
   readFile(new URL("../data/store.json", import.meta.url), "utf8").then(JSON.parse),
   readFile(new URL("../data/skins.json", import.meta.url), "utf8").then(JSON.parse),
   readFile(new URL("../data/badges.json", import.meta.url), "utf8").then(JSON.parse),
@@ -10,7 +10,9 @@ const [store, skins, badges, app, html, masterSite, adminRequestSite, worker] = 
   readFile(new URL("../index.html", import.meta.url), "utf8"),
   readFile(new URL("../SITES/master.html", import.meta.url), "utf8"),
   readFile(new URL("../SITES/request-admin.html", import.meta.url), "utf8"),
-  readFile(new URL("./index.js", import.meta.url), "utf8")
+  readFile(new URL("../SITES/request-admin.js", import.meta.url), "utf8"),
+  readFile(new URL("./index.js", import.meta.url), "utf8"),
+  readFile(new URL("./wrangler.toml", import.meta.url), "utf8")
 ]);
 
 test("the diamond shop sells the three requested skins at their configured prices", () => {
@@ -126,6 +128,14 @@ test("master access code stays outside promo JSON and admin request pages are em
   assert.match(html, /id="screen-settings"[\s\S]*id="open-admin-request-site"/);
   assert.match(masterSite, /id="master-password"/);
   assert.match(adminRequestSite, /id="request-form"/);
+  assert.match(adminRequestScript, /api\/adm\/requests/);
+  assert.match(wrangler, /127\.0\.0\.1:8765/);
+  assert.match(wrangler, /localhost:5500/);
+  assert.match(html, /settings-version[\s\S]*1\.0\.14/);
+  assert.match(html, /id="open-master-panel"/);
+  assert.match(app, /openGameSite\("SITES\/master\.html"\)/);
+  assert.match(masterSite, /Senha mestre/);
+  assert.match(worker, /async function masterLogin/);
   assert.match(worker, /ACCOUNT_SPECIAL_CODE/);
   assert.match(worker, /adminApprovedAt \+ 7 \* 24 \* 60 \* 60 \* 1000/);
   assert.match(worker, /recipients\.size > 5/);

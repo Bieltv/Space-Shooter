@@ -13,9 +13,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=26">
+  <link rel="stylesheet" href="css/style.css?v=27">
   <script defer src="js/config.js"></script>
-  <script defer src="js/app.js?v=33"></script>
+  <script defer src="js/app.js?v=34"></script>
 </head>
 <body>
   <div class="starfield" aria-hidden="true"></div>
@@ -129,9 +129,7 @@
       <div class="panel">
         <p class="eyebrow" data-i18n="menuLabel">MENU</p>
         <h2 id="settings-title" data-i18n="settings">Configurações</h2>
-        <div class="setting-row">
-          <div><h3 data-i18n="gameVersion">Versão do jogo</h3><p>1.0.14</p></div>
-        </div>
+        <p class="settings-version"><span data-i18n="gameVersion">Versão do jogo</span> <strong>1.0.14</strong></p>
         <div class="setting-row">
           <div><h3 data-i18n="graphics">Gráficos</h3><p data-i18n="graphicsHint">Define a quantidade de partículas e efeitos animados.</p></div>
           <div class="segmented" role="group" aria-label="Qualidade gráfica">
@@ -169,6 +167,10 @@
         <div class="setting-row">
           <div><h3 data-i18n="adminRequestSite">Solicitar acesso ADM</h3><p data-i18n="adminRequestHint">Envie uma solicitação para a conta mestre analisar.</p></div>
           <button class="small-button" id="open-admin-request-site" type="button" data-i18n="adminRequestSite">Solicitar acesso ADM</button>
+        </div>
+        <div class="setting-row">
+          <div><h3 data-i18n="masterPanel">Painel mestre</h3><p data-i18n="masterPanelHint">Acesso restrito à conta que administra o jogo.</p></div>
+          <button class="small-button" id="open-master-panel" type="button" data-i18n="masterPanel">Painel mestre</button>
         </div>
         <div class="setting-row">
           <div><h3 data-i18n="evolution">Evolução</h3><p data-i18n="evolutionsHint">Melhore sua nave até o nível 10 usando moedas.</p></div>

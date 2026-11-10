@@ -88,6 +88,8 @@ const translations = {
     diamondSkinOwned: "Adquirida", diamondSkinInsufficient: "Você não tem diamantes suficientes para esta skin.",
     diamondSkinPurchased: "Skin comprada e adicionada à sua coleção.",
     gameVersion: "Versão do jogo",
+    masterPanel: "Painel mestre",
+    masterPanelHint: "Acesso restrito à conta que administra o jogo.",
     localMigrationCountdown: "Migre sua conta para o Firebase nos próximos {time}. Depois do prazo, os dados locais desta conta serão excluídos.",
     localMigrationExpired: "O prazo de migração terminou; os dados locais desta conta foram removidos.",
     adminPanelHint: "Contas banidas podem ser reativadas nesta tela.",
@@ -374,6 +376,8 @@ const translations = {
     diamondSkinOwned: "Owned", diamondSkinInsufficient: "You don't have enough diamonds for this skin.",
     diamondSkinPurchased: "Skin purchased and added to your collection.",
     gameVersion: "Game version",
+    masterPanel: "Master panel",
+    masterPanelHint: "Restricted to the account that administers the game.",
     localMigrationCountdown: "Migrate your account to Firebase within {time}. After the deadline, this account's local data will be deleted.",
     localMigrationExpired: "The migration deadline passed; this account's local data was removed.",
     adminPanelHint: "Banned accounts can be restored from this screen.",
@@ -7205,6 +7209,7 @@ $("#promo-code-form").addEventListener("submit", (event) => {
   void redeemPromoCode($("#promo-code-input").value);
 });
 $("#open-admin-request-site").addEventListener("click", () => openGameSite("SITES/request-admin.html"));
+$("#open-master-panel").addEventListener("click", () => openGameSite("SITES/master.html"));
 $("#close-game-site").addEventListener("click", () => $("#game-site-dialog").close());
 $("#game-site-dialog").addEventListener("close", () => {
   $("#game-site-frame").removeAttribute("src");
