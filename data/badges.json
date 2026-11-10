@@ -29,7 +29,7 @@
       "rarity": "rare",
       "symbol": "◇",
       "name": { "pt-BR": "Poder do diamante", "en": "Diamond Power" },
-      "description": { "pt-BR": "Faça sua primeira compra usando diamantes. Será liberado quando houver uma loja que aceite essa moeda.", "en": "Make your first purchase using diamonds. This will unlock when a store accepts this currency." }
+      "description": { "pt-BR": "Faça sua primeira compra usando diamantes.", "en": "Make your first purchase using diamonds." }
     },
     {
       "id": "christmas-2026",
@@ -98,6 +98,68 @@
       "description": {
         "pt-BR": "Fique em 1º lugar cinco vezes nas disputas semanais contra jogadores ou IA.",
         "en": "Place first five times in weekly competitions against players or AI."
+      }
+    },
+    {
+      "id": "admin-account",
+      "rarity": "legendary",
+      "symbol": "RGB",
+      "secret": true,
+      "rgb": true,
+      "name": { "pt-BR": "Conta ADM", "en": "Admin Account" },
+      "description": {
+        "pt-BR": "Concedido a contas com acesso administrativo.",
+        "en": "Awarded to accounts with administrator access."
+      }
+    },
+    {
+      "id": "kind-donor",
+      "rarity": "uncommon",
+      "symbol": "♡",
+      "name": { "pt-BR": "Doador Gentil", "en": "Kind Donor" },
+      "description": {
+        "pt-BR": "Faça 5 doações de Neon-moedas ou diamantes para amigos.",
+        "en": "Gift Neon Coins or diamonds to friends 5 times."
+      }
+    },
+    {
+      "id": "extremely-kind-donor",
+      "rarity": "rare",
+      "symbol": "♡",
+      "name": { "pt-BR": "Doador Extremamente Gentil", "en": "Extremely Kind Donor" },
+      "description": {
+        "pt-BR": "Faça 15 doações de Neon-moedas ou diamantes para amigos.",
+        "en": "Gift Neon Coins or diamonds to friends 15 times."
+      }
+    },
+    {
+      "id": "partner",
+      "rarity": "epic",
+      "symbol": "✉",
+      "name": { "pt-BR": "Parceiro", "en": "Partner" },
+      "description": {
+        "pt-BR": "Presenteie um amigo com 1 Passe Neon Ouro.",
+        "en": "Gift a friend 1 Neon Gold Pass."
+      }
+    },
+    {
+      "id": "kind-partner",
+      "rarity": "epic",
+      "symbol": "✉",
+      "name": { "pt-BR": "Parceiro Gentil", "en": "Kind Partner" },
+      "description": {
+        "pt-BR": "Presenteie amigos com 5 Passes Neon Ouro.",
+        "en": "Gift friends 5 Neon Gold Passes."
+      }
+    },
+    {
+      "id": "extremely-kind-partner",
+      "rarity": "legendary",
+      "symbol": "✉",
+      "name": { "pt-BR": "Parceiro Extremamente Gentil", "en": "Extremely Kind Partner" },
+      "description": {
+        "pt-BR": "Presenteie amigos com 15 Passes Neon Ouro.",
+        "en": "Gift friends 15 Neon Gold Passes."
       }
     }
   ]

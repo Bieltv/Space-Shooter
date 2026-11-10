@@ -130,6 +130,9 @@
         <p class="eyebrow" data-i18n="menuLabel">MENU</p>
         <h2 id="settings-title" data-i18n="settings">Configurações</h2>
         <div class="setting-row">
+          <div><h3 data-i18n="gameVersion">Versão do jogo</h3><p>1.0.14</p></div>
+        </div>
+        <div class="setting-row">
           <div><h3 data-i18n="graphics">Gráficos</h3><p data-i18n="graphicsHint">Define a quantidade de partículas e efeitos animados.</p></div>
           <div class="segmented" role="group" aria-label="Qualidade gráfica">
             <button type="button" data-quality="minimum" data-i18n="minimum">Mínimo</button>
@@ -162,6 +165,10 @@
           <div><h3 data-i18n="cloudMigration">Migrar conta local</h3><p data-i18n="cloudMigrationHint">Vincule esta conta local ao Firebase e sincronize seu progresso.</p></div>
           <button class="small-button" id="open-cloud-migration" type="button" data-i18n="cloudMigrationButton">Migrar para a nuvem</button>
           <p class="inline-status migration-deadline-notice" id="cloud-migration-notice" hidden></p>
+        </div>
+        <div class="setting-row">
+          <div><h3 data-i18n="adminRequestSite">Solicitar acesso ADM</h3><p data-i18n="adminRequestHint">Envie uma solicitação para a conta mestre analisar.</p></div>
+          <button class="small-button" id="open-admin-request-site" type="button" data-i18n="adminRequestSite">Solicitar acesso ADM</button>
         </div>
         <div class="setting-row">
           <div><h3 data-i18n="evolution">Evolução</h3><p data-i18n="evolutionsHint">Melhore sua nave até o nível 10 usando moedas.</p></div>
@@ -459,6 +466,10 @@
         <p class="section-copy" data-i18n="diamondStoreHint">Use Money-Void, uma moeda virtual, para adquirir diamantes. Não há pagamentos reais.</p>
         <div class="store-wallet"><span data-i18n="yourBalance">Seus saldos</span><strong><span id="diamond-screen-money-void">0</span> <span data-i18n="moneyVoid">Money-Void</span> · <span id="diamond-screen-value">0</span> <span data-i18n="diamonds">Diamantes</span></strong></div>
         <div class="diamond-package-list" id="diamond-package-list"></div>
+        <section class="diamond-skin-shop" aria-labelledby="diamond-skin-shop-title">
+          <h3 class="store-section-title" id="diamond-skin-shop-title" data-i18n="diamondSkins">Skins por diamantes</h3>
+          <div class="diamond-package-list" id="diamond-skin-list"></div>
+        </section>
         <button class="neon-button back-button" data-screen="store" data-i18n="back">Voltar</button>
       </div>
     </section>
@@ -493,8 +504,6 @@
           <p class="inline-status" id="promo-code-status" role="status" aria-live="polite"></p>
           <small class="promo-code-notice" data-i18n="promoCodePublicNotice">Os códigos deste protótipo ficam visíveis no JSON do jogo.</small>
         </form>
-        <button class="small-button" id="open-admin-request-site" type="button" data-i18n="adminRequestSite">Solicitar acesso ADM</button>
-        <button class="small-button" id="open-admin-request-site" type="button">Solicitar acesso ADM</button>
         <div class="inbox-tabs" role="tablist" aria-label="Caixa de entrada">
           <button type="button" role="tab" id="inbox-messages-tab" aria-controls="inbox-list" aria-selected="true" data-inbox-tab="messages" data-i18n="messages">Mensagens</button>
           <button type="button" role="tab" id="inbox-rewards-tab" aria-controls="inbox-list" aria-selected="false" data-inbox-tab="rewards" data-i18n="rewards">Recompensas</button>
@@ -623,6 +632,23 @@
     </form>
   </dialog>
 
+  <dialog class="game-dialog" id="diamond-skin-purchase-dialog" aria-labelledby="diamond-skin-purchase-title">
+    <div class="dialog-panel">
+      <p class="eyebrow" data-i18n="purchaseConfirmation">CONFIRMAR COMPRA</p>
+      <h2 id="diamond-skin-purchase-title"></h2>
+      <div class="purchase-breakdown">
+        <p><span data-i18n="yourBalance">Seu saldo</span><strong id="diamond-skin-purchase-balance">0</strong></p>
+        <p><span data-i18n="packageCost">Custo</span><strong id="diamond-skin-purchase-cost">0</strong></p>
+        <p class="purchase-remaining"><span data-i18n="balanceAfter">Saldo após comprar</span><strong id="diamond-skin-purchase-after">0</strong></p>
+      </div>
+      <p id="diamond-skin-purchase-error" class="dialog-error" role="status"></p>
+      <div class="dialog-actions">
+        <button type="button" class="neon-button muted" id="cancel-diamond-skin-purchase" data-i18n="cancel">Cancelar</button>
+        <button type="button" class="neon-button gold-button" id="confirm-diamond-skin-purchase" data-i18n="buy">Comprar</button>
+      </div>
+    </div>
+  </dialog>
+
   <dialog class="game-dialog" id="purchase-dialog" aria-labelledby="purchase-title">
     <div class="dialog-panel">
       <p class="eyebrow" data-i18n="purchaseConfirmation">CONFIRMAR COMPRA</p>
@@ -638,6 +664,26 @@
         <button type="button" class="neon-button gold-button" id="confirm-purchase" data-i18n="buy">Comprar</button>
       </div>
     </div>
+  </dialog>
+
+  <dialog class="game-dialog" id="friend-resource-gift-dialog" aria-labelledby="friend-resource-gift-title">
+    <form class="dialog-panel" id="friend-resource-gift-form">
+      <p class="eyebrow" data-i18n="purchaseConfirmation">CONFIRMAR PRESENTE</p>
+      <h2 id="friend-resource-gift-title" data-i18n="giftCurrency">Presentear moedas/diamantes</h2>
+      <label><span data-i18n="giftType">Tipo de presente</span>
+        <select name="type">
+          <option value="coins" data-i18n="coins">Neon-moedas</option>
+          <option value="diamonds" data-i18n="diamonds">Diamantes</option>
+        </select>
+      </label>
+      <label><span data-i18n="giftAmount">Quantidade</span><input name="amount" type="number" min="1" max="1000000" required value="100"></label>
+      <p class="purchase-breakdown"><span data-i18n="yourBalance">Seu saldo</span><strong id="friend-resource-gift-balance">0</strong></p>
+      <p class="dialog-error" id="friend-resource-gift-error" role="status"></p>
+      <div class="dialog-actions">
+        <button type="button" class="neon-button muted" id="cancel-friend-resource-gift" data-i18n="cancel">Cancelar</button>
+        <button type="submit" class="neon-button gold-button" id="confirm-friend-resource-gift" data-i18n="sendGift">Enviar presente</button>
+      </div>
+    </form>
   </dialog>
 
   <dialog class="game-dialog" id="starting-skill-dialog" aria-labelledby="starting-skill-confirm-title">
@@ -842,6 +888,7 @@
       <div id="player-profile-badges" class="player-profile-badges"></div>
       <section class="friend-profile-inventory" id="player-profile-inventory" hidden></section>
       <button class="small-button" id="friend-profile-action" type="button" hidden></button>
+      <button class="small-button" id="friend-resource-gift-action" type="button" hidden data-i18n="giftCurrency">Presentear moedas/diamantes</button>
       <section class="admin-player-actions" id="admin-player-actions" hidden>
         <h3 data-i18n="adminPlayerActions">Ações administrativas</h3>
         <form id="admin-gift-form" class="admin-gift-form">

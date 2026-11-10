@@ -2,15 +2,51 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const [store, skins, app, html, masterSite, adminRequestSite, worker] = await Promise.all([
+const [store, skins, badges, app, html, masterSite, adminRequestSite, worker] = await Promise.all([
   readFile(new URL("../data/store.json", import.meta.url), "utf8").then(JSON.parse),
   readFile(new URL("../data/skins.json", import.meta.url), "utf8").then(JSON.parse),
+  readFile(new URL("../data/badges.json", import.meta.url), "utf8").then(JSON.parse),
   readFile(new URL("../js/app.js", import.meta.url), "utf8"),
   readFile(new URL("../index.html", import.meta.url), "utf8"),
   readFile(new URL("../SITES/master.html", import.meta.url), "utf8"),
   readFile(new URL("../SITES/request-admin.html", import.meta.url), "utf8"),
   readFile(new URL("./index.js", import.meta.url), "utf8")
 ]);
+
+test("the diamond shop sells the three requested skins at their configured prices", () => {
+  assert.deepEqual(store.diamondSkins.map(({ category, skinId, priceDiamonds }) =>
+    [category, skinId, priceDiamonds]), [
+    ["ship", "ship-neon-pink", 750],
+    ["shield", "shield-gray-dark", 450],
+    ["shot", "shot-led", 500]
+  ]);
+  assert.ok(skins.categories.ship.some((skin) => skin.id === "ship-neon-pink"));
+  assert.ok(skins.categories.shield.some((skin) => skin.id === "shield-gray-dark"));
+  assert.ok(skins.categories.shot.some((skin) => skin.id === "shot-led" && skin.shape === "led"));
+  assert.match(app, /function purchaseDiamondSkin\(\)/);
+  assert.match(app, /context\.arc\(bullet\.x, bullet\.y - point \* 5, 2/);
+});
+
+test("the six donor and administrator badges have the requested criteria and rarities", () => {
+  const addedBadges = badges.badges.filter((badge) => [
+    "admin-account", "kind-donor", "extremely-kind-donor", "partner", "kind-partner",
+    "extremely-kind-partner"
+  ].includes(badge.id));
+  assert.equal(addedBadges.length, 6);
+  assert.equal(addedBadges.find((badge) => badge.id === "admin-account").secret, true);
+  assert.equal(addedBadges.find((badge) => badge.id === "admin-account").rgb, true);
+  assert.deepEqual(addedBadges.map(({ id, rarity }) => [id, rarity]), [
+    ["admin-account", "legendary"],
+    ["kind-donor", "uncommon"],
+    ["extremely-kind-donor", "rare"],
+    ["partner", "epic"],
+    ["kind-partner", "epic"],
+    ["extremely-kind-partner", "legendary"]
+  ]);
+  assert.match(app, /friendResourceGiftCount >= 5/);
+  assert.match(app, /friendResourceGiftCount >= 15/);
+  assert.match(app, /friendPassGiftCount >= 15/);
+});
 
 test("the December Special Box catalog has valid exact odds and rewards", () => {
   const box = store.specialLootBox;
@@ -86,6 +122,8 @@ test("master access code stays outside promo JSON and admin request pages are em
   assert.match(app, /\/api\/master\/verify-code/);
   assert.match(html, /id="game-site-frame"/);
   assert.match(html, /id="open-admin-request-site"/);
+  assert.equal((html.match(/id="open-admin-request-site"/g) || []).length, 1);
+  assert.match(html, /id="screen-settings"[\s\S]*id="open-admin-request-site"/);
   assert.match(masterSite, /id="master-password"/);
   assert.match(adminRequestSite, /id="request-form"/);
   assert.match(worker, /ACCOUNT_SPECIAL_CODE/);

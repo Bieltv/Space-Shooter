@@ -79,6 +79,15 @@ const translations = {
     coins: "Neon-moedas", diamonds: "Diamantes", moneyVoid: "Money-Void", walletBalance: "CARTEIRA", score: "Pontos", lives: "Vidas", pause: "Pausar", resume: "Continuar",
     inbox: "Caixa de entrada", events: "Eventos", eventsHint: "Confira os eventos ativos e os próximos eventos.",
     adminMode: "Modo ADM", adminPanel: "Painel administrativo", adminRequestSite: "Solicitar acesso ADM",
+    adminRequestHint: "Envie uma solicitação para a conta mestre analisar.",
+    secretBadge: "Emblema secreto", secretBadgeDescription: "Conquiste este emblema secreto para revelar seus detalhes.",
+    giftCurrency: "Presentear moedas/diamantes",
+    giftCurrencySuccess: "Presente enviado para a caixa de recompensas do seu amigo.",
+    friendGiftReceived: "Presente enviado por {username}.",
+    diamondSkins: "Skins exclusivas", diamondSkinBuy: "Comprar por {amount} diamantes",
+    diamondSkinOwned: "Adquirida", diamondSkinInsufficient: "Você não tem diamantes suficientes para esta skin.",
+    diamondSkinPurchased: "Skin comprada e adicionada à sua coleção.",
+    gameVersion: "Versão do jogo",
     localMigrationCountdown: "Migre sua conta para o Firebase nos próximos {time}. Depois do prazo, os dados locais desta conta serão excluídos.",
     localMigrationExpired: "O prazo de migração terminou; os dados locais desta conta foram removidos.",
     adminPanelHint: "Contas banidas podem ser reativadas nesta tela.",
@@ -356,6 +365,15 @@ const translations = {
     coins: "Neon Coins", diamonds: "Diamonds", moneyVoid: "Money-Void", walletBalance: "WALLET", score: "Score", lives: "Lives", pause: "Pause", resume: "Resume",
     inbox: "Inbox", events: "Events", eventsHint: "Browse active and upcoming events.",
     adminMode: "Admin mode", adminPanel: "Admin panel", adminRequestSite: "Request admin access",
+    adminRequestHint: "Send an application for the master account to review.",
+    secretBadge: "Secret badge", secretBadgeDescription: "Earn this secret badge to reveal its details.",
+    giftCurrency: "Gift coins/diamonds",
+    giftCurrencySuccess: "Gift sent to your friend's reward inbox.",
+    friendGiftReceived: "Gift sent by {username}.",
+    diamondSkins: "Exclusive skins", diamondSkinBuy: "Buy for {amount} diamonds",
+    diamondSkinOwned: "Owned", diamondSkinInsufficient: "You don't have enough diamonds for this skin.",
+    diamondSkinPurchased: "Skin purchased and added to your collection.",
+    gameVersion: "Game version",
     localMigrationCountdown: "Migrate your account to Firebase within {time}. After the deadline, this account's local data will be deleted.",
     localMigrationExpired: "The migration deadline passed; this account's local data was removed.",
     adminPanelHint: "Banned accounts can be restored from this screen.",
@@ -642,9 +660,11 @@ let profileRequestId = 0;
 let activeInboxTab = "messages";
 let activePublicProfile = null;
 let activeFriendGiftUid = null;
+let activeFriendResourceGiftUid = null;
 let pendingSpecialLootQuantity = 0;
 let specialLootSpinInProgress = false;
 let pendingDiamondPackageId = null;
+let pendingDiamondSkinId = null;
 let pendingStartEventId = null;
 let selectedStartingAbility = null;
 let accuracyAnimationId = 0;
@@ -947,16 +967,17 @@ async function refreshAdminGiftInbox() {
   try {
     const response = await cloudRequest("/api/me");
     if (account?.cloudUid !== owner.cloudUid) return;
+    const isGiftReward = (reward) => ["admin", "friend-gift"].includes(reward?.source);
     const serverGifts = Array.isArray(response.state?.inbox?.rewards)
-      ? response.state.inbox.rewards.filter((reward) => reward?.source === "admin")
+      ? response.state.inbox.rewards.filter(isGiftReward)
       : [];
     const mergedById = new Map(serverGifts.map((reward) => [reward.id, reward]));
-    for (const gift of account.inbox.rewards.filter((reward) => reward.source === "admin")) {
+    for (const gift of account.inbox.rewards.filter(isGiftReward)) {
       const serverGift = mergedById.get(gift.id);
       if (!serverGift || (gift.claimed && !serverGift.claimed)) mergedById.set(gift.id, gift);
     }
     const rewards = trimInboxRewards([
-      ...account.inbox.rewards.filter((reward) => reward.source !== "admin"),
+      ...account.inbox.rewards.filter((reward) => !isGiftReward(reward)),
       ...mergedById.values()
     ]);
     if (JSON.stringify(rewards) !== JSON.stringify(account.inbox.rewards)) {
@@ -1110,6 +1131,22 @@ function mergeCloudFriendGiftState(localAccount, serverState) {
       merged.diamonds = serverState.diamonds;
     }
   }
+  const serverResourceGiftCount = Number.isSafeInteger(serverState.friendResourceGiftCount)
+    ? serverState.friendResourceGiftCount
+    : 0;
+  if (serverResourceGiftCount > (localAccount.friendResourceGiftCount || 0)) {
+    merged.friendResourceGiftCount = serverResourceGiftCount;
+    for (const [currency, counter] of [
+      ["coins", "friendGiftCoinsSpent"],
+      ["diamonds", "friendGiftDiamondsSpent"]
+    ]) {
+      const serverSpent = Number.isSafeInteger(serverState[counter]) ? serverState[counter] : 0;
+      const localSpent = Number.isSafeInteger(localAccount[counter]) ? localAccount[counter] : 0;
+      const pendingSpend = Math.max(0, serverSpent - localSpent);
+      if (pendingSpend) merged[currency] = Math.max(0, merged[currency] - pendingSpend);
+      merged[counter] = Math.max(serverSpent, localSpent);
+    }
+  }
   if (serverState.battlePass?.premium === true && !merged.battlePass.premium) {
     merged = grantBattlePassRewardsThrough({
       ...merged,
@@ -1126,6 +1163,23 @@ function mergeCloudFriendGiftState(localAccount, serverState) {
       messages.set(message.id, current?.read ? current : message);
     }
     merged.inbox = { ...merged.inbox, messages: [...messages.values()].slice(-100) };
+  }
+  const serverGiftRewards = Array.isArray(serverState.inbox?.rewards)
+    ? serverState.inbox.rewards.filter((reward) => ["admin", "friend-gift"].includes(reward?.source))
+    : [];
+  if (serverGiftRewards.length) {
+    const rewards = new Map(merged.inbox.rewards.map((reward) => [reward.id, reward]));
+    for (const reward of serverGiftRewards) {
+      const local = rewards.get(reward.id);
+      rewards.set(reward.id, local?.claimed && !reward.claimed ? local : reward);
+    }
+    merged.inbox = {
+      ...merged.inbox,
+      rewards: trimInboxRewards([
+        ...merged.inbox.rewards.filter((reward) => !["admin", "friend-gift"].includes(reward.source)),
+        ...rewards.values()
+      ])
+    };
   }
   return merged;
 }
@@ -1350,6 +1404,15 @@ function normalizeAccount(nextAccount) {
     diamonds: Number.isSafeInteger(nextAccount.diamonds) && nextAccount.diamonds >= 0 ? nextAccount.diamonds : 0,
     friendPassGiftCount: Number.isSafeInteger(nextAccount.friendPassGiftCount) && nextAccount.friendPassGiftCount >= 0
       ? nextAccount.friendPassGiftCount
+      : 0,
+    friendResourceGiftCount: Number.isSafeInteger(nextAccount.friendResourceGiftCount) && nextAccount.friendResourceGiftCount >= 0
+      ? nextAccount.friendResourceGiftCount
+      : 0,
+    friendGiftCoinsSpent: Number.isSafeInteger(nextAccount.friendGiftCoinsSpent) && nextAccount.friendGiftCoinsSpent >= 0
+      ? nextAccount.friendGiftCoinsSpent
+      : 0,
+    friendGiftDiamondsSpent: Number.isSafeInteger(nextAccount.friendGiftDiamondsSpent) && nextAccount.friendGiftDiamondsSpent >= 0
+      ? nextAccount.friendGiftDiamondsSpent
       : 0,
     moneyVoid: Number.isSafeInteger(nextAccount.moneyVoid) && nextAccount.moneyVoid >= 0 ? nextAccount.moneyVoid : 0,
     eventProgress,
@@ -2186,7 +2249,7 @@ function updateInboxBadge() {
   const count = account
     ? account.inbox.messages.filter((message) => !message.read).length +
       account.inbox.rewards.filter((reward) =>
-        ["promo-code", "admin"].includes(reward.source) && !reward.claimed
+        ["promo-code", "admin", "friend-gift"].includes(reward.source) && !reward.claimed
       ).length +
       friendsData.incoming.length
     : 0;
@@ -2287,6 +2350,24 @@ function evaluateAccountBadges(nextAccount) {
   if (updatedAccount.weeklyTop1Wins >= 5) {
     updatedAccount = recordBadge(updatedAccount, "born-winner");
   }
+  if (updatedAccount.adminRole === "provisional" || updatedAccount.adminRole === "permanent") {
+    updatedAccount = recordBadge(updatedAccount, "admin-account");
+  }
+  if (updatedAccount.friendResourceGiftCount >= 5) {
+    updatedAccount = recordBadge(updatedAccount, "kind-donor");
+  }
+  if (updatedAccount.friendResourceGiftCount >= 15) {
+    updatedAccount = recordBadge(updatedAccount, "extremely-kind-donor");
+  }
+  if (updatedAccount.friendPassGiftCount >= 1) {
+    updatedAccount = recordBadge(updatedAccount, "partner");
+  }
+  if (updatedAccount.friendPassGiftCount >= 5) {
+    updatedAccount = recordBadge(updatedAccount, "kind-partner");
+  }
+  if (updatedAccount.friendPassGiftCount >= 15) {
+    updatedAccount = recordBadge(updatedAccount, "extremely-kind-partner");
+  }
   const christmasEvent = eventData?.events.find((event) => event.id === "natal-2026");
   const finalTarget = christmasEvent?.milestoneRewards?.find((reward) =>
     reward.skinId === "ship-christmas-ornament")?.atScore;
@@ -2306,17 +2387,19 @@ function renderBadges() {
   grid.replaceChildren(...badgeData.badges.map((badge) => {
     const earnedAt = account?.badges?.[badge.id];
     const rarity = skinData.rarities[badge.rarity];
+    const secretHidden = badge.secret === true && !earnedAt;
+    const badgeName = secretHidden ? t("secretBadge") : localizedText(badge.name);
     const button = document.createElement("button");
-    button.className = `badge-card rarity-${badge.rarity}${earnedAt ? " badge-earned" : " badge-locked"}`;
+    button.className = `badge-card rarity-${badge.rarity}${earnedAt ? " badge-earned" : " badge-locked"}${badge.rgb ? " badge-rgb" : ""}`;
     button.type = "button";
     button.dataset.badgeId = badge.id;
     button.style.setProperty("--badge-color", rarity.color);
-    button.setAttribute("aria-label", `${localizedText(badge.name)} · ${earnedAt ? t("badgeEarned").replace("{date}", new Date(earnedAt).toLocaleDateString(language)) : t("badgeLocked")}`);
+    button.setAttribute("aria-label", `${badgeName} · ${earnedAt ? t("badgeEarned").replace("{date}", new Date(earnedAt).toLocaleDateString(language)) : t("badgeLocked")}`);
     const icon = document.createElement("span");
     icon.className = "badge-hex";
     icon.textContent = badge.symbol;
     const title = document.createElement("strong");
-    title.textContent = localizedText(badge.name);
+    title.textContent = badgeName;
     const rarityLabel = document.createElement("small");
     rarityLabel.textContent = localizedText(rarity);
     const lock = document.createElement("span");
@@ -2410,17 +2493,18 @@ function renderOwnProfile() {
     const locked = !Number.isSafeInteger(earnedAt) || earnedAt <= 0;
     const button = document.createElement("button");
     button.type = "button";
-    button.className = `profile-badge-option${equipped ? " equipped" : ""}${locked ? " locked" : ""}`;
+    button.className = `profile-badge-option${equipped ? " equipped" : ""}${locked ? " locked" : ""}${badge.rgb ? " badge-rgb" : ""}`;
     button.disabled = !account.cloudUid || verifiedProfileBadges === null || locked ||
       profileBadgeSaveInProgress || (!equipped && equippedBadges.length >= 3);
     button.setAttribute("aria-pressed", String(equipped));
-    button.setAttribute("aria-label", `${localizedText(badge.name)} · ${locked ? t("badgeLocked") : equipped ? t("unequipBadge") : t("equipBadge")}`);
+    const badgeName = badge.secret === true && locked ? t("secretBadge") : localizedText(badge.name);
+    button.setAttribute("aria-label", `${badgeName} · ${locked ? t("badgeLocked") : equipped ? t("unequipBadge") : t("equipBadge")}`);
     button.style.setProperty("--badge-color", skinData.rarities[badge.rarity].color);
     const icon = document.createElement("span");
     icon.className = "badge-hex";
     icon.textContent = badge.symbol;
     const name = document.createElement("strong");
-    name.textContent = localizedText(badge.name);
+    name.textContent = badgeName;
     const action = document.createElement("small");
     action.textContent = locked ? t("badgeLocked") : equipped ? t("unequipBadge") : t("equipBadge");
     button.append(icon, name, action);
@@ -2608,7 +2692,7 @@ async function removeFriendFromUi(friendUid) {
 
 function createProfileBadge(badge, earnedAt, showDate) {
   const item = document.createElement("span");
-  item.className = `profile-badge rarity-${badge.rarity}`;
+  item.className = `profile-badge rarity-${badge.rarity}${badge.rgb ? " badge-rgb" : ""}`;
   item.style.setProperty("--badge-color", skinData.rarities[badge.rarity].color);
   item.title = `${localizedText(badge.name)}${earnedAt ? ` · ${new Date(earnedAt).toLocaleDateString(language)}` : ""}`;
   const icon = document.createElement("span");
@@ -2701,12 +2785,16 @@ function renderBadgeDetails(badgeId) {
   if (!badge) return;
   const rarity = skinData.rarities[badge.rarity];
   const earnedAt = account?.badges?.[badge.id];
-  $("#badge-detail-icon").textContent = badge.symbol;
+  const secretHidden = badge.secret === true && !earnedAt;
+  $("#badge-detail-icon").textContent = secretHidden ? "?" : badge.symbol;
   $("#badge-detail-icon").style.setProperty("--badge-color", rarity.color);
+  $("#badge-detail-icon").classList.toggle("badge-rgb", badge.rgb === true);
   $("#badge-detail-rarity").textContent = localizedText(rarity);
   $("#badge-detail-rarity").style.color = rarity.color;
-  $("#badge-detail-title").textContent = localizedText(badge.name);
-  $("#badge-detail-description").textContent = localizedText(badge.description);
+  $("#badge-detail-title").textContent = secretHidden ? t("secretBadge") : localizedText(badge.name);
+  $("#badge-detail-description").textContent = secretHidden
+    ? t("secretBadgeDescription")
+    : localizedText(badge.description);
   $("#badge-detail-earned").textContent = earnedAt
     ? t("badgeEarned").replace("{date}", new Date(earnedAt).toLocaleString(language))
     : t("badgeLocked");
@@ -2805,7 +2893,7 @@ function renderInbox() {
   }
   const entries = activeInboxTab === "messages"
     ? account.inbox.messages
-    : account.inbox.rewards.filter((reward) => ["promo-code", "admin"].includes(reward.source));
+    : account.inbox.rewards.filter((reward) => ["promo-code", "admin", "friend-gift"].includes(reward.source));
   const friendRequests = activeInboxTab === "messages" ? friendsData.incoming : [];
   if (!entries.length && !friendRequests.length) {
     const empty = document.createElement("p");
@@ -2837,6 +2925,8 @@ function renderInbox() {
           : `${entry.amount.toLocaleString(language)} ${t("coins")}`;
       if (entry.source === "admin") {
         copy.textContent = t("adminGiftReceived");
+      } else if (entry.source === "friend-gift") {
+        copy.textContent = t("friendGiftReceived").replace("{username}", entry.senderUsername || t("player"));
       } else if (entry.source === "promo-code") {
         copy.textContent = t("promoRewardDetails")
           .replace("{title}", localizedText(entry.promoTitle) || t("rewards"))
@@ -2891,6 +2981,34 @@ function renderDiamondPackages() {
     button.textContent = t("buyDiamonds");
     button.disabled = !account || moneyVoid < pack.priceMoneyVoid;
     card.append(description, button);
+    return card;
+  }));
+  const skinList = $("#diamond-skin-list");
+  if (!skinList || !storeData.diamondSkins) return;
+  skinList.replaceChildren(...storeData.diamondSkins.map((offer) => {
+    const skin = skinData.categories[offer.category].find((entry) => entry.id === offer.skinId);
+    if (!skin) throw new Error(`Skin de diamantes não encontrada: ${offer.skinId}.`);
+    const card = document.createElement("article");
+    card.className = "diamond-package diamond-skin-package";
+    const description = document.createElement("div");
+    const name = document.createElement("strong");
+    name.textContent = skin.name[language];
+    const detail = document.createElement("p");
+    detail.textContent = skin.description[language];
+    const visual = document.createElement("span");
+    visual.className = `skin-visual ${skin.shape}`;
+    visual.style.setProperty("--skin-color", skin.color);
+    visual.setAttribute("aria-hidden", "true");
+    description.append(name, detail);
+    const button = document.createElement("button");
+    button.className = "neon-button gold-button";
+    button.type = "button";
+    button.dataset.diamondSkin = offer.id;
+    button.textContent = ownedSkins.has(skin.id)
+      ? t("diamondSkinOwned")
+      : t("diamondSkinBuy").replace("{amount}", offer.priceDiamonds.toLocaleString(language));
+    button.disabled = !account || ownedSkins.has(skin.id) || diamonds < offer.priceDiamonds;
+    card.append(visual, description, button);
     return card;
   }));
 }
@@ -3384,6 +3502,45 @@ function openDiamondPurchase(packageId) {
   $("#diamond-purchase-dialog").showModal();
 }
 
+function openDiamondSkinPurchase(offerId) {
+  const offer = storeData?.diamondSkins?.find((entry) => entry.id === offerId);
+  const skin = offer && skinData.categories[offer.category]?.find((entry) => entry.id === offer.skinId);
+  if (!offer || !skin || !account || ownedSkins.has(skin.id)) return;
+  pendingDiamondSkinId = offer.id;
+  $("#diamond-skin-purchase-title").textContent = skin.name[language];
+  $("#diamond-skin-purchase-balance").textContent = diamonds.toLocaleString(language);
+  $("#diamond-skin-purchase-cost").textContent = `${offer.priceDiamonds.toLocaleString(language)} ${t("diamonds")}`;
+  $("#diamond-skin-purchase-after").textContent =
+    `${Math.max(0, diamonds - offer.priceDiamonds).toLocaleString(language)} ${t("diamonds")}`;
+  $("#diamond-skin-purchase-error").textContent =
+    diamonds < offer.priceDiamonds ? t("diamondSkinInsufficient") : "";
+  $("#confirm-diamond-skin-purchase").disabled = diamonds < offer.priceDiamonds;
+  $("#diamond-skin-purchase-dialog").showModal();
+}
+
+function purchaseDiamondSkin() {
+  const offer = storeData?.diamondSkins?.find((entry) => entry.id === pendingDiamondSkinId);
+  const skin = offer && skinData.categories[offer.category]?.find((entry) => entry.id === offer.skinId);
+  if (!offer || !skin || !account) return;
+  const button = $("#confirm-diamond-skin-purchase");
+  button.disabled = true;
+  try {
+    if (ownedSkins.has(skin.id)) throw new Error(t("diamondSkinOwned"));
+    if (diamonds < offer.priceDiamonds) throw new Error(t("diamondSkinInsufficient"));
+    persistAccount(recordBadge({
+      ...account,
+      diamonds: account.diamonds - offer.priceDiamonds,
+      ownedSkins: [...account.ownedSkins, skin.id]
+    }, "first-diamond-purchase"));
+    $("#diamond-skin-purchase-dialog").close();
+    pendingDiamondSkinId = null;
+    showToast(t("diamondSkinPurchased"));
+  } catch (error) {
+    $("#diamond-skin-purchase-error").textContent = error.message;
+    button.disabled = false;
+  }
+}
+
 function purchaseDiamonds() {
   const pack = storeData?.diamondPackages.find((entry) => entry.id === pendingDiamondPackageId);
   if (!pack || !account) return;
@@ -3408,7 +3565,7 @@ function purchaseDiamonds() {
 
 function claimInboxReward(rewardId) {
   const reward = account?.inbox.rewards.find((entry) => entry.id === rewardId);
-  if (!reward || !["promo-code", "admin"].includes(reward.source) || reward.claimed) return;
+  if (!reward || !["promo-code", "admin", "friend-gift"].includes(reward.source) || reward.claimed) return;
   try {
     let updatedReward = { ...reward, claimed: true, claimedAt: Date.now() };
     let changes = {};
@@ -3817,7 +3974,7 @@ function validateSkinData(data) {
       const validShapes = {
         ship: ["triangle", "triangle-wide", "diamond", "void-neon", "christmas-ornament", "white-neon", "christmas-tree", "star", "fire-orb", "ice-crystal", "void-orb", "explosive-orb"],
         shield: ["circle", "double-circle", "hexagon", "petal-ring", "gold-pulse", "christmas-lights", "star-points", "eclipse"],
-        shot: ["line", "line-thin", "line-wide", "double-line", "star", "candy-cane"]
+        shot: ["line", "line-thin", "line-wide", "double-line", "star", "candy-cane", "led"]
       };
       if (!skin.id || ids.has(skin.id) || !data.rarities[skin.rarity] || !skin.color ||
           !validShapes[category].includes(skin.shape) || !skin.name?.["pt-BR"] || !skin.name?.en ||
@@ -3986,8 +4143,8 @@ function validateEventData(data) {
 }
 
 function validateBadgeData(data) {
-  if (!Array.isArray(data?.badges) || data.badges.length !== 13) {
-    throw new Error("O catálogo deve conter os treze emblemas configurados.");
+  if (!Array.isArray(data?.badges) || data.badges.length !== 19) {
+    throw new Error("O catálogo deve conter os dezenove emblemas configurados.");
   }
   const ids = new Set();
   for (const badge of data.badges) {
@@ -4124,6 +4281,18 @@ function validateStoreData(data, skinCatalog) {
       throw new Error("Pacote de diamantes inválido no arquivo da loja.");
     }
     packageIds.add(pack.id);
+  }
+  if (!Array.isArray(data.diamondSkins) || data.diamondSkins.length !== 3) {
+    throw new Error("A loja de diamantes deve conter as três skins configuradas.");
+  }
+  const diamondSkinIds = new Set();
+  for (const offer of data.diamondSkins) {
+    if (!offer.id || diamondSkinIds.has(offer.id) || !skinCategories.includes(offer.category) ||
+        !skinCatalog.categories[offer.category]?.some((skin) => skin.id === offer.skinId) ||
+        !Number.isSafeInteger(offer.priceDiamonds) || offer.priceDiamonds <= 0) {
+      throw new Error(`Oferta de skin por diamantes inválida ou repetida: ${offer.id || "(sem ID)"}.`);
+    }
+    diamondSkinIds.add(offer.id);
   }
 }
 
@@ -4684,6 +4853,7 @@ async function openPublicProfile(uid) {
   $("#player-profile-inventory").hidden = true;
   $("#player-profile-inventory").replaceChildren();
   $("#friend-profile-action").hidden = true;
+  $("#friend-resource-gift-action").hidden = true;
   $("#admin-player-status").textContent = "";
   $("#player-profile-title").textContent = t("playerProfile");
   $("#player-profile-score").textContent = t("leaderboardLoading");
@@ -4731,6 +4901,15 @@ async function openPublicProfile(uid) {
     const friendAction = $("#friend-profile-action");
     const canManageFriend = Boolean(account?.cloudUid && !account.adminMode && profile.uid !== account.cloudUid);
     friendAction.hidden = !canManageFriend;
+    const resourceGiftAction = $("#friend-resource-gift-action");
+    resourceGiftAction.hidden = !canManageFriend || !isFriend;
+    delete resourceGiftAction.dataset.friendAction;
+    delete resourceGiftAction.dataset.friendUid;
+    if (!resourceGiftAction.hidden) {
+      resourceGiftAction.dataset.friendAction = "gift-currency";
+      resourceGiftAction.dataset.friendUid = profile.uid;
+      resourceGiftAction.disabled = false;
+    }
     delete friendAction.dataset.friendAction;
     delete friendAction.dataset.friendUid;
     delete friendAction.dataset.friendRequestId;
@@ -4801,6 +4980,71 @@ function openFriendGiftDialog(friendUid) {
   $("#friend-gift-error").textContent = account.diamonds < cost ? t("friendGiftInsufficient") : "";
   $("#confirm-friend-gift").disabled = account.diamonds < cost;
   $("#friend-gift-dialog").showModal();
+}
+
+function updateFriendResourceGiftForm() {
+  const form = $("#friend-resource-gift-form");
+  if (!form || !account) return;
+  const type = form.elements.type.value;
+  const balance = type === "diamonds" ? account.diamonds : account.coins;
+  const amount = form.elements.amount;
+  amount.max = String(Math.min(balance, 1_000_000));
+  $("#friend-resource-gift-balance").textContent =
+    `${balance.toLocaleString(language)} ${t(type)}`;
+  const quantity = Number(amount.value);
+  $("#confirm-friend-resource-gift").disabled = !Number.isSafeInteger(quantity) ||
+    quantity < 1 || quantity > Math.min(balance, 1_000_000);
+}
+
+function openFriendResourceGiftDialog(friendUid) {
+  if (!account?.cloudUid || !friendsData.friends.some((friend) => friend.uid === friendUid)) return;
+  activeFriendResourceGiftUid = friendUid;
+  const form = $("#friend-resource-gift-form");
+  form.reset();
+  form.elements.amount.value = "100";
+  $("#friend-resource-gift-error").textContent = "";
+  updateFriendResourceGiftForm();
+  $("#friend-resource-gift-dialog").showModal();
+}
+
+async function confirmFriendResourceGift(event) {
+  event.preventDefault();
+  const friendUid = activeFriendResourceGiftUid;
+  const form = event.currentTarget;
+  const type = form.elements.type.value;
+  const amount = Number(form.elements.amount.value);
+  const button = $("#confirm-friend-resource-gift");
+  if (!friendUid || !account?.cloudUid || button.disabled) return;
+  const senderUid = account.cloudUid;
+  button.disabled = true;
+  $("#friend-resource-gift-error").textContent = "";
+  try {
+    const receipt = await cloudRequest(`/api/friends/${encodeURIComponent(friendUid)}/gift`, {
+      method: "POST",
+      body: { type, amount }
+    });
+    if (!receipt.gifted || !Number.isSafeInteger(receipt.balance) ||
+        !Number.isSafeInteger(receipt.friendResourceGiftCount) ||
+        !Number.isSafeInteger(receipt.friendGiftCoinsSpent) ||
+        !Number.isSafeInteger(receipt.friendGiftDiamondsSpent)) {
+      throw new Error(t("cloudApiUnavailable"));
+    }
+    if (account?.cloudUid === senderUid) {
+      persistAccount({
+        ...account,
+        [type]: receipt.balance,
+        friendResourceGiftCount: receipt.friendResourceGiftCount,
+        friendGiftCoinsSpent: receipt.friendGiftCoinsSpent,
+        friendGiftDiamondsSpent: receipt.friendGiftDiamondsSpent
+      });
+    }
+    $("#friend-resource-gift-dialog").close();
+    activeFriendResourceGiftUid = null;
+    showToast(t("giftCurrencySuccess"));
+  } catch (error) {
+    $("#friend-resource-gift-error").textContent = error.message;
+    button.disabled = false;
+  }
 }
 
 async function sendFriendRequestFromProfile(friendUid, button) {
@@ -5944,6 +6188,15 @@ function drawGame() {
   context.shadowBlur = settings.quality === "minimum" ? 0 : 9;
   context.lineCap = "round";
   for (const bullet of game.bullets) {
+    if (shotSkin.shape === "led") {
+      context.fillStyle = shotSkin.color;
+      for (let point = 0; point < 3; point++) {
+        context.beginPath();
+        context.arc(bullet.x, bullet.y - point * 5, 2, 0, Math.PI * 2);
+        context.fill();
+      }
+      continue;
+    }
     if (shotSkin.shape === "candy-cane") {
       context.lineCap = "round";
       context.lineWidth = 5;
@@ -6309,7 +6562,7 @@ function runDebugChecks() {
           skinCategories.some((category) => skinData.categories[category].some((skin) =>
             skin.id === reward.skinId && skin.rarity === "epic")))))],
     ["Catálogo de treze emblemas válido",
-      badgeData?.badges.length === 13 &&
+      badgeData?.badges.length === 19 &&
       badgeData.badges.some((badge) => badge.id === "player-beta" && badge.rarity === "legendary")],
     ["Códigos promocionais válidos", Array.isArray(promoCodeData?.codes)],
     ["Idioma suportado", Object.hasOwn(translations, language)],
@@ -6854,6 +7107,7 @@ document.addEventListener("click", (event) => {
     void answerFriendRequestFromUi(target.dataset.friendRequestId, "accept");
   }
   if (target.dataset.friendAction === "gift") openFriendGiftDialog(target.dataset.friendUid);
+  if (target.dataset.friendAction === "gift-currency") openFriendResourceGiftDialog(target.dataset.friendUid);
   if (target.dataset.collectionTab) {
     activeCollectionTab = target.dataset.collectionTab;
     renderBadges();
@@ -6895,6 +7149,7 @@ document.addEventListener("click", (event) => {
   }
   if (target.dataset.claimReward) claimInboxReward(target.dataset.claimReward);
   if (target.dataset.diamondPackage) openDiamondPurchase(target.dataset.diamondPackage);
+  if (target.dataset.diamondSkin) openDiamondSkinPurchase(target.dataset.diamondSkin);
   if (target.id === "open-purchase") openPurchaseDialog();
   if (target.id === "pause-settings-button") {
     showScreen("settings");
@@ -6998,6 +7253,13 @@ $("#cancel-friend-gift").addEventListener("click", () => {
   activeFriendGiftUid = null;
   $("#friend-gift-dialog").close();
 });
+$("#friend-resource-gift-form").addEventListener("submit", (event) => void confirmFriendResourceGift(event));
+$("#friend-resource-gift-form").addEventListener("input", updateFriendResourceGiftForm);
+$("#friend-resource-gift-form").addEventListener("change", updateFriendResourceGiftForm);
+$("#cancel-friend-resource-gift").addEventListener("click", () => {
+  activeFriendResourceGiftUid = null;
+  $("#friend-resource-gift-dialog").close();
+});
 $("#admin-gift-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!account?.adminMode || !activeAdminProfileUid) return;
@@ -7085,6 +7347,11 @@ $("#confirm-diamond-purchase").addEventListener("click", purchaseDiamonds);
 $("#cancel-diamond-purchase").addEventListener("click", () => {
   pendingDiamondPackageId = null;
   $("#diamond-purchase-dialog").close();
+});
+$("#confirm-diamond-skin-purchase").addEventListener("click", purchaseDiamondSkin);
+$("#cancel-diamond-skin-purchase").addEventListener("click", () => {
+  pendingDiamondSkinId = null;
+  $("#diamond-skin-purchase-dialog").close();
 });
 $("#close-luck-drop-result").addEventListener("click", () => {
   if (!luckSpinInProgress) $("#luck-drop-result-dialog").close();

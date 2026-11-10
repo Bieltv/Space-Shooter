@@ -36,7 +36,8 @@
       { "id": "ship-yellow", "rarity": "common", "color": "#ffe04b", "shape": "triangle", "name": { "pt-BR": "Amarela", "en": "Yellow" }, "description": { "pt-BR": "Nave simples amarela.", "en": "A simple yellow ship." } },
       { "id": "ship-white", "rarity": "common", "color": "#f8fbff", "shape": "triangle", "name": { "pt-BR": "Branca", "en": "White" }, "description": { "pt-BR": "Nave simples branca.", "en": "A simple white ship." } },
       { "id": "ship-blue", "rarity": "common", "color": "#4c8dff", "shape": "triangle", "name": { "pt-BR": "Azul", "en": "Blue" }, "description": { "pt-BR": "Nave simples azul.", "en": "A simple blue ship." } },
-      { "id": "ship-golden-star", "rarity": "legendary", "color": "#ffd45c", "accentColor": "#fff3b0", "shape": "star", "name": { "pt-BR": "Estrela Dourada", "en": "Golden Star" }, "description": { "pt-BR": "Nave lendária em forma de estrela dourada.", "en": "A legendary ship shaped like a golden star." } }
+      { "id": "ship-golden-star", "rarity": "legendary", "color": "#ffd45c", "accentColor": "#fff3b0", "shape": "star", "name": { "pt-BR": "Estrela Dourada", "en": "Golden Star" }, "description": { "pt-BR": "Nave lendária em forma de estrela dourada.", "en": "A legendary ship shaped like a golden star." } },
+      { "id": "ship-neon-pink", "rarity": "epic", "color": "#ff45c8", "accentColor": "#ffb0eb", "shape": "triangle-wide", "name": { "pt-BR": "Rosa Neon", "en": "Neon Pink" }, "description": { "pt-BR": "Uma nave rosa vibrante com brilho neon.", "en": "A vibrant pink ship with a neon glow." } }
     ],
     "shield": [
       { "id": "shield-uncommon", "rarity": "uncommon", "color": "#42ee78", "shape": "circle", "name": { "pt-BR": "Broto", "en": "Sprout" }, "description": { "pt-BR": "Uma barreira verde e vibrante.", "en": "A vivid green barrier." } },
@@ -60,7 +61,8 @@
       { "id": "shield-white", "rarity": "common", "color": "#f8fbff", "shape": "circle", "name": { "pt-BR": "Escudo Branco", "en": "White Shield" }, "description": { "pt-BR": "Escudo simples branco.", "en": "A simple white shield." } },
       { "id": "shield-blue", "rarity": "common", "color": "#4c8dff", "shape": "circle", "name": { "pt-BR": "Escudo Azul", "en": "Blue Shield" }, "description": { "pt-BR": "Escudo simples azul.", "en": "A simple blue shield." } },
       { "id": "shield-golden-star", "rarity": "legendary", "color": "#ffd45c", "shape": "star-points", "name": { "pt-BR": "Escudo Estrela Dourada", "en": "Golden Star Shield" }, "description": { "pt-BR": "Escudo lendário alinhado às pontas da Estrela Dourada.", "en": "A legendary shield aligned with the Golden Star's points." } },
-      { "id": "shield-eclipse", "rarity": "epic", "color": "#f8fbff", "shape": "eclipse", "attributes": { "pt-BR": "+2 vidas de escudo", "en": "+2 shield health" }, "name": { "pt-BR": "Eclipse", "en": "Eclipse" }, "description": { "pt-BR": "Escudo branco em formato de eclipse. Aumenta a vida do escudo em 2.", "en": "A white eclipse-shaped shield. Adds 2 shield health." } }
+      { "id": "shield-eclipse", "rarity": "epic", "color": "#f8fbff", "shape": "eclipse", "attributes": { "pt-BR": "+2 vidas de escudo", "en": "+2 shield health" }, "name": { "pt-BR": "Eclipse", "en": "Eclipse" }, "description": { "pt-BR": "Escudo branco em formato de eclipse. Aumenta a vida do escudo em 2.", "en": "A white eclipse-shaped shield. Adds 2 shield health." } },
+      { "id": "shield-gray-dark", "rarity": "rare", "color": "#383a42", "accentColor": "#777b88", "shape": "double-circle", "name": { "pt-BR": "Escudo Grafite", "en": "Graphite Shield" }, "description": { "pt-BR": "Um escudo de órbitas em cinza-escuro.", "en": "A dark gray shield with twin energy rings." } }
     ],
     "shot": [
       { "id": "shot-uncommon", "rarity": "uncommon", "color": "#42ee78", "shape": "line-thin", "name": { "pt-BR": "Folha", "en": "Leaf" }, "description": { "pt-BR": "Um disparo verde e veloz.", "en": "A fast green shot." } },
@@ -75,7 +77,8 @@
       { "id": "shot-yellow", "rarity": "common", "color": "#ffe04b", "shape": "line", "name": { "pt-BR": "Tiro Amarelo", "en": "Yellow Shot" }, "description": { "pt-BR": "Tiro simples amarelo.", "en": "A simple yellow shot." } },
       { "id": "shot-white", "rarity": "common", "color": "#f8fbff", "shape": "line", "name": { "pt-BR": "Tiro Branco", "en": "White Shot" }, "description": { "pt-BR": "Tiro simples branco.", "en": "A simple white shot." } },
       { "id": "shot-blue", "rarity": "common", "color": "#4c8dff", "shape": "line", "name": { "pt-BR": "Tiro Azul", "en": "Blue Shot" }, "description": { "pt-BR": "Tiro simples azul.", "en": "A simple blue shot." } },
-      { "id": "shot-double-gold", "rarity": "legendary", "color": "#ffd45c", "shape": "double-line", "attributes": { "pt-BR": "+1 de dano por tiro", "en": "+1 damage per shot" }, "name": { "pt-BR": "Disparo Duplo Dourado", "en": "Golden Double Shot" }, "description": { "pt-BR": "Tiro lendário duplo que causa +1 de dano.", "en": "A legendary double shot that deals +1 damage." } }
+      { "id": "shot-double-gold", "rarity": "legendary", "color": "#ffd45c", "shape": "double-line", "attributes": { "pt-BR": "+1 de dano por tiro", "en": "+1 damage per shot" }, "name": { "pt-BR": "Disparo Duplo Dourado", "en": "Golden Double Shot" }, "description": { "pt-BR": "Tiro lendário duplo que causa +1 de dano.", "en": "A legendary double shot that deals +1 damage." } },
+      { "id": "shot-led", "rarity": "rare", "color": "#ff3b32", "shape": "led", "name": { "pt-BR": "LED", "en": "LED" }, "description": { "pt-BR": "Três pontos luminosos alinhados como um LED real.", "en": "Three bright dots aligned like a real LED." } }
     ]
   }
 }

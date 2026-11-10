@@ -311,7 +311,7 @@ test("friends can accept requests, view collections, and gift the premium pass a
         friends: [],
         friendRequestsReceived: [],
         friendRequestsSent: [],
-        state: { diamonds: 1200, battlePass: { level: 1, premium: false }, inbox: { messages: [], rewards: [] } }
+        state: { coins: 2000, diamonds: 1200, battlePass: { level: 1, premium: false }, inbox: { messages: [], rewards: [] } }
       },
       updateTime: "1"
     }],
@@ -326,6 +326,7 @@ test("friends can accept requests, view collections, and gift the premium pass a
         friendRequestsReceived: [],
         friendRequestsSent: [],
         state: {
+          coins: 10,
           diamonds: 0,
           ownedSkins: ["ship-common", "ship-special-flame"],
           battlePass: { level: 7, premium: false },
@@ -423,23 +424,44 @@ test("friends can accept requests, view collections, and gift the premium pass a
     assert.equal(profiles.get("bob").profile.state.battlePass.premium, true);
     assert.equal(profiles.get("bob").profile.state.inbox.messages.length, 1);
 
+    const resourceGift = await send("/api/friends/bob/gift", "POST", {
+      type: "coins",
+      amount: 150
+    }, "alice");
+    assert.equal(resourceGift.status, 200);
+    const resourceReceipt = await resourceGift.json();
+    assert.equal(resourceReceipt.balance, 1850);
+    assert.equal(resourceReceipt.friendResourceGiftCount, 1);
+    assert.equal(resourceReceipt.friendGiftCoinsSpent, 150);
+    assert.equal(profiles.get("bob").profile.state.inbox.rewards[0].source, "friend-gift");
+    assert.equal(profiles.get("bob").profile.state.inbox.rewards[0].amount, 150);
+
     const staleSenderSave = await send("/api/me", "PUT", {
       state: {
+        coins: 2000,
         diamonds: 1200,
         friendPassGiftCount: 0,
+        friendResourceGiftCount: 0,
+        friendGiftCoinsSpent: 0,
+        friendGiftDiamondsSpent: 0,
         battlePass: { level: 1, premium: false },
         inbox: { messages: [], rewards: [] }
       }
     }, "alice");
     assert.equal(staleSenderSave.status, 200);
-    assert.equal((await staleSenderSave.json()).state.diamonds, 600);
+    const savedSenderState = (await staleSenderSave.json()).state;
+    assert.equal(savedSenderState.diamonds, 600);
+    assert.equal(savedSenderState.coins, 1850);
     assert.equal(profiles.get("alice").profile.state.friendPassGiftCount, 1);
+    assert.equal(profiles.get("alice").profile.state.friendResourceGiftCount, 1);
 
     const staleRecipientSave = await send("/api/me", "PUT", { state: staleRecipientState }, "bob");
     assert.equal(staleRecipientSave.status, 200);
     const savedRecipientState = (await staleRecipientSave.json()).state;
     assert.equal(savedRecipientState.battlePass.premium, true);
     assert.equal(savedRecipientState.inbox.messages.length, 1);
+    assert.equal(savedRecipientState.inbox.rewards.length, 1);
+    assert.equal(savedRecipientState.inbox.rewards[0].source, "friend-gift");
 
     assert.equal((await send("/api/friends/bob/gift-pass", "POST", {}, "alice")).status, 409);
     assert.equal(profiles.get("alice").profile.state.diamonds, 600);

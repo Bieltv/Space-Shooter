@@ -87,5 +87,10 @@
     { "id": "diamonds-1000", "diamonds": 1000, "priceMoneyVoid": 8000 },
     { "id": "diamonds-2500", "diamonds": 2500, "priceMoneyVoid": 18000 },
     { "id": "diamonds-4500", "diamonds": 4500, "priceMoneyVoid": 30000 }
+  ],
+  "diamondSkins": [
+    { "id": "neon-pink-ship", "category": "ship", "skinId": "ship-neon-pink", "priceDiamonds": 750 },
+    { "id": "graphite-shield", "category": "shield", "skinId": "shield-gray-dark", "priceDiamonds": 450 },
+    { "id": "led-shot", "category": "shot", "skinId": "shot-led", "priceDiamonds": 500 }
   ]
 }

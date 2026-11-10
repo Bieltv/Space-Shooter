@@ -858,8 +858,9 @@ function mergeAdminGiftRewards(currentState, nextState) {
   const nextInbox = nextState.inbox && typeof nextState.inbox === "object"
     ? nextState.inbox
     : {};
+  const isProtectedGift = (reward) => ["admin", "friend-gift"].includes(reward?.source);
   const currentGifts = Array.isArray(currentInbox.rewards)
-    ? currentInbox.rewards.filter((reward) => reward?.source === "admin")
+    ? currentInbox.rewards.filter(isProtectedGift)
     : [];
   const incomingRewards = Array.isArray(nextInbox.rewards) ? nextInbox.rewards : [];
   const incomingById = new Map(incomingRewards
@@ -879,7 +880,7 @@ function mergeAdminGiftRewards(currentState, nextState) {
     ...nextState,
     inbox: {
       ...nextInbox,
-      rewards: [...incomingRewards.filter((reward) => reward?.source !== "admin"), ...preservedGifts].slice(-100)
+      rewards: [...incomingRewards.filter((reward) => !isProtectedGift(reward)), ...preservedGifts].slice(-100)
     }
   };
 }
@@ -900,6 +901,28 @@ function mergeFriendGiftState(currentState, nextState) {
     state.diamonds = Math.max(0, diamonds - pendingGiftCount * 600);
   }
   state.friendPassGiftCount = giftCount;
+
+  for (const [currency, counter] of [
+    ["coins", "friendGiftCoinsSpent"],
+    ["diamonds", "friendGiftDiamondsSpent"]
+  ]) {
+    const spent = Number.isSafeInteger(currentState?.[counter]) && currentState[counter] >= 0
+      ? currentState[counter]
+      : 0;
+    const acknowledgedSpent = Number.isSafeInteger(nextState[counter]) && nextState[counter] >= 0
+      ? nextState[counter]
+      : 0;
+    const pendingSpend = Math.max(0, spent - acknowledgedSpent);
+    if (pendingSpend) {
+      const balance = Number.isSafeInteger(state[currency]) && state[currency] >= 0 ? state[currency] : 0;
+      state[currency] = Math.max(0, balance - pendingSpend);
+    }
+    state[counter] = spent;
+  }
+  state.friendResourceGiftCount = Number.isSafeInteger(currentState?.friendResourceGiftCount) &&
+    currentState.friendResourceGiftCount >= 0
+    ? currentState.friendResourceGiftCount
+    : 0;
 
   const currentPass = currentState?.battlePass && typeof currentState.battlePass === "object"
     ? currentState.battlePass
@@ -1387,6 +1410,94 @@ async function giftBattlePass(request, env, uid, friendUid) {
   return jsonResponse({ gifted: true, cost: 600, ...giftReceipt });
 }
 
+async function giftFriendResource(request, env, uid, friendUid) {
+  if (!/^[A-Za-z0-9_-]{1,128}$/.test(friendUid) || friendUid === uid) {
+    return jsonResponse({ error: "Amigo inválido." }, 400);
+  }
+  const body = await request.json();
+  if (!["coins", "diamonds"].includes(body.type) ||
+      !Number.isSafeInteger(body.amount) || body.amount < 1 || body.amount > 1_000_000) {
+    return jsonResponse({ error: "Informe uma quantidade válida entre 1 e 1.000.000." }, 400);
+  }
+  const accessToken = await googleAccessToken(env);
+  let giftReceipt;
+  const result = await mutateFriendProfiles(env, accessToken, uid, friendUid, (sender, recipient) => {
+    if (!profileArray(sender, "friends").includes(friendUid) ||
+        !profileArray(recipient, "friends").includes(uid)) {
+      return jsonResponse({ error: "Só é possível enviar presentes a um amigo." }, 403);
+    }
+    const senderState = sender.state && typeof sender.state === "object" ? sender.state : {};
+    const balance = Number.isSafeInteger(senderState[body.type]) && senderState[body.type] >= 0
+      ? senderState[body.type]
+      : 0;
+    if (balance < body.amount) {
+      return jsonResponse({ error: "Saldo insuficiente para enviar esse presente." }, 409);
+    }
+    const giftCount = Number.isSafeInteger(senderState.friendResourceGiftCount) &&
+      senderState.friendResourceGiftCount >= 0
+      ? senderState.friendResourceGiftCount
+      : 0;
+    const spentKey = body.type === "coins" ? "friendGiftCoinsSpent" : "friendGiftDiamondsSpent";
+    const spent = Number.isSafeInteger(senderState[spentKey]) && senderState[spentKey] >= 0
+      ? senderState[spentKey]
+      : 0;
+    const spentCoins = Number.isSafeInteger(senderState.friendGiftCoinsSpent) && senderState.friendGiftCoinsSpent >= 0
+      ? senderState.friendGiftCoinsSpent
+      : 0;
+    const spentDiamonds = Number.isSafeInteger(senderState.friendGiftDiamondsSpent) && senderState.friendGiftDiamondsSpent >= 0
+      ? senderState.friendGiftDiamondsSpent
+      : 0;
+    if (!Number.isSafeInteger(giftCount + 1) || !Number.isSafeInteger(spent + body.amount)) {
+      return jsonResponse({ error: "O limite de presentes desta conta foi atingido." }, 409);
+    }
+    const recipientState = recipient.state && typeof recipient.state === "object" ? recipient.state : {};
+    const recipientInbox = recipientState.inbox && typeof recipientState.inbox === "object"
+      ? recipientState.inbox
+      : {};
+    const reward = {
+      id: encodeBase64Url(crypto.getRandomValues(new Uint8Array(12))),
+      type: body.type,
+      amount: body.amount,
+      source: "friend-gift",
+      senderUsername: sender.username,
+      createdAt: Date.now(),
+      claimed: false
+    };
+    const now = reward.createdAt;
+    giftReceipt = {
+      type: body.type,
+      amount: body.amount,
+      balance: balance - body.amount,
+      friendResourceGiftCount: giftCount + 1,
+      friendGiftCoinsSpent: body.type === "coins" ? spent + body.amount : spentCoins,
+      friendGiftDiamondsSpent: body.type === "diamonds" ? spent + body.amount : spentDiamonds
+    };
+    return {
+      first: {
+        state: {
+          ...senderState,
+          [body.type]: balance - body.amount,
+          friendResourceGiftCount: giftCount + 1,
+          [spentKey]: spent + body.amount
+        },
+        updatedAt: now
+      },
+      second: {
+        state: {
+          ...recipientState,
+          inbox: {
+            ...recipientInbox,
+            rewards: [...(Array.isArray(recipientInbox.rewards) ? recipientInbox.rewards : []), reward].slice(-100)
+          }
+        },
+        updatedAt: now
+      }
+    };
+  });
+  if (result) return result;
+  return jsonResponse({ gifted: true, ...giftReceipt });
+}
+
 function allowedOrigin(request, env) {
   const origin = request.headers.get("origin");
   const allowList = (env.ALLOWED_ORIGINS || "").split(",").map((value) => value.trim()).filter(Boolean);
@@ -1484,7 +1595,7 @@ export default {
           response = await sendFriendRequest(request, env, uid);
         } else {
           const actionMatch = url.pathname.match(/^\/api\/friends\/requests\/([^/]+)\/(accept|decline)$/);
-          const friendMatch = url.pathname.match(/^\/api\/friends\/([^/]+)(?:\/(profile|gift-pass))?$/);
+          const friendMatch = url.pathname.match(/^\/api\/friends\/([^/]+)(?:\/(profile|gift-pass|gift))?$/);
           if (actionMatch && request.method === "POST") {
             response = await answerFriendRequest(
               env, uid, decodeURIComponent(actionMatch[1]), actionMatch[2] === "accept"
@@ -1495,6 +1606,9 @@ export default {
           } else if (friendMatch && friendMatch[1] !== "requests" &&
               request.method === "POST" && friendMatch[2] === "gift-pass") {
             response = await giftBattlePass(request, env, uid, decodeURIComponent(friendMatch[1]));
+          } else if (friendMatch && friendMatch[1] !== "requests" &&
+              request.method === "POST" && friendMatch[2] === "gift") {
+            response = await giftFriendResource(request, env, uid, decodeURIComponent(friendMatch[1]));
           } else if (friendMatch && friendMatch[1] !== "requests" &&
               request.method === "DELETE" && !friendMatch[2]) {
             response = await removeFriend(env, uid, decodeURIComponent(friendMatch[1]));
@@ -1540,6 +1654,7 @@ export default {
             "/api/friends (GET)", "/api/friends/requests (POST)",
             "/api/friends/requests/:id/accept|decline (POST)",
             "/api/friends/:uid/profile (GET)", "/api/friends/:uid/gift-pass (POST)",
+            "/api/friends/:uid/gift (POST)",
             "/api/friends/:uid (DELETE)",
             "/api/leaderboard", "/api/me (GET, PUT, DELETE)",
             "/api/me/equipped-badges (PUT)", "/api/profiles/:uid"
