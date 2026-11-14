@@ -13,9 +13,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=27">
+  <link rel="stylesheet" href="css/style.css?v=28">
   <script defer src="js/config.js"></script>
-  <script defer src="js/app.js?v=34"></script>
+  <script defer src="js/app.js?v=35"></script>
 </head>
 <body>
   <div class="starfield" aria-hidden="true"></div>
@@ -56,6 +56,9 @@
         </button>
         <button class="quick-nav-button admin-quick-button" id="admin-quick-button" type="button" data-screen="admin" data-i18n-aria-label="adminMode" title="Modo ADM" hidden>
           <span aria-hidden="true">◆</span>
+        </button>
+        <button class="quick-nav-button" id="adm-quick-button" type="button" data-screen="adm" data-i18n-aria-label="admMode" title="Modo ADM" hidden>
+          <span aria-hidden="true">✦</span>
         </button>
       </nav>
     </div>
@@ -129,7 +132,7 @@
       <div class="panel">
         <p class="eyebrow" data-i18n="menuLabel">MENU</p>
         <h2 id="settings-title" data-i18n="settings">Configurações</h2>
-        <p class="settings-version"><span data-i18n="gameVersion">Versão do jogo</span> <strong>1.0.14</strong></p>
+        <p class="settings-version"><span data-i18n="gameVersion">Versão do jogo</span> <strong>1.0.15</strong></p>
         <div class="setting-row">
           <div><h3 data-i18n="graphics">Gráficos</h3><p data-i18n="graphicsHint">Define a quantidade de partículas e efeitos animados.</p></div>
           <div class="segmented" role="group" aria-label="Qualidade gráfica">
@@ -155,6 +158,10 @@
         <div class="setting-row account-id-row">
           <div><h3 data-i18n="playerId">ID do jogador</h3><p id="settings-player-id"></p></div>
         </div>
+        <div class="setting-row" id="username-settings-row" hidden>
+          <div><h3 data-i18n="changeUsername">Mudar nome</h3><p id="username-change-hint" data-i18n="usernameChangeHint">Seu nome pode ser alterado uma vez a cada 30 dias.</p></div>
+          <div class="username-setting-value"><strong id="settings-username"></strong><button class="small-button" id="edit-username" type="button" data-i18n="edit">Editar</button></div>
+        </div>
         <div class="setting-row">
           <div><h3 data-i18n="exportAccount">Exportar conta JSON</h3><p data-i18n="exportHint">Crie um backup criptografado para transferir sua conta para outro aparelho.</p></div>
           <button class="small-button" id="open-export-account" type="button" data-i18n="exportAccountButton">Exportar backup</button>
@@ -163,14 +170,6 @@
           <div><h3 data-i18n="cloudMigration">Migrar conta local</h3><p data-i18n="cloudMigrationHint">Vincule esta conta local ao Firebase e sincronize seu progresso.</p></div>
           <button class="small-button" id="open-cloud-migration" type="button" data-i18n="cloudMigrationButton">Migrar para a nuvem</button>
           <p class="inline-status migration-deadline-notice" id="cloud-migration-notice" hidden></p>
-        </div>
-        <div class="setting-row">
-          <div><h3 data-i18n="adminRequestSite">Solicitar acesso ADM</h3><p data-i18n="adminRequestHint">Envie uma solicitação para a conta mestre analisar.</p></div>
-          <button class="small-button" id="open-admin-request-site" type="button" data-i18n="adminRequestSite">Solicitar acesso ADM</button>
-        </div>
-        <div class="setting-row">
-          <div><h3 data-i18n="masterPanel">Painel mestre</h3><p data-i18n="masterPanelHint">Acesso restrito à conta que administra o jogo.</p></div>
-          <button class="small-button" id="open-master-panel" type="button" data-i18n="masterPanel">Painel mestre</button>
         </div>
         <div class="setting-row">
           <div><h3 data-i18n="evolution">Evolução</h3><p data-i18n="evolutionsHint">Melhore sua nave até o nível 10 usando moedas.</p></div>
@@ -371,6 +370,20 @@
       </div>
     </section>
 
+    <section class="screen" id="screen-adm" aria-labelledby="adm-title" hidden>
+      <div class="panel">
+        <p class="eyebrow" data-i18n="admMode">MODO ADM</p>
+        <h2 id="adm-title" data-i18n="admAccount">Conta ADM</h2>
+        <p class="section-copy" data-i18n="admDescription">Sua conta tem saldo infinito e pode presentear amigos.</p>
+        <div class="adm-benefits">
+          <p data-i18n="admInfiniteWallet">Neon-moedas e diamantes: infinitos</p>
+          <p id="adm-pass-gift-limit"></p>
+          <p data-i18n="admResourceGiftLimits">Limite por presente: 10.000 Neon-moedas ou 1.000 diamantes.</p>
+        </div>
+        <button class="neon-button back-button" data-screen="home" data-i18n="back">Voltar</button>
+      </div>
+    </section>
+
     <section class="screen" id="screen-event" aria-labelledby="event-title" hidden>
       <div class="panel event-panel">
         <p class="eyebrow" data-i18n="event">EVENTO</p>
@@ -504,7 +517,7 @@
             <button class="neon-button cyan" type="submit" data-i18n="redeemCode">Resgatar código</button>
           </div>
           <p class="inline-status" id="promo-code-status" role="status" aria-live="polite"></p>
-          <small class="promo-code-notice" data-i18n="promoCodePublicNotice">Os códigos deste protótipo ficam visíveis no JSON do jogo.</small>
+          <small class="promo-code-notice" data-i18n="promoCodePublicNotice">Códigos promocionais comuns ficam visíveis no JSON do jogo.</small>
         </form>
         <div class="inbox-tabs" role="tablist" aria-label="Caixa de entrada">
           <button type="button" role="tab" id="inbox-messages-tab" aria-controls="inbox-list" aria-selected="true" data-inbox-tab="messages" data-i18n="messages">Mensagens</button>
@@ -674,18 +687,29 @@
       <h2 id="friend-resource-gift-title" data-i18n="giftCurrency">Presentear moedas/diamantes</h2>
       <label><span data-i18n="giftType">Tipo de presente</span>
         <select name="type">
-          <option value="skin" data-i18n="skinGift">Skin</option>
           <option value="coins" data-i18n="coins">Neon-moedas</option>
           <option value="diamonds" data-i18n="diamonds">Diamantes</option>
         </select>
       </label>
-      <label id="admin-gift-skin-field"><span data-i18n="skinGift">Skin</span><select name="skinId"></select></label>
-      <label id="admin-gift-amount-field"><span data-i18n="giftAmount">Quantidade</span><input name="amount" type="number" min="1" max="1000000" required value="100"></label>
+      <label><span data-i18n="giftAmount">Quantidade</span><input name="amount" type="number" min="1" max="10000" required value="100"></label>
       <p class="purchase-breakdown"><span data-i18n="yourBalance">Seu saldo</span><strong id="friend-resource-gift-balance">0</strong></p>
       <p class="dialog-error" id="friend-resource-gift-error" role="status"></p>
       <div class="dialog-actions">
         <button type="button" class="neon-button muted" id="cancel-friend-resource-gift" data-i18n="cancel">Cancelar</button>
         <button type="submit" class="neon-button gold-button" id="confirm-friend-resource-gift" data-i18n="sendGift">Enviar presente</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="game-dialog" id="username-change-dialog" aria-labelledby="username-change-title">
+    <form class="dialog-panel" id="username-change-form">
+      <p class="eyebrow" data-i18n="settings">CONFIGURAÇÕES</p>
+      <h2 id="username-change-title" data-i18n="changeUsername">Mudar nome</h2>
+      <label><span data-i18n="playerName">Nome de jogador</span><input name="username" required minlength="3" maxlength="20" pattern="[\p{L}\p{N}_\-]{3,20}" autocomplete="off"></label>
+      <p class="inline-status" id="username-change-status" role="status" aria-live="polite"></p>
+      <div class="dialog-actions">
+        <button type="button" class="neon-button muted" id="cancel-username-change" data-i18n="cancel">Cancelar</button>
+        <button type="submit" class="neon-button gold-button" id="confirm-username-change" data-i18n="save">Salvar</button>
       </div>
     </form>
   </dialog>
@@ -898,11 +922,13 @@
         <form id="admin-gift-form" class="admin-gift-form">
           <label><span data-i18n="giftType">Tipo de presente</span>
             <select name="type">
+              <option value="skin" data-i18n="skinGift">Skin</option>
               <option value="coins" data-i18n="coins">Neon-moedas</option>
               <option value="diamonds" data-i18n="diamonds">Diamantes</option>
             </select>
           </label>
-          <label><span data-i18n="giftAmount">Quantidade</span><input name="amount" type="number" min="1" max="1000000" required value="100"></label>
+          <label id="admin-gift-skin-field"><span data-i18n="skinGift">Skin</span><select name="skinId"></select></label>
+          <label id="admin-gift-amount-field"><span data-i18n="giftAmount">Quantidade</span><input name="amount" type="number" min="1" max="1000000" required value="100"></label>
           <button class="small-button" type="submit" data-i18n="sendGift">Enviar presente</button>
         </form>
         <p class="inline-status" id="admin-player-status" role="status" aria-live="polite"></p>

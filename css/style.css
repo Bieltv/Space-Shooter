@@ -798,10 +798,28 @@ body[data-quality="minimum"] .skin-visual.gold-pulse, body[data-quality="minimum
 .gold-button { border-color: #ffd45c; color: #ffe6a5; }
 .gold-button:hover { background: rgba(255, 212, 92, .1); box-shadow: 0 0 18px rgba(255, 212, 92, .2); }
 .admin-gold-name { color: #ffd95a; animation: admin-gold-glow 2.2s ease-in-out infinite alternate; }
+.adm-name-rgb {
+  background: linear-gradient(90deg, #ff3b32, #ffd45c, #42ee78, #31eaff, #bf72ff, #ff3b32);
+  background-size: 250% auto;
+  background-clip: text;
+  color: transparent;
+  animation: adm-name-rgb 3s linear infinite;
+}
+.adm-name-rgb::after {
+  content: " ✦ ADM";
+  color: #ffd95a;
+  font-size: .72em;
+  text-shadow: 0 0 7px rgba(255, 217, 90, .85), 0 0 15px rgba(255, 164, 52, .55);
+  animation: admin-gold-glow 1.5s ease-in-out infinite alternate;
+}
+@keyframes adm-name-rgb { to { background-position: 250% center; } }
 @keyframes admin-gold-glow {
   from { text-shadow: 0 0 5px rgba(255, 217, 90, .3); }
   to { text-shadow: 0 0 14px rgba(255, 217, 90, .9), 0 0 25px rgba(255, 164, 52, .45); }
 }
+.username-setting-value { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+.username-setting-value strong { overflow-wrap: anywhere; }
+.adm-benefits { display: grid; gap: 8px; margin: 20px 0; color: #ffe6a5; font-size: 9px; line-height: 1.8; }
 .store-empty { display: grid; min-height: 180px; place-content: center; justify-items: center; gap: 18px; border: 1px dashed var(--line); color: var(--muted); font-size: 8px; line-height: 1.9; text-align: center; }
 .store-empty-icon { color: #ffd45c; font-size: 30px; }
 .game-dialog { width: min(92vw, 560px); max-height: 85vh; padding: 0; border: 1px solid var(--cyan); background: var(--panel); color: var(--text); box-shadow: 0 0 36px rgba(49, 234, 255, .2); }

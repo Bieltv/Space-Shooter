@@ -79,6 +79,16 @@ const translations = {
     coins: "Neon-moedas", diamonds: "Diamantes", moneyVoid: "Money-Void", walletBalance: "CARTEIRA", score: "Pontos", lives: "Vidas", pause: "Pausar", resume: "Continuar",
     inbox: "Caixa de entrada", events: "Eventos", eventsHint: "Confira os eventos ativos e os próximos eventos.",
     adminMode: "Modo ADM", adminPanel: "Painel administrativo", adminRequestSite: "Solicitar acesso ADM",
+    admMode: "Modo ADM", admAccount: "Conta ADM",
+    admDescription: "Sua conta tem saldo infinito e pode presentear amigos.",
+    admInfiniteWallet: "Neon-moedas e diamantes: infinitos",
+    admGiftFree: "Grátis",
+    admPassGiftLimit: "Passes presenteados: {sent} / 10",
+    admResourceGiftLimits: "Limite por presente: 10.000 Neon-moedas ou 1.000 diamantes.",
+    admActivationSuccess: "Código ADM aceito. Reinicie o jogo para ativar a conta ADM.",
+    admAlreadyActive: "Esta conta já tem o modo ADM.",
+    admRequiresCloud: "Entre em uma conta conectada à nuvem para ativar o modo ADM.",
+    admActivationUnavailable: "A ativação ADM está indisponível. Tente novamente mais tarde.",
     adminRequestHint: "Envie uma solicitação para a conta mestre analisar.",
     secretBadge: "Emblema secreto", secretBadgeDescription: "Conquiste este emblema secreto para revelar seus detalhes.",
     giftCurrency: "Presentear moedas/diamantes",
@@ -173,7 +183,14 @@ const translations = {
     promoCodeInvalid: "Código inválido ou inativo.", promoCodeUsed: "Este código já foi resgatado nesta conta.",
     promoCodeSuccess: "Código resgatado! Sua recompensa está na caixa de entrada.",
     debugCodeSuccess: "Modo de depuração ativado. O botão está disponível no topo.",
-    promoCodePublicNotice: "Os códigos deste protótipo ficam visíveis no JSON do jogo.",
+    promoCodePublicNotice: "Códigos promocionais comuns ficam visíveis no JSON do jogo.",
+    changeUsername: "Mudar nome", usernameChangeHint: "Seu nome pode ser alterado uma vez a cada 30 dias.",
+    usernameChangeNext: "Você poderá mudar seu nome novamente em {date}.",
+    usernameChangeSuccess: "Nome alterado. A próxima alteração estará disponível em 30 dias.",
+    usernameChangeInvalid: "Use de 3 a 20 letras, números, hífens ou sublinhados.",
+    usernameChangeCooldown: "Você só pode mudar o nome uma vez a cada 30 dias.",
+    usernameChangeCloudRequired: "Conecte sua conta à nuvem para mudar o nome.",
+    edit: "Editar", save: "Salvar", infinite: "∞",
     promoRewardDetails: "{title} · código {code}.",
     luckDropLabel: "CAIXA DA SORTE", luckDropTitle: "Luck Drop", luckDropHint: "Gire para receber uma skin inédita ou Neon-moedas. Sem duplicatas.",
     luckDropOdds: "A skin lendária Vazio Neon tem 1,4% de chance.", buyLuckDrop: "Comprar · 1.000",
@@ -369,6 +386,16 @@ const translations = {
     coins: "Neon Coins", diamonds: "Diamonds", moneyVoid: "Money-Void", walletBalance: "WALLET", score: "Score", lives: "Lives", pause: "Pause", resume: "Resume",
     inbox: "Inbox", events: "Events", eventsHint: "Browse active and upcoming events.",
     adminMode: "Admin mode", adminPanel: "Admin panel", adminRequestSite: "Request admin access",
+    admMode: "Admin mode", admAccount: "Admin account",
+    admDescription: "Your account has an infinite balance and can gift friends.",
+    admInfiniteWallet: "Neon Coins and diamonds: unlimited",
+    admGiftFree: "Free",
+    admPassGiftLimit: "Passes gifted: {sent} / 10",
+    admResourceGiftLimits: "Gift limit: 10,000 Neon Coins or 1,000 diamonds.",
+    admActivationSuccess: "Admin code accepted. Restart the game to activate the admin account.",
+    admAlreadyActive: "This account already has admin mode.",
+    admRequiresCloud: "Sign in to a cloud-connected account to activate admin mode.",
+    admActivationUnavailable: "Admin activation is unavailable. Try again later.",
     adminRequestHint: "Send an application for the master account to review.",
     secretBadge: "Secret badge", secretBadgeDescription: "Earn this secret badge to reveal its details.",
     giftCurrency: "Gift coins/diamonds",
@@ -463,7 +490,14 @@ const translations = {
     promoCodeInvalid: "This code is invalid or inactive.", promoCodeUsed: "This code has already been redeemed on this account.",
     promoCodeSuccess: "Code redeemed! Your reward is waiting in the inbox.",
     debugCodeSuccess: "Debug mode enabled. The button is now available at the top.",
-    promoCodePublicNotice: "Codes in this prototype are visible in the game's JSON files.",
+    promoCodePublicNotice: "Regular promo codes are visible in the game's JSON files.",
+    changeUsername: "Change name", usernameChangeHint: "Your name can be changed once every 30 days.",
+    usernameChangeNext: "You can change your name again on {date}.",
+    usernameChangeSuccess: "Name changed. You can change it again in 30 days.",
+    usernameChangeInvalid: "Use 3–20 letters, numbers, hyphens, or underscores.",
+    usernameChangeCooldown: "You can change your name only once every 30 days.",
+    usernameChangeCloudRequired: "Connect your account to the cloud to change your name.",
+    edit: "Edit", save: "Save", infinite: "∞",
     promoRewardDetails: "{title} · code {code}.",
     luckDropLabel: "LUCK BOX", luckDropTitle: "Luck Drop", luckDropHint: "Spin to receive a new skin or Neon Coins. No duplicates.",
     luckDropOdds: "The legendary Neon Void skin has a 1.4% chance.", buyLuckDrop: "Buy · 1,000",
@@ -598,6 +632,7 @@ const ACCURACY_REWARD_MONEY_VOID = 100;
 const SHOT_INTERVAL_MS = 500;
 const INITIAL_LIVES = 3;
 const MAX_UPGRADE_LEVEL = 10;
+const ADM_BALANCE = Number.MAX_SAFE_INTEGER - 1_000_000;
 const BOSS_INTERVAL_SECONDS = 60;
 const BOSS_MAX_HEALTH = 150;
 const GUARDIAN_MAX_HEALTH = 10;
@@ -808,8 +843,8 @@ function saveSettings() {
 }
 
 function updateWallet() {
-  const formattedCoins = coins.toLocaleString(language);
-  const formattedDiamonds = diamonds.toLocaleString(language);
+  const formattedCoins = account?.admEnabled ? "∞" : coins.toLocaleString(language);
+  const formattedDiamonds = account?.admEnabled ? "∞" : diamonds.toLocaleString(language);
   const formattedMoneyVoid = moneyVoid.toLocaleString(language);
   $("#coin-value").textContent = formattedCoins;
   $("#home-coin-value").textContent = formattedCoins;
@@ -821,6 +856,10 @@ function updateWallet() {
   $("#diamond-screen-money-void").textContent = formattedMoneyVoid;
   $("#event-money-void").textContent = formattedMoneyVoid;
   $("#diamond-screen-value").textContent = formattedDiamonds;
+}
+
+function formatCurrencyBalance(amount) {
+  return account?.admEnabled ? "∞" : amount.toLocaleString(language);
 }
 
 function requestGameFullscreen() {
@@ -1109,6 +1148,8 @@ function normalizeCloudAccount(session, email, passwordSalt, passwordHash) {
     cloudUid: profile.uid,
     adminRole: ["provisional", "permanent"].includes(profile.adminRole) ? profile.adminRole : null,
     adminMode: ["provisional", "permanent"].includes(profile.adminRole),
+    admEnabled: profile.admEnabled === true,
+    usernameChangedAt: Number.isSafeInteger(profile.usernameChangedAt) ? profile.usernameChangedAt : 0,
     username: profile.username,
     normalizedName: profile.username.toLocaleLowerCase("pt-BR"),
     playerId: `NV-${profile.uid.slice(0, 8).toUpperCase()}`,
@@ -1404,6 +1445,13 @@ function normalizeAccount(nextAccount) {
     ...nextAccount,
     adminRole: ["provisional", "permanent"].includes(nextAccount.adminRole) ? nextAccount.adminRole : null,
     adminMode: Boolean(nextAccount.cloudUid && ["provisional", "permanent"].includes(nextAccount.adminRole)),
+    admEnabled: Boolean(nextAccount.cloudUid && nextAccount.admEnabled === true),
+    usernameChangedAt: Number.isSafeInteger(nextAccount.usernameChangedAt) && nextAccount.usernameChangedAt > 0
+      ? nextAccount.usernameChangedAt
+      : 0,
+    admPassGiftCount: Number.isSafeInteger(nextAccount.admPassGiftCount) && nextAccount.admPassGiftCount >= 0
+      ? nextAccount.admPassGiftCount
+      : 0,
     migrationDeadlineAt: Number.isSafeInteger(nextAccount.migrationDeadlineAt)
       ? nextAccount.migrationDeadlineAt
       : 0,
@@ -1469,10 +1517,9 @@ function normalizeAccount(nextAccount) {
     nextUpgradePrices
   };
   if (normalized.adminMode) {
-    const unlimitedBalance = Number.MAX_SAFE_INTEGER - 1_000_000;
-    normalized.coins = unlimitedBalance;
-    normalized.diamonds = unlimitedBalance;
-    normalized.moneyVoid = unlimitedBalance;
+    normalized.coins = ADM_BALANCE;
+    normalized.diamonds = ADM_BALANCE;
+    normalized.moneyVoid = ADM_BALANCE;
     normalized.ownedSkins = [...new Set([
       ...normalized.ownedSkins,
       ...(skinData ? skinCategories.flatMap((category) => skinData.categories[category].map((skin) => skin.id)) : [])
@@ -1497,6 +1544,14 @@ function normalizeAccount(nextAccount) {
         .map((ability) => [ability.id, Number.MAX_SAFE_INTEGER])),
       dropCharges: Number.MAX_SAFE_INTEGER,
       treeLevel: 3
+    };
+  }
+  if (normalized.admEnabled) {
+    normalized.coins = ADM_BALANCE;
+    normalized.diamonds = ADM_BALANCE;
+    normalized.badges = {
+      ...normalized.badges,
+      "admin-account": normalized.badges["admin-account"] || Date.now()
     };
   }
   return normalized;
@@ -1766,6 +1821,7 @@ function updateAccount(nextAccount) {
   $("#leaderboard-region").value = account.region || "";
   $("#leaderboard-opt-in").checked = account.leaderboardOptIn === true;
   $("#cloud-migration-row").hidden = Boolean(account.cloudUid);
+  renderUsernameSettings();
   const migrationNotice = $("#cloud-migration-notice");
   migrationNotice.hidden = Boolean(account.cloudUid);
   if (!account.cloudUid && account.migrationDeadlineAt) {
@@ -1790,6 +1846,7 @@ function updateAccount(nextAccount) {
   $("#auth-gate").hidden = true;
   $("#logout-button").hidden = false;
   $("#admin-quick-button").hidden = !account.adminMode || !adminSessionToken;
+  $("#adm-quick-button").hidden = !account.admEnabled;
   $("#friends-quick-button").hidden = !account.cloudUid;
   $("#admin-player-actions").hidden = !account.adminMode || !activeAdminProfileUid;
   $("#debug-toggle").hidden = !account.debugEnabled;
@@ -1802,6 +1859,7 @@ function updateAccount(nextAccount) {
   $("#settings-player-id").textContent = account.playerId;
   $("#player-id").hidden = false;
   updateWallet();
+  renderAdmScreen();
   renderSkins();
   renderStore();
   renderMissions();
@@ -1821,6 +1879,7 @@ function requireAuthentication() {
   activeAdminProfileUid = null;
   activeAdminProfileBanned = false;
   $("#cloud-migration-row").hidden = true;
+  $("#username-settings-row").hidden = true;
   setAuthMode("login");
   coins = 0;
   diamonds = 0;
@@ -1838,6 +1897,7 @@ function requireAuthentication() {
   if ($("#purchase-dialog").open) $("#purchase-dialog").close();
   $("#logout-button").hidden = true;
   $("#admin-quick-button").hidden = true;
+  $("#adm-quick-button").hidden = true;
   $("#admin-player-actions").hidden = true;
   $("#player-id").hidden = true;
   $("#player-id").textContent = "";
@@ -2528,7 +2588,7 @@ function renderOwnProfile() {
   if (!grid || !account || !badgeData || !skinData) return;
   $("#own-profile-username").textContent = account.username;
   $("#own-profile-username").classList.toggle("admin-gold-name", account.adminRole === "permanent");
-  $("#own-profile-username").classList.toggle("admin-gold-name", account.adminRole === "permanent");
+  $("#own-profile-username").classList.toggle("adm-name-rgb", account.admEnabled === true);
   $("#own-profile-player-id").textContent = account.playerId;
   $("#own-profile-score").textContent = t("playerProfileScore")
     .replace("{score}", Number(account.bestScore || 0).toLocaleString(language));
@@ -2551,6 +2611,7 @@ function renderOwnProfile() {
   } else if (verifiedProfileBadges === null) {
     status.textContent = account.cloudUid ? t("profileChecking") : t("profileDatabaseRequired");
   }
+
   grid.replaceChildren(...badgeData.badges.map((badge) => {
     const earnedAt = verifiedProfileBadges?.get(badge.id);
     const equipped = equippedBadges.includes(badge.id);
@@ -2577,12 +2638,31 @@ function renderOwnProfile() {
   }));
 }
 
+function renderAdmScreen() {
+  const counter = $("#adm-pass-gift-limit");
+  if (!counter || !account) return;
+  counter.textContent = t("admPassGiftLimit").replace("{sent}", String(account.admPassGiftCount || 0));
+}
+
+function renderUsernameSettings() {
+  if (!account) return;
+  $("#username-settings-row").hidden = !account.cloudUid;
+  $("#settings-username").textContent = account.username || "";
+  $("#settings-username").classList.toggle("adm-name-rgb", account.admEnabled === true);
+  const nextUsernameChangeAt = account.usernameChangedAt
+    ? account.usernameChangedAt + 30 * 24 * 60 * 60 * 1000
+    : 0;
+  $("#username-change-hint").textContent = nextUsernameChangeAt > Date.now()
+    ? t("usernameChangeNext").replace("{date}", new Date(nextUsernameChangeAt).toLocaleDateString(language))
+    : t("usernameChangeHint");
+}
+
 function renderOwnResources() {
   const resources = $("#own-profile-resources");
   if (!resources || !account) return;
   const entries = [
-    [t("coins"), account.coins.toLocaleString(language)],
-    [t("diamonds"), account.diamonds.toLocaleString(language)],
+    [t("coins"), formatCurrencyBalance(account.coins)],
+    [t("diamonds"), formatCurrencyBalance(account.diamonds)],
     [t("skins"), account.ownedSkins.length.toLocaleString(language)],
     [t("battlePass"), `${account.battlePass.level}/30 · ${account.battlePass.premium ? t("friendPassGold") : t("friendPassSilver")}`]
   ];
@@ -2648,6 +2728,7 @@ function renderFriends() {
       const copy = document.createElement("div");
       copy.className = "friend-entry-copy";
       const name = document.createElement("strong");
+      name.classList.toggle("adm-name-rgb", friend.admEnabled === true);
       name.textContent = friend.username;
       const score = document.createElement("small");
       score.textContent = `${t("playerProfileScore").replace("{score}", Number(friend.bestScore || 0).toLocaleString(language))} · ${friend.uid}`;
@@ -3184,7 +3265,7 @@ function openSpecialLootSpin(quantity) {
   const price = storeData.specialLootBox.priceDiamonds * quantity;
   $("#special-loot-confirm-copy").textContent = t("specialBoxConfirm")
     .replace("{amount}", String(quantity));
-  $("#special-loot-balance").textContent = `${account.diamonds.toLocaleString(language)} ${t("diamonds")}`;
+  $("#special-loot-balance").textContent = `${formatCurrencyBalance(account.diamonds)} ${t("diamonds")}`;
   $("#special-loot-cost").textContent = `${price.toLocaleString(language)} ${t("diamonds")}`;
   $("#special-loot-after").textContent = `${Math.max(0, account.diamonds - price).toLocaleString(language)} ${t("diamonds")}`;
   $("#special-loot-error").textContent = account.diamonds < price ? t("specialBoxInsufficient") : "";
@@ -3572,7 +3653,7 @@ function openDiamondSkinPurchase(offerId) {
   if (!offer || !skin || !account || ownedSkins.has(skin.id)) return;
   pendingDiamondSkinId = offer.id;
   $("#diamond-skin-purchase-title").textContent = skin.name[language];
-  $("#diamond-skin-purchase-balance").textContent = diamonds.toLocaleString(language);
+  $("#diamond-skin-purchase-balance").textContent = formatCurrencyBalance(diamonds);
   $("#diamond-skin-purchase-cost").textContent = `${offer.priceDiamonds.toLocaleString(language)} ${t("diamonds")}`;
   $("#diamond-skin-purchase-after").textContent =
     `${Math.max(0, diamonds - offer.priceDiamonds).toLocaleString(language)} ${t("diamonds")}`;
@@ -3679,6 +3760,46 @@ function openGameSite(sitePath) {
   $("#game-site-dialog").showModal();
 }
 
+function openUsernameChangeDialog() {
+  if (!account?.cloudUid) {
+    showToast(t("usernameChangeCloudRequired"));
+    return;
+  }
+  const form = $("#username-change-form");
+  form.reset();
+  form.elements.username.value = account.username || "";
+  $("#username-change-status").textContent = "";
+  $("#username-change-dialog").showModal();
+}
+
+async function submitUsernameChange(event) {
+  event.preventDefault();
+  if (!account?.cloudUid) return;
+  const form = event.currentTarget;
+  const username = form.elements.username.value.trim();
+  const button = $("#confirm-username-change");
+  button.disabled = true;
+  $("#username-change-status").textContent = "";
+  try {
+    const response = await cloudRequest("/api/me/username", {
+      method: "PUT",
+      body: { username }
+    });
+    persistAccount({
+      ...account,
+      username: response.profile.username,
+      normalizedName: response.profile.username.toLocaleLowerCase("pt-BR"),
+      usernameChangedAt: response.profile.usernameChangedAt
+    });
+    $("#username-change-dialog").close();
+    showToast(t("usernameChangeSuccess"));
+  } catch (error) {
+    $("#username-change-status").textContent = error.message || t("usernameChangeInvalid");
+  } finally {
+    button.disabled = false;
+  }
+}
+
 async function redeemPromoCode(value) {
   const status = $("#promo-code-status");
   if (!account || !promoCodeData) {
@@ -3708,7 +3829,26 @@ async function redeemPromoCode(value) {
       status.textContent = error.message || t("cloudApiUnavailable");
       return;
     }
-    status.textContent = t("promoCodeInvalid");
+    try {
+      const response = await cloudRequest("/api/adm/activate", {
+        method: "POST",
+        body: { code: normalizedCode }
+      });
+      if (response.profile?.admEnabled !== true) throw new Error(t("cloudApiUnavailable"));
+      status.textContent = t("admActivationSuccess");
+      $("#promo-code-form").reset();
+      return;
+    } catch (error) {
+      if (!cloudSession?.uid) {
+        status.textContent = t("admRequiresCloud");
+      } else if (error.status === 409) {
+        status.textContent = t("admAlreadyActive");
+      } else if (error.status === 503) {
+        status.textContent = t("admActivationUnavailable");
+      } else {
+        status.textContent = error.status === 401 ? t("promoCodeInvalid") : error.message;
+      }
+    }
     return;
   }
   if (promo.active !== true ||
@@ -4477,7 +4617,7 @@ function updateBattlePassVisibility() {
 function openBattlePassPurchase() {
   if (!account || account.battlePass.premium) return;
   const cost = battlePassData.priceDiamonds;
-  $("#battle-pass-purchase-balance").textContent = account.diamonds.toLocaleString(language);
+  $("#battle-pass-purchase-balance").textContent = formatCurrencyBalance(account.diamonds);
   $("#battle-pass-purchase-cost").textContent = cost.toLocaleString(language);
   $("#battle-pass-purchase-after").textContent = Math.max(0, account.diamonds - cost).toLocaleString(language);
   $("#battle-pass-purchase-error").textContent = account.diamonds < cost ? t("battlePassInsufficientDiamonds") : "";
@@ -4846,6 +4986,7 @@ function escapeHtml(value) {
 
 function showScreen(name) {
   if (name === "admin" && (!account?.adminMode || !adminSessionToken)) return;
+  if (name === "adm" && !account?.admEnabled) return;
   if (name === "friends" && !account?.cloudUid) {
     showToast(t("cloudApiUnavailable"));
     return;
@@ -4876,6 +5017,7 @@ function showScreen(name) {
     renderOwnProfile();
     void loadOwnProfile();
   }
+  if (name === "adm") renderAdmScreen();
   if (name === "friends") {
     renderFriends();
     void loadFriends();
@@ -4956,6 +5098,7 @@ async function openPublicProfile(uid) {
     $("#admin-toggle-ban").textContent = t(activeAdminProfileBanned ? "unbanAccount" : "banAccount");
     $("#player-profile-title").textContent = profile.username;
     $("#player-profile-title").classList.toggle("admin-gold-name", profile.adminRole === "permanent");
+    $("#player-profile-title").classList.toggle("adm-name-rgb", profile.admEnabled === true);
     $("#player-profile-score").textContent = t("playerProfileScore")
       .replace("{score}", Number(profile.bestScore || 0).toLocaleString(language));
     if (isFriend) {
@@ -4990,7 +5133,11 @@ async function openPublicProfile(uid) {
         friendAction.textContent = t("friendRequestPending");
         friendAction.disabled = true;
       } else {
-        friendAction.disabled = isFriend && account.diamonds < 600;
+        friendAction.disabled = isFriend && (
+          account.admEnabled
+            ? account.admPassGiftCount >= 10
+            : account.diamonds < 600
+        );
         friendAction.textContent = isFriend ? t("giftBattlePass") : t("addFriend");
         friendAction.dataset.friendAction = isFriend ? "gift" : "add";
         friendAction.dataset.friendUid = profile.uid;
@@ -5038,11 +5185,15 @@ function openFriendGiftDialog(friendUid) {
   if (!account?.cloudUid || !friendsData.friends.some((friend) => friend.uid === friendUid)) return;
   activeFriendGiftUid = friendUid;
   const cost = 600;
-  $("#friend-gift-balance").textContent = account.diamonds.toLocaleString(language);
-  $("#friend-gift-cost").textContent = `${cost.toLocaleString(language)} ${t("diamonds")}`;
-  $("#friend-gift-after").textContent = `${Math.max(0, account.diamonds - cost).toLocaleString(language)} ${t("diamonds")}`;
-  $("#friend-gift-error").textContent = account.diamonds < cost ? t("friendGiftInsufficient") : "";
-  $("#confirm-friend-gift").disabled = account.diamonds < cost;
+  $("#friend-gift-balance").textContent = formatCurrencyBalance(account.diamonds);
+  $("#friend-gift-cost").textContent = account.admEnabled ? t("admGiftFree") : `${cost.toLocaleString(language)} ${t("diamonds")}`;
+  $("#friend-gift-after").textContent = formatCurrencyBalance(account.diamonds);
+  $("#friend-gift-error").textContent = account.admEnabled && account.admPassGiftCount >= 10
+    ? t("admPassGiftLimit").replace("{sent}", "10")
+    : !account.admEnabled && account.diamonds < cost ? t("friendGiftInsufficient") : "";
+  $("#confirm-friend-gift").disabled = account.admEnabled
+    ? account.admPassGiftCount >= 10
+    : account.diamonds < cost;
   $("#friend-gift-dialog").showModal();
 }
 
@@ -5051,13 +5202,14 @@ function updateFriendResourceGiftForm() {
   if (!form || !account) return;
   const type = form.elements.type.value;
   const balance = type === "diamonds" ? account.diamonds : account.coins;
+  const maximum = account.admEnabled ? (type === "diamonds" ? 1_000 : 10_000) : 1_000_000;
   const amount = form.elements.amount;
-  amount.max = String(Math.min(balance, 1_000_000));
+  amount.max = String(account.admEnabled ? maximum : Math.min(balance, 1_000_000));
   $("#friend-resource-gift-balance").textContent =
-    `${balance.toLocaleString(language)} ${t(type)}`;
+    `${formatCurrencyBalance(balance)} ${t(type)}`;
   const quantity = Number(amount.value);
   $("#confirm-friend-resource-gift").disabled = !Number.isSafeInteger(quantity) ||
-    quantity < 1 || quantity > Math.min(balance, 1_000_000);
+    quantity < 1 || quantity > (account.admEnabled ? maximum : Math.min(balance, 1_000_000));
 }
 
 function openFriendResourceGiftDialog(friendUid) {
@@ -5141,14 +5293,16 @@ async function confirmFriendGift() {
       method: "POST",
       body: {}
     });
-    if (!Number.isSafeInteger(receipt.diamonds) || !Number.isSafeInteger(receipt.friendPassGiftCount)) {
+    if (!Number.isSafeInteger(receipt.diamonds) || !Number.isSafeInteger(receipt.friendPassGiftCount) ||
+        !Number.isSafeInteger(receipt.admPassGiftCount)) {
       throw new Error(t("cloudApiUnavailable"));
     }
     if (account?.cloudUid === senderUid) {
       persistAccount({
         ...account,
         diamonds: receipt.diamonds,
-        friendPassGiftCount: receipt.friendPassGiftCount
+        friendPassGiftCount: receipt.friendPassGiftCount,
+        admPassGiftCount: receipt.admPassGiftCount
       });
     }
     if (activePublicProfile?.uid === friendUid) {
@@ -5161,7 +5315,9 @@ async function confirmFriendGift() {
     showToast(t("giftPassSuccess"));
   } catch (error) {
     $("#friend-gift-error").textContent = error.message;
-    button.disabled = account?.diamonds < 600;
+    button.disabled = account?.admEnabled
+      ? account.admPassGiftCount >= 10
+      : account?.diamonds < 600;
   }
 }
 
@@ -5275,6 +5431,7 @@ async function loadLeaderboard(scope) {
       const player = document.createElement("span");
       player.className = "leaderboard-entry-name";
       if (entry.adminRole === "permanent") player.classList.add("admin-gold-name");
+      if (entry.admEnabled === true) player.classList.add("adm-name-rgb");
       player.textContent = entry.username;
       const equippedBadges = (Array.isArray(entry.equippedBadges) ? entry.equippedBadges : [])
         .map((badgeId) => badgeData?.badges.find((badge) => badge.id === badgeId))
@@ -7270,8 +7427,9 @@ $("#promo-code-form").addEventListener("submit", (event) => {
   event.preventDefault();
   void redeemPromoCode($("#promo-code-input").value);
 });
-$("#open-admin-request-site").addEventListener("click", () => openGameSite("SITES/request-admin.html"));
-$("#open-master-panel").addEventListener("click", () => openGameSite("SITES/master.html"));
+$("#edit-username").addEventListener("click", openUsernameChangeDialog);
+$("#username-change-form").addEventListener("submit", (event) => void submitUsernameChange(event));
+$("#cancel-username-change").addEventListener("click", () => $("#username-change-dialog").close());
 $("#close-game-site").addEventListener("click", () => $("#game-site-dialog").close());
 $("#game-site-dialog").addEventListener("close", () => {
   $("#game-site-frame").removeAttribute("src");
@@ -7516,6 +7674,8 @@ $("#language-select").addEventListener("change", (event) => {
   settings.language = language;
   saveSettings();
   applyTranslations();
+  renderUsernameSettings();
+  renderAdmScreen();
 });
 $("#mission-popups").addEventListener("change", (event) => {
   settings.missionPopups = event.target.checked;

@@ -5,6 +5,7 @@ const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const GOOGLE_SCOPE = "https://www.googleapis.com/auth/datastore";
 const MAX_ACCOUNT_BYTES = 600_000;
 const ADMIN_SESSION_TTL_MS = 15 * 60 * 1000;
+const ADM_BALANCE = Number.MAX_SAFE_INTEGER - 1_000_000;
 
 function jsonResponse(body, status = 200, headers = {}) {
   return new Response(JSON.stringify(body), { status, headers: { ...JSON_HEADERS, ...headers } });
@@ -187,6 +188,8 @@ function sanitizeGameState(value) {
   delete state.idToken;
   delete state.cloudAuth;
   delete state.email;
+  delete state.admEnabled;
+  delete state.admPassGiftCount;
   if (!Number.isSafeInteger(state.bestScore) || state.bestScore < 0 || state.bestScore > 1_000_000_000) {
     state.bestScore = 0;
   }
@@ -211,12 +214,131 @@ function publicProfile(profile) {
     username: profile.username,
     adminRole: ["provisional", "permanent"].includes(profile.adminRole) ? profile.adminRole : null,
     adminApprovedAt: Number.isSafeInteger(profile.adminApprovedAt) ? profile.adminApprovedAt : null,
+    admEnabled: profile.admEnabled === true,
+    usernameChangedAt: Number.isSafeInteger(profile.usernameChangedAt) ? profile.usernameChangedAt : 0,
     bestScore: Number.isSafeInteger(profile.bestScore) ? profile.bestScore : 0,
     badges: profile.badges && typeof profile.badges === "object" ? profile.badges : {},
     equippedBadges: Array.isArray(profile.equippedBadges) ? profile.equippedBadges : [],
     region: typeof profile.region === "string" ? profile.region : "",
     createdAt: profile.createdAt
   };
+}
+
+async function activateAdm(request, env, uid) {
+  if (typeof env.ADM_ACTIVATION_CODE !== "string" || env.ADM_ACTIVATION_CODE.length < 24) {
+    return jsonResponse({ error: "Ativação ADM indisponível." }, 503);
+  }
+  const body = await request.json();
+  if (typeof body.code !== "string" ||
+      body.code.trim().toUpperCase() !== env.ADM_ACTIVATION_CODE.toUpperCase()) {
+    return jsonResponse({ error: "Código ADM inválido." }, 401);
+  }
+  const accessToken = await googleAccessToken(env);
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const document = await getProfileDocument(env, uid, accessToken);
+    if (!document || document.profile.banned === true) {
+      return jsonResponse({ error: "Perfil de jogo não encontrado." }, 404);
+    }
+    if (document.profile.admEnabled === true) {
+      return jsonResponse({ error: "Esta conta já tem o modo ADM." }, 409);
+    }
+    const now = Date.now();
+    const profile = {
+      ...document.profile,
+      admEnabled: true,
+      admActivatedAt: now,
+      badges: { ...(document.profile.badges || {}), "admin-account": now },
+      updatedAt: now
+    };
+    const state = {
+      ...(profile.state && typeof profile.state === "object" ? profile.state : {}),
+      coins: ADM_BALANCE,
+      diamonds: ADM_BALANCE,
+      admPassGiftCount: Number.isSafeInteger(profile.state?.friendPassGiftCount) &&
+        profile.state.friendPassGiftCount >= 0
+        ? profile.state.friendPassGiftCount
+        : 0,
+      badges: { ...(profile.state?.badges || {}), "admin-account": now }
+    };
+    profile.state = state;
+    try {
+      await writeProfile(env, profile, accessToken, false, { updateTime: document.updateTime });
+      return jsonResponse({ profile: publicProfile(profile), state });
+    } catch (error) {
+      if (error.status !== 409 || attempt === 2) throw error;
+    }
+  }
+  throw new Error("Could not activate ADM after concurrent changes.");
+}
+
+async function changeUsername(request, env, uid) {
+  const body = await request.json();
+  const username = validateUsername(body.username);
+  if (!username) return jsonResponse({ error: "Informe um nome válido entre 3 e 20 caracteres." }, 400);
+  const accessToken = await googleAccessToken(env);
+  const normalizedName = username.toLocaleLowerCase("pt-BR");
+  const cooldown = 30 * 24 * 60 * 60 * 1000;
+  const newUsernameDocumentId = await digestHex(normalizedName);
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const document = await getProfileDocument(env, uid, accessToken);
+    if (!document || document.profile.banned === true) {
+      return jsonResponse({ error: "Perfil de jogo não encontrado." }, 404);
+    }
+    const profile = document.profile;
+    if ((profile.normalizedName || profile.username.toLocaleLowerCase("pt-BR")) === normalizedName) {
+      return jsonResponse({ error: "Escolha um nome diferente do atual." }, 400);
+    }
+    const now = Date.now();
+    if (Number.isSafeInteger(profile.usernameChangedAt) && profile.usernameChangedAt > 0 &&
+        now - profile.usernameChangedAt < cooldown) {
+      return jsonResponse({
+        error: "Você só pode mudar o nome uma vez a cada 30 dias.",
+        nextUsernameChangeAt: profile.usernameChangedAt + cooldown
+      }, 409);
+    }
+    const oldName = profile.normalizedName || profile.username.toLocaleLowerCase("pt-BR");
+    const oldUsernameDocumentId = await digestHex(oldName);
+    const updatedProfile = {
+      ...profile,
+      username,
+      normalizedName,
+      usernameChangedAt: now,
+      updatedAt: now
+    };
+    try {
+      await firebaseRequest(env, accessToken, ":commit", {
+        method: "POST",
+        body: JSON.stringify({
+          writes: [
+            {
+              update: {
+                name: `${projectRoot(env)}/usernames/${newUsernameDocumentId}`,
+                fields: { uid: firestoreValue(uid), username: firestoreValue(username) }
+              },
+              currentDocument: { exists: false }
+            },
+            { delete: `${projectRoot(env)}/usernames/${oldUsernameDocumentId}` },
+            {
+              update: {
+                name: `${projectRoot(env)}/users/${encodeURIComponent(uid)}`,
+                fields: Object.fromEntries(Object.entries(updatedProfile)
+                  .map(([key, value]) => [key, firestoreValue(value)]))
+              },
+              currentDocument: { updateTime: document.updateTime }
+            }
+          ]
+        })
+      });
+      return jsonResponse({ profile: publicProfile(updatedProfile) });
+    } catch (error) {
+      if (error.status === 409 && attempt < 2) continue;
+      if (error.status === 409 || error.status === 400) {
+        return jsonResponse({ error: "Esse nome de jogador já está em uso." }, 409);
+      }
+      throw error;
+    }
+  }
+  throw new Error("Could not change player name after concurrent updates.");
 }
 
 async function writeProfile(env, profile, accessToken, create = false, options = {}) {
@@ -973,6 +1095,19 @@ async function saveCurrentUser(request, env, uid) {
       current.state,
       mergeAdminGiftRewards(current.state, sanitizeGameState(body.state))
     );
+    const currentAdmPassGiftCount = Number.isSafeInteger(current.state?.admPassGiftCount) &&
+      current.state.admPassGiftCount >= 0
+      ? current.state.admPassGiftCount
+      : 0;
+    state.admPassGiftCount = currentAdmPassGiftCount;
+    if (current.admEnabled === true) {
+      state.coins = ADM_BALANCE;
+      state.diamonds = ADM_BALANCE;
+      state.badges = {
+        ...(state.badges || {}),
+        "admin-account": current.badges?.["admin-account"] || Date.now()
+      };
+    }
     const equippedBadges = Array.isArray(current.equippedBadges) ? current.equippedBadges : [];
     state.equippedBadges = equippedBadges;
     const profile = {
@@ -1218,7 +1353,12 @@ async function listFriends(env, uid) {
   const friendUids = profileArray(current.profile, "friends");
   const friends = (await Promise.all(friendUids.map((friendUid) => getProfile(env, friendUid, accessToken))))
     .filter((profile) => profile && profile.banned !== true)
-    .map((profile) => ({ uid: profile.uid, username: profile.username, bestScore: profile.bestScore || 0 }));
+    .map((profile) => ({
+      uid: profile.uid,
+      username: profile.username,
+      admEnabled: profile.admEnabled === true,
+      bestScore: profile.bestScore || 0
+    }));
   return jsonResponse({
     friends,
     incoming: profileArray(current.profile, "friendRequestsReceived"),
@@ -1359,7 +1499,16 @@ async function giftBattlePass(request, env, uid, friendUid) {
     }
     const senderState = sender.state && typeof sender.state === "object" ? sender.state : {};
     const senderDiamonds = Number.isSafeInteger(senderState.diamonds) ? senderState.diamonds : 0;
-    if (senderDiamonds < 600) return jsonResponse({ error: "Você precisa de 600 diamantes para presentear o Passe." }, 409);
+    const admPassGiftCount = Number.isSafeInteger(senderState.admPassGiftCount) &&
+      senderState.admPassGiftCount >= 0
+      ? senderState.admPassGiftCount
+      : 0;
+    if (sender.admEnabled === true && admPassGiftCount >= 10) {
+      return jsonResponse({ error: "O limite de 10 Passes do modo ADM foi atingido." }, 409);
+    }
+    if (sender.admEnabled !== true && senderDiamonds < 600) {
+      return jsonResponse({ error: "Você precisa de 600 diamantes para presentear o Passe." }, 409);
+    }
     const friendPassGiftCount = Number.isSafeInteger(senderState.friendPassGiftCount) &&
       senderState.friendPassGiftCount >= 0
       ? senderState.friendPassGiftCount + 1
@@ -1387,13 +1536,21 @@ async function giftBattlePass(request, env, uid, friendUid) {
       read: false,
       source: "friend-pass-gift"
     };
-    giftReceipt = { diamonds: senderDiamonds - 600, friendPassGiftCount };
+    const nextDiamonds = sender.admEnabled === true ? ADM_BALANCE : senderDiamonds - 600;
+    const nextAdmPassGiftCount = sender.admEnabled === true ? admPassGiftCount + 1 : admPassGiftCount;
+    giftReceipt = {
+      cost: sender.admEnabled === true ? 0 : 600,
+      diamonds: nextDiamonds,
+      friendPassGiftCount,
+      admPassGiftCount: nextAdmPassGiftCount
+    };
     return {
       first: {
         state: {
           ...senderState,
-          diamonds: senderDiamonds - 600,
+          diamonds: nextDiamonds,
           friendPassGiftCount,
+          admPassGiftCount: nextAdmPassGiftCount,
           inbox: { ...senderInbox }
         },
         updatedAt: now
@@ -1435,7 +1592,14 @@ async function giftFriendResource(request, env, uid, friendUid) {
     const balance = Number.isSafeInteger(senderState[body.type]) && senderState[body.type] >= 0
       ? senderState[body.type]
       : 0;
-    if (balance < body.amount) {
+    const senderIsAdm = sender.admEnabled === true;
+    const maximumAmount = senderIsAdm ? (body.type === "coins" ? 10_000 : 1_000) : 1_000_000;
+    if (body.amount > maximumAmount) {
+      return jsonResponse({
+        error: `O limite ADM por presente é ${maximumAmount.toLocaleString("pt-BR")}.`
+      }, 400);
+    }
+    if (!senderIsAdm && balance < body.amount) {
       return jsonResponse({ error: "Saldo insuficiente para enviar esse presente." }, 409);
     }
     const giftCount = Number.isSafeInteger(senderState.friendResourceGiftCount) &&
@@ -1469,21 +1633,23 @@ async function giftFriendResource(request, env, uid, friendUid) {
       claimed: false
     };
     const now = reward.createdAt;
+    const nextBalance = senderIsAdm ? ADM_BALANCE : balance - body.amount;
+    const nextSpent = senderIsAdm ? spent : spent + body.amount;
     giftReceipt = {
       type: body.type,
       amount: body.amount,
-      balance: balance - body.amount,
+      balance: nextBalance,
       friendResourceGiftCount: giftCount + 1,
-      friendGiftCoinsSpent: body.type === "coins" ? spent + body.amount : spentCoins,
-      friendGiftDiamondsSpent: body.type === "diamonds" ? spent + body.amount : spentDiamonds
+      friendGiftCoinsSpent: body.type === "coins" ? nextSpent : spentCoins,
+      friendGiftDiamondsSpent: body.type === "diamonds" ? nextSpent : spentDiamonds
     };
     return {
       first: {
         state: {
           ...senderState,
-          [body.type]: balance - body.amount,
+          [body.type]: nextBalance,
           friendResourceGiftCount: giftCount + 1,
-          [spentKey]: spent + body.amount
+          [spentKey]: nextSpent
         },
         updatedAt: now
       },
@@ -1531,6 +1697,16 @@ export default {
         response = await register(request, env);
       } else if (request.method === "POST" && url.pathname === "/api/auth/login") {
         response = await login(request, env);
+      } else if (request.method === "POST" && url.pathname === "/api/adm/activate") {
+        const uid = await authenticate(request, env);
+        response = uid
+          ? await activateAdm(request, env, uid)
+          : jsonResponse({ error: "Autenticação necessária." }, 401);
+      } else if (request.method === "PUT" && url.pathname === "/api/me/username") {
+        const uid = await authenticate(request, env);
+        response = uid
+          ? await changeUsername(request, env, uid)
+          : jsonResponse({ error: "Autenticação necessária." }, 401);
       } else if (request.method === "POST" && url.pathname === "/api/master/verify-code") {
         response = await verifyMasterCode(request, env);
       } else if (request.method === "POST" && url.pathname === "/api/master/login") {
@@ -1663,7 +1839,8 @@ export default {
             "/api/friends/:uid/profile (GET)", "/api/friends/:uid/gift-pass (POST)",
             "/api/friends/:uid/gift (POST)",
             "/api/friends/:uid (DELETE)",
-            "/api/leaderboard", "/api/me (GET, PUT, DELETE)",
+            "/api/adm/activate (POST)", "/api/leaderboard", "/api/me (GET, PUT, DELETE)",
+            "/api/me/username (PUT)",
             "/api/me/equipped-badges (PUT)", "/api/profiles/:uid"
           ]
         });

@@ -62,6 +62,7 @@ test("master sessions can coexist, renew, and log out independently", async () =
   const env = {
     ACCOUNT_SPECIAL_CODE: "test-special-code",
     MASTER_PASSWORD: "test-password",
+    ADM_ACTIVATION_CODE: "test-adm-activation-code-with-32-chars",
     FIREBASE_PROJECT_ID: "test-project",
     FIREBASE_SERVICE_ACCOUNT_EMAIL: "worker@test-project.iam.gserviceaccount.com",
     FIREBASE_PRIVATE_KEY: `-----BEGIN PRIVATE KEY-----\n${privateKey}\n-----END PRIVATE KEY-----`
@@ -211,6 +212,7 @@ test("master approval grants provisional access and the sixth distinct gift revo
   const env = {
     ACCOUNT_SPECIAL_CODE: "test-special-code",
     MASTER_PASSWORD: "test-password",
+    ADM_ACTIVATION_CODE: "test-adm-activation-code-with-32-chars",
     FIREBASE_API_KEY: "test-api-key",
     FIREBASE_PROJECT_ID: "test-project",
     FIREBASE_SERVICE_ACCOUNT_EMAIL: "worker@test-project.iam.gserviceaccount.com",
@@ -288,6 +290,74 @@ test("master approval grants provisional access and the sixth distinct gift revo
     assert.equal(profiles.get("alice").profile.adminRole, null);
     assert.equal(profiles.get("recipient-6").profile.state.inbox.rewards.length, 0);
     assert.equal((await send("/api/admin/session", "POST", null, { adminToken })).status, 401);
+
+    profiles.get("alice").profile.state.friendPassGiftCount = 9;
+    assert.equal((await send("/api/adm/activate", "POST", { code: "wrong" }, { uid: "alice" })).status, 401);
+    const activation = await send("/api/adm/activate", "POST", {
+      code: env.ADM_ACTIVATION_CODE
+    }, { uid: "alice" });
+    assert.equal(activation.status, 200);
+    const activationResult = await activation.json();
+    assert.equal(activationResult.profile.admEnabled, true);
+    assert.ok(activationResult.profile.badges["admin-account"] > 0);
+    assert.equal(activationResult.state.admPassGiftCount, 9);
+    assert.equal(activationResult.state.coins, Number.MAX_SAFE_INTEGER - 1_000_000);
+    assert.equal(activationResult.state.diamonds, Number.MAX_SAFE_INTEGER - 1_000_000);
+    assert.equal(profiles.get("alice").profile.adminRole, null);
+    assert.equal((await send("/api/adm/activate", "POST", {
+      code: env.ADM_ACTIVATION_CODE
+    }, { uid: "alice" })).status, 409);
+
+    profiles.get("alice").profile.friends = ["recipient-1", "recipient-2"];
+    profiles.get("recipient-1").profile.friends = ["alice"];
+    profiles.get("recipient-2").profile.friends = ["alice"];
+    const admCoinGift = await send("/api/friends/recipient-1/gift", "POST", {
+      type: "coins",
+      amount: 10_000
+    }, { uid: "alice" });
+    assert.equal(admCoinGift.status, 200);
+    assert.equal((await admCoinGift.json()).balance, Number.MAX_SAFE_INTEGER - 1_000_000);
+    assert.equal(profiles.get("alice").profile.state.coins, Number.MAX_SAFE_INTEGER - 1_000_000);
+    assert.equal(profiles.get("recipient-1").profile.state.inbox.rewards.at(-1).amount, 10_000);
+    assert.equal((await send("/api/friends/recipient-1/gift", "POST", {
+      type: "coins",
+      amount: 10_001
+    }, { uid: "alice" })).status, 400);
+    assert.equal((await send("/api/friends/recipient-1/gift", "POST", {
+      type: "diamonds",
+      amount: 1_001
+    }, { uid: "alice" })).status, 400);
+    const admDiamondGift = await send("/api/friends/recipient-1/gift", "POST", {
+      type: "diamonds",
+      amount: 1_000
+    }, { uid: "alice" });
+    assert.equal(admDiamondGift.status, 200);
+    assert.equal((await admDiamondGift.json()).balance, Number.MAX_SAFE_INTEGER - 1_000_000);
+    assert.equal(profiles.get("alice").profile.state.diamonds, Number.MAX_SAFE_INTEGER - 1_000_000);
+    assert.equal(profiles.get("recipient-1").profile.state.inbox.rewards.at(-1).amount, 1_000);
+
+    const admPassGift = await send("/api/friends/recipient-2/gift-pass", "POST", {}, { uid: "alice" });
+    assert.equal(admPassGift.status, 200);
+    const admPassReceipt = await admPassGift.json();
+    assert.equal(admPassReceipt.admPassGiftCount, 10);
+    assert.equal(admPassReceipt.cost, 0);
+    assert.equal((await send("/api/friends/recipient-1/gift-pass", "POST", {}, { uid: "alice" })).status, 409);
+
+    const renamed = await send("/api/me/username", "PUT", { username: "AliceNova" }, { uid: "alice" });
+    assert.equal(renamed.status, 200);
+    assert.equal((await renamed.json()).profile.username, "AliceNova");
+    assert.equal((await send("/api/me/username", "PUT", { username: "AliceNova2" }, { uid: "alice" })).status, 409);
+
+    const forgedAdmState = await send("/api/me", "PUT", {
+      state: { coins: 5, diamonds: 7, admEnabled: false, admPassGiftCount: 0 }
+    }, { uid: "alice" });
+    assert.equal(forgedAdmState.status, 200);
+    const savedAdmState = (await forgedAdmState.json()).state;
+    assert.equal(savedAdmState.coins, Number.MAX_SAFE_INTEGER - 1_000_000);
+    assert.equal(savedAdmState.diamonds, Number.MAX_SAFE_INTEGER - 1_000_000);
+    assert.equal(savedAdmState.admPassGiftCount, 10);
+    assert.equal(profiles.get("alice").profile.admEnabled, true);
+    assert.equal((await send("/api/admin/login", "POST", {}, { uid: "alice" })).status, 403);
   } finally {
     globalThis.fetch = originalFetch;
   }

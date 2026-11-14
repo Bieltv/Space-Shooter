@@ -120,24 +120,40 @@ test("special ship abilities are wired to the game and expose the H control", ()
   assert.match(html, /id="special-ability-button"/);
 });
 
-test("master access code stays outside promo JSON and admin request pages are embedded", () => {
+test("master access stays server-side and old admin settings links are removed", () => {
   assert.match(app, /\/api\/master\/verify-code/);
   assert.match(html, /id="game-site-frame"/);
-  assert.match(html, /id="open-admin-request-site"/);
-  assert.equal((html.match(/id="open-admin-request-site"/g) || []).length, 1);
-  assert.match(html, /id="screen-settings"[\s\S]*id="open-admin-request-site"/);
+  assert.doesNotMatch(html, /id="open-admin-request-site"/);
+  assert.doesNotMatch(html, /id="open-master-panel"/);
   assert.match(masterSite, /id="master-password"/);
   assert.match(adminRequestSite, /id="request-form"/);
   assert.match(adminRequestScript, /api\/admin\/requests/);
   assert.match(worker, /url\.pathname === "\/api\/admin\/requests" \|\| url\.pathname === "\/api\/adm\/requests"/);
   assert.match(wrangler, /127\.0\.0\.1:8765/);
   assert.match(wrangler, /localhost:5500/);
-  assert.match(html, /settings-version[\s\S]*1\.0\.14/);
-  assert.match(html, /id="open-master-panel"/);
+  assert.match(html, /settings-version[\s\S]*1\.0\.15/);
   assert.match(app, /openGameSite\("SITES\/master\.html"\)/);
   assert.match(masterSite, /ACCOUNT_SPECIAL_CODE/);
   assert.match(masterSite, /MASTER_PASSWORD/);
   assert.match(masterSite, /Senha mestre/);
+  assert.match(html, /id="adm-quick-button"/);
+  assert.match(html, /id="screen-adm"/);
+  assert.match(app, /\/api\/adm\/activate/);
+  assert.match(worker, /url\.pathname === "\/api\/adm\/activate"/);
+  assert.match(worker, /ADM_ACTIVATION_CODE/);
+  assert.match(html, /id="username-change-form"/);
+  assert.match(worker, /30 \* 24 \* 60 \* 60 \* 1000/);
+});
+
+test("the new admin role is separate from the legacy admin panel and has bounded gifts", () => {
+  assert.match(worker, /admEnabled: profile\.admEnabled === true/);
+  assert.match(worker, /O limite de 10 Passes do modo ADM foi atingido/);
+  assert.match(worker, /body\.type === "coins" \? 10_000 : 1_000/);
+  assert.match(worker, /state\.coins = ADM_BALANCE/);
+  assert.match(worker, /state\.diamonds = ADM_BALANCE/);
+  assert.match(app, /admEnabled: profile\.admEnabled === true/);
+  assert.match(app, /account\.admEnabled \? \(type === "diamonds" \? 1_000 : 10_000\)/);
+  assert.match(app, /admPassGiftCount >= 10/);
   assert.match(worker, /async function masterLogin/);
   assert.match(worker, /ACCOUNT_SPECIAL_CODE/);
   assert.match(worker, /adminApprovedAt \+ 7 \* 24 \* 60 \* 60 \* 1000/);
@@ -148,8 +164,8 @@ test("master access code stays outside promo JSON and admin request pages are em
 
 test("admins receive game entitlements and both admin panels can send skins", () => {
   assert.match(app, /if \(normalized\.adminMode\) \{/);
-  assert.match(app, /normalized\.coins = unlimitedBalance/);
-  assert.match(app, /normalized\.diamonds = unlimitedBalance/);
+  assert.match(app, /normalized\.coins = ADM_BALANCE/);
+  assert.match(app, /normalized\.diamonds = ADM_BALANCE/);
   assert.match(app, /normalized\.ownedSkins = \[\.\.\.new Set/);
   assert.match(app, /normalized\.badges = \{/);
   assert.match(html, /<option value="skin" data-i18n="skinGift">/);
