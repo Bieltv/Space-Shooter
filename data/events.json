@@ -29,34 +29,60 @@
       "gameMode": "christmas",
       "bossScoreBonus": 5000,
       "milestoneRewards": [
-        { "atScore": 90000, "skinId": "shot-christmas-stars" },
-        { "atScore": 190000, "skinId": "shield-christmas-wreath" },
-        { "atScore": 550000, "skinId": "ship-christmas-ornament" }
+        {
+          "atScore": 90000,
+          "skinId": "shot-christmas-stars"
+        },
+        {
+          "atScore": 190000,
+          "skinId": "shield-christmas-wreath"
+        },
+        {
+          "atScore": 550000,
+          "skinId": "ship-christmas-ornament"
+        }
       ],
       "phases": [
         {
           "number": 1,
           "startsAt": "2026-12-01T00:00:00-03:00",
           "endsAt": "2026-12-06T23:59:59-03:00",
-          "scoreTargets": [10000, 15000, 20000]
+          "scoreTargets": [
+            10000,
+            15000,
+            20000
+          ]
         },
         {
           "number": 2,
           "startsAt": "2026-12-07T00:00:00-03:00",
           "endsAt": "2026-12-12T23:59:59-03:00",
-          "scoreTargets": [45000, 60000, 90000]
+          "scoreTargets": [
+            45000,
+            60000,
+            90000
+          ]
         },
         {
           "number": 3,
           "startsAt": "2026-12-13T00:00:00-03:00",
           "endsAt": "2026-12-18T23:59:59-03:00",
-          "scoreTargets": [120000, 170000, 190000]
+          "scoreTargets": [
+            120000,
+            170000,
+            190000
+          ]
         },
         {
           "number": 4,
           "startsAt": "2026-12-19T00:00:00-03:00",
           "endsAt": "2026-12-25T23:59:59-03:00",
-          "scoreTargets": [240000, 300000, 430000, 550000]
+          "scoreTargets": [
+            240000,
+            300000,
+            430000,
+            550000
+          ]
         }
       ]
     },
@@ -74,30 +100,96 @@
       "endsAt": "2026-12-25T23:59:59-03:00",
       "gameMode": "standard",
       "milestoneRewards": [
-        { "atScore": 440000, "skinId": "ship-gray-neon" },
-        { "atScore": 440000, "skinId": "shield-gray-neon" },
-        { "atScore": 440000, "skinId": "shot-gray-neon" }
+        {
+          "atScore": 440000,
+          "skinId": "ship-gray-neon"
+        },
+        {
+          "atScore": 440000,
+          "skinId": "shield-gray-neon"
+        },
+        {
+          "atScore": 440000,
+          "skinId": "shot-gray-neon"
+        }
       ],
       "phases": [
         {
           "number": 1,
           "startsAt": "2026-11-30T00:00:00-03:00",
           "endsAt": "2026-12-08T23:59:59-03:00",
-          "scoreTargets": [150000]
+          "scoreTargets": [
+            150000
+          ]
         },
         {
           "number": 2,
           "startsAt": "2026-12-09T00:00:00-03:00",
           "endsAt": "2026-12-17T23:59:59-03:00",
-          "scoreTargets": [300000]
+          "scoreTargets": [
+            300000
+          ]
         },
         {
           "number": 3,
           "startsAt": "2026-12-18T00:00:00-03:00",
           "endsAt": "2026-12-25T23:59:59-03:00",
-          "scoreTargets": [440000]
+          "scoreTargets": [
+            440000
+          ]
         }
       ]
+    },
+    {
+      "id": "corrida-tokens-geada-2026",
+      "title": {
+        "pt-BR": "Corrida de tokens geada",
+        "en": "Frost Token Rush"
+      },
+      "description": {
+        "pt-BR": "Colete tokens de cristal de gelo durante as partidas do evento e troque-os por skins transparentes, Neon-moedas e um bônus temporário de fichas em dobro.",
+        "en": "Collect ice-crystal tokens during event runs and exchange them for translucent skins, Neon Coins, and a temporary token multiplier."
+      },
+      "startsAt": "2026-12-01T00:00:00-03:00",
+      "endsAt": "2027-01-01T00:00:00-03:00",
+      "scheduledDaysBefore": 7,
+      "gameMode": "frost-tokens",
+      "tokenIntervalSeconds": 15,
+      "shop": {
+        "skinOffers": [
+          {
+            "skinId": "ship-frost-race",
+            "priceTokens": 350
+          },
+          {
+            "skinId": "shield-frost-race",
+            "priceTokens": 350
+          },
+          {
+            "skinId": "shot-frost-race",
+            "priceTokens": 350
+          }
+        ],
+        "coinPacks": [
+          {
+            "amount": 1000,
+            "priceTokens": 20
+          },
+          {
+            "amount": 2000,
+            "priceTokens": 40
+          },
+          {
+            "amount": 3000,
+            "priceTokens": 60
+          }
+        ],
+        "tokenBoost": {
+          "multiplier": 3,
+          "priceTokens": 15,
+          "durationMs": 86400000
+        }
+      }
     }
   ]
 }

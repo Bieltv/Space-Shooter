@@ -127,6 +127,17 @@ const translations = {
     eventNotAvailable: "Este evento não está disponível para jogar agora.",
     eventBossDefeated: "Chefe natalino derrotado! +5.000 pontos",
     eventProgressSaved: "Partida encerrada. O progresso do evento foi salvo.",
+    eventDetailsTab: "Evento", eventShopTab: "Loja geada",
+    frostTokenBalance: "Tokens de cristal de gelo",
+    frostTokenCollected: "+{amount} tokens de cristal de gelo",
+    frostCoinPack: "Pacote de {amount} Neon-moedas · {price} tokens",
+    frostTokenBoost: "Bônus x3 de tokens por 1 dia · {price} tokens",
+    frostBoostActive: "Bônus x3 ativo até {date}",
+    frostShopBuy: "Comprar", frostShopOwned: "Adquirida", frostShopInsufficient: "Tokens insuficientes",
+    frostSkinPurchased: "Skin de geada adicionada à coleção.",
+    frostCoinsPurchased: "Pacote de Neon-moedas resgatado.",
+    frostBoostPurchased: "Bônus x3 ativado por 24 horas.",
+    frostShopInactive: "A loja abre junto com o evento em 1º de dezembro.",
     ornamentEvolution: "Evolução: {stage} · +{bonus}% de dano · {progress}/500 pontos",
     ornamentRed: "Vermelha", ornamentGreen: "Verde", ornamentGold: "Dourada", ornamentSilver: "Prateada",
     badges: "Emblemas", badgesHint: "Colecione emblemas hexagonais e confira como conquistá-los.",
@@ -434,6 +445,17 @@ const translations = {
     eventNotAvailable: "This event is not available to play right now.",
     eventBossDefeated: "Christmas boss defeated! +5,000 points",
     eventProgressSaved: "Run ended. Event progress was saved.",
+    eventDetailsTab: "Event", eventShopTab: "Frost shop",
+    frostTokenBalance: "Ice crystal tokens",
+    frostTokenCollected: "+{amount} ice crystal tokens",
+    frostCoinPack: "{amount} Neon Coins pack · {price} tokens",
+    frostTokenBoost: "3x token bonus for 1 day · {price} tokens",
+    frostBoostActive: "3x bonus active until {date}",
+    frostShopBuy: "Buy", frostShopOwned: "Owned", frostShopInsufficient: "Not enough tokens",
+    frostSkinPurchased: "Frost skin added to your collection.",
+    frostCoinsPurchased: "Neon Coins pack redeemed.",
+    frostBoostPurchased: "3x bonus activated for 24 hours.",
+    frostShopInactive: "The shop opens with the event on December 1.",
     ornamentEvolution: "Evolution: {stage} · +{bonus}% damage · {progress}/500 points",
     ornamentRed: "Red", ornamentGreen: "Green", ornamentGold: "Gold", ornamentSilver: "Silver",
     badges: "Badges", badgesHint: "Collect hexagonal badges and see how to earn them.",
@@ -634,6 +656,7 @@ const INITIAL_LIVES = 3;
 const MAX_UPGRADE_LEVEL = 10;
 const ADM_BALANCE = Number.MAX_SAFE_INTEGER - 1_000_000;
 const BOSS_INTERVAL_SECONDS = 60;
+const FROST_TOKEN_EVENT_ID = "corrida-tokens-geada-2026";
 const BOSS_MAX_HEALTH = 150;
 const GUARDIAN_MAX_HEALTH = 10;
 const BOSS_GUARDIAN_COUNT = 3;
@@ -981,7 +1004,7 @@ async function refreshCloudSession() {
 async function cloudRequest(path, options = {}) {
   if (!API_BASE_URL) throw new Error("Configure a URL pública do Worker em js/config.js.");
   if (options.auth !== false && cloudSession &&
-      (!cloudSession.idToken || cloudSession.expiresAt <= Date.now() + 30_000)) {
+    (!cloudSession.idToken || cloudSession.expiresAt <= Date.now() + 30_000)) {
     await refreshCloudSession();
   }
   const headers = { "content-type": "application/json", ...options.headers };
@@ -1366,6 +1389,9 @@ function normalizeAccount(nextAccount) {
     ? Object.fromEntries(Object.entries(nextAccount.eventProgress)
       .filter(([eventId, score]) => typeof eventId === "string" && Number.isSafeInteger(score) && score >= 0))
     : {};
+  const savedFrostTokenRace = nextAccount.frostTokenRace && typeof nextAccount.frostTokenRace === "object"
+    ? nextAccount.frostTokenRace
+    : {};
   const savedBadges = nextAccount.badges && typeof nextAccount.badges === "object" ? nextAccount.badges : {};
   const badges = Object.fromEntries(Object.entries(savedBadges)
     .filter(([id, earnedAt]) => typeof id === "string" && Number.isSafeInteger(earnedAt) && earnedAt > 0));
@@ -1472,6 +1498,14 @@ function normalizeAccount(nextAccount) {
       : 0,
     moneyVoid: Number.isSafeInteger(nextAccount.moneyVoid) && nextAccount.moneyVoid >= 0 ? nextAccount.moneyVoid : 0,
     eventProgress,
+    frostTokenRace: {
+      tokens: Number.isSafeInteger(savedFrostTokenRace.tokens) && savedFrostTokenRace.tokens >= 0
+        ? savedFrostTokenRace.tokens
+        : 0,
+      boostExpiresAt: Number.isSafeInteger(savedFrostTokenRace.boostExpiresAt) && savedFrostTokenRace.boostExpiresAt > 0
+        ? savedFrostTokenRace.boostExpiresAt
+        : 0
+    },
     badges,
     equippedBadges,
     medals,
@@ -1608,6 +1642,7 @@ function upgradeValue(type, level = account?.upgrades?.[type] ?? 1) {
   if (type === "damage") return Math.max(1, level);
   if (type === "hull") return INITIAL_LIVES + Math.max(0, level - 1);
   if (type === "shield" && selectedSkins.shield === "shield-eclipse") return Math.max(1, level) + 2;
+  if (type === "shield" && selectedSkins.shield === "shield-frost-race") return Math.max(1, level - 1);
   return Math.max(1, level);
 }
 
@@ -1704,13 +1739,13 @@ async function createEncryptedBackup(password) {
 
 function validateImportedAccount(importedAccount) {
   if (!importedAccount || typeof importedAccount !== "object" ||
-      typeof importedAccount.username !== "string" ||
-      !/^[\p{L}\p{N}_-]{3,20}$/u.test(importedAccount.username) ||
-      typeof importedAccount.playerId !== "string" || !importedAccount.playerId ||
-      !Number.isSafeInteger(importedAccount.coins) || importedAccount.coins < 0 ||
-      !Array.isArray(importedAccount.ownedSkins) ||
-      !importedAccount.equippedSkins || typeof importedAccount.equippedSkins !== "object" ||
-      !importedAccount.welcomeOffer || typeof importedAccount.welcomeOffer !== "object") {
+    typeof importedAccount.username !== "string" ||
+    !/^[\p{L}\p{N}_-]{3,20}$/u.test(importedAccount.username) ||
+    typeof importedAccount.playerId !== "string" || !importedAccount.playerId ||
+    !Number.isSafeInteger(importedAccount.coins) || importedAccount.coins < 0 ||
+    !Array.isArray(importedAccount.ownedSkins) ||
+    !importedAccount.equippedSkins || typeof importedAccount.equippedSkins !== "object" ||
+    !importedAccount.welcomeOffer || typeof importedAccount.welcomeOffer !== "object") {
     throw new Error(t("backupInvalid"));
   }
 }
@@ -1724,7 +1759,7 @@ async function decryptBackup(file, password, username) {
     throw new Error(t("backupInvalid"));
   }
   if (backup?.format !== "neon-void-account-backup" || backup.version !== 1 ||
-      backup.kdf !== "PBKDF2-SHA-256" || backup.iterations !== BACKUP_ITERATIONS) {
+    backup.kdf !== "PBKDF2-SHA-256" || backup.iterations !== BACKUP_ITERATIONS) {
     throw new Error(t("backupInvalid"));
   }
   const salt = base64ToBytes(backup.salt);
@@ -1751,8 +1786,8 @@ async function decryptBackup(file, password, username) {
   const playerId = importedAccount.playerId;
   const importedMissions = payload.missions;
   if (!importedMissions || !Number.isSafeInteger(importedMissions.cycle) ||
-      !importedMissions.progress || typeof importedMissions.progress !== "object" ||
-      Array.isArray(importedMissions.progress)) throw new Error(t("backupInvalid"));
+    !importedMissions.progress || typeof importedMissions.progress !== "object" ||
+    Array.isArray(importedMissions.progress)) throw new Error(t("backupInvalid"));
   const missionGoals = new Map(missionData.missionSets.flatMap((set) =>
     set.missions.map((mission) => [mission.id, mission.goal])
   ));
@@ -2088,7 +2123,7 @@ function finishBoss() {
   game.enemyBullets = [];
   game.nextBossAt = nextBossSpawnAt(game.elapsed);
   if (selectedSpecialAbility()?.id === "void" && game.bossesDefeated >= 2 &&
-      !Number.isFinite(game.specialAbilityReadyAt)) {
+    !Number.isFinite(game.specialAbilityReadyAt)) {
     game.specialAbilityReadyAt = game.elapsed;
   }
   $("#boss-hud").hidden = true;
@@ -2348,10 +2383,10 @@ function localizedText(value) {
 function updateInboxBadge() {
   const count = account
     ? account.inbox.messages.filter((message) => !message.read).length +
-      account.inbox.rewards.filter((reward) =>
-        ["promo-code", "admin", "friend-gift"].includes(reward.source) && !reward.claimed
-      ).length +
-      friendsData.incoming.length
+    account.inbox.rewards.filter((reward) =>
+      ["promo-code", "admin", "friend-gift"].includes(reward.source) && !reward.claimed
+    ).length +
+    friendsData.incoming.length
     : 0;
   const badge = $("#home-inbox-count");
   badge.textContent = count > 99 ? "99+" : String(count);
@@ -2423,7 +2458,7 @@ function evaluateAccountBadges(nextAccount) {
   if (Number.isSafeInteger(updatedAccount.createdAt) && updatedAccount.createdAt > 0) {
     updatedAccount = recordBadge(updatedAccount, "account-created", updatedAccount.createdAt);
     if (updatedAccount.createdAt >= Date.parse("2026-11-02T00:00:00-03:00") &&
-        updatedAccount.createdAt < Date.parse("2026-12-01T00:00:00-03:00")) {
+      updatedAccount.createdAt < Date.parse("2026-12-01T00:00:00-03:00")) {
       updatedAccount = recordBadge(updatedAccount, "player-beta", updatedAccount.createdAt);
     }
   }
@@ -2956,9 +2991,16 @@ function renderEventDetails(event) {
   const phases = event.phases || [];
   const isActive = event.startsAt <= Date.now() && event.endsAt > Date.now();
   const list = $("#event-phase-list");
+  const hasShop = Boolean(event.shop);
+  $("#event-tabs").hidden = !hasShop;
+  $("#event-details-tab").setAttribute("aria-selected", "true");
+  $("#event-shop-tab").setAttribute("aria-selected", "false");
+  $("#event-details-panel").hidden = false;
+  $("#event-shop-panel").hidden = true;
   $("#event-progress").hidden = phases.length === 0;
-  $("#play-event-button").hidden = !phases.length || !isActive;
+  $("#play-event-button").hidden = !(isActive && (phases.length || event.gameMode === "frost-tokens"));
   $("#play-event-button").dataset.eventId = event.id;
+  if (hasShop) renderFrostShop(event);
   if (!phases.length) return;
 
   const score = account?.eventProgress?.[event.id] || 0;
@@ -3004,6 +3046,91 @@ function renderEventDetails(event) {
     }
     return card;
   }));
+}
+
+function renderFrostShop(event) {
+  const shop = event.shop;
+  const isActive = event.startsAt <= Date.now() && event.endsAt > Date.now();
+  const tokenRace = account?.frostTokenRace || { tokens: 0, boostExpiresAt: 0 };
+  const tokenCount = tokenRace.tokens.toLocaleString(language);
+  $("#frost-token-count").textContent = tokenCount;
+  const status = [];
+  if (!isActive) status.push(t("frostShopInactive"));
+  if (tokenRace.boostExpiresAt > Date.now()) {
+    status.push(t("frostBoostActive").replace("{date}", new Date(tokenRace.boostExpiresAt).toLocaleString(language)));
+  }
+  $("#frost-shop-status").textContent = status.join(" · ");
+  const items = shop.skinOffers.map((offer) => {
+    const skin = findSkin(offer.skinId);
+    const owned = account?.ownedSkins.includes(offer.skinId) === true;
+    const disabled = !isActive || !account || owned || tokenRace.tokens < offer.priceTokens;
+    const buttonLabel = owned ? t("frostShopOwned") : tokenRace.tokens < offer.priceTokens
+      ? t("frostShopInsufficient") : t("frostShopBuy");
+    return `<article class="event-shop-item">
+      <div class="event-shop-item-copy">
+        <span class="skin-visual ${escapeHtml(skin.shape)}" style="--skin-color:${escapeHtml(skin.color)};--accent-color:${escapeHtml(skin.accentColor || skin.color)};--skin-opacity:${skin.opacity || 1}" aria-hidden="true"></span>
+        <span><strong>${escapeHtml(localizedText(skin.name))}</strong><small>${offer.priceTokens.toLocaleString(language)} ${escapeHtml(t("frostTokenBalance"))}</small></span>
+      </div>
+      <button class="neon-button cyan" type="button" data-frost-skin="${escapeHtml(offer.skinId)}"${disabled ? " disabled" : ""}>${escapeHtml(buttonLabel)}</button>
+    </article>`;
+  });
+  items.push(...shop.coinPacks.map((pack) => {
+    const disabled = !isActive || !account || tokenRace.tokens < pack.priceTokens;
+    return `<article class="event-shop-item">
+      <div class="event-shop-item-copy"><span class="frost-shop-symbol" aria-hidden="true">₵</span><span><strong>${escapeHtml(t("frostCoinPack").replace("{amount}", pack.amount.toLocaleString(language)).replace("{price}", pack.priceTokens.toLocaleString(language)))}</strong></span></div>
+      <button class="neon-button gold-button" type="button" data-frost-coins="${pack.amount}"${disabled ? " disabled" : ""}>${escapeHtml(t("frostShopBuy"))}</button>
+    </article>`;
+  }));
+  const boost = shop.tokenBoost;
+  const boostDisabled = !isActive || !account || tokenRace.tokens < boost.priceTokens;
+  items.push(`<article class="event-shop-item">
+    <div class="event-shop-item-copy"><span class="frost-shop-symbol" aria-hidden="true">×3</span><span><strong>${escapeHtml(t("frostTokenBoost").replace("{price}", boost.priceTokens.toLocaleString(language)))}</strong></span></div>
+    <button class="neon-button cyan" type="button" data-frost-boost="true"${boostDisabled ? " disabled" : ""}>${escapeHtml(t("frostShopBuy"))}</button>
+  </article>`);
+  $("#frost-shop-list").innerHTML = items.join("");
+}
+
+function purchaseFrostShopItem(kind, value) {
+  const event = eventData?.events.find((entry) => entry.id === FROST_TOKEN_EVENT_ID);
+  if (!account || !event || event.startsAt > Date.now() || event.endsAt <= Date.now()) return;
+  const tokenRace = account.frostTokenRace;
+  try {
+    if (kind === "skin") {
+      const offer = event.shop.skinOffers.find((entry) => entry.skinId === value);
+      if (!offer || account.ownedSkins.includes(offer.skinId) || tokenRace.tokens < offer.priceTokens) return;
+      persistAccount({
+        ...account,
+        ownedSkins: [...account.ownedSkins, offer.skinId],
+        frostTokenRace: { ...tokenRace, tokens: tokenRace.tokens - offer.priceTokens }
+      });
+      showToast(t("frostSkinPurchased"));
+    } else if (kind === "coins") {
+      const pack = event.shop.coinPacks.find((entry) => entry.amount === value);
+      if (!pack || tokenRace.tokens < pack.priceTokens) return;
+      persistAccount({
+        ...account,
+        coins: account.coins + pack.amount,
+        frostTokenRace: { ...tokenRace, tokens: tokenRace.tokens - pack.priceTokens }
+      });
+      showToast(t("frostCoinsPurchased"));
+    } else if (kind === "boost") {
+      const boost = event.shop.tokenBoost;
+      if (tokenRace.tokens < boost.priceTokens) return;
+      persistAccount({
+        ...account,
+        frostTokenRace: {
+          ...tokenRace,
+          tokens: tokenRace.tokens - boost.priceTokens,
+          boostExpiresAt: Math.max(Date.now(), tokenRace.boostExpiresAt) + boost.durationMs
+        }
+      });
+      showToast(t("frostBoostPurchased"));
+    }
+  } catch (error) {
+    showToast(error.message);
+    return;
+  }
+  renderFrostShop(event);
 }
 
 function applyEventMilestoneRewards(nextAccount, eventId, score) {
@@ -3190,8 +3317,10 @@ function getPassAndEventSkinIds() {
 function getEventSkinIds() {
   const eventRewards = (eventData?.events || []).flatMap((event) =>
     (event.milestoneRewards || []).map((reward) => reward.skinId));
+  const eventShopSkins = (eventData?.events || []).flatMap((event) =>
+    (event.shop?.skinOffers || []).map((offer) => offer.skinId));
   const catalogEventSkins = (skinData?.events || []).map((event) => event.skin?.id).filter(Boolean);
-  return new Set([...eventRewards, ...catalogEventSkins]);
+  return new Set([...eventRewards, ...eventShopSkins, ...catalogEventSkins]);
 }
 
 function getBattlePassDropEligibleSkins(rarity) {
@@ -3852,8 +3981,8 @@ async function redeemPromoCode(value) {
     return;
   }
   if (promo.active !== true ||
-      (promo.startsAt && Date.parse(promo.startsAt) > now) ||
-      (promo.endsAt && Date.parse(promo.endsAt) <= now)) {
+    (promo.startsAt && Date.parse(promo.startsAt) > now) ||
+    (promo.endsAt && Date.parse(promo.endsAt) <= now)) {
     status.textContent = t("promoCodeInvalid");
     return;
   }
@@ -4056,7 +4185,7 @@ function validateMissionData(data) {
     }
     for (const mission of set.missions) {
       if (!mission.id || ids.has(mission.id) || !mission.metric || !Number.isFinite(mission.goal) || mission.goal <= 0 ||
-          !mission.title?.["pt-BR"] || !mission.title?.en || !mission.description?.["pt-BR"] || !mission.description?.en) {
+        !mission.title?.["pt-BR"] || !mission.title?.en || !mission.description?.["pt-BR"] || !mission.description?.en) {
         throw new Error(`Missão inválida ou ID repetido: ${mission.id || "(sem ID)"}.`);
       }
       ids.add(mission.id);
@@ -4176,13 +4305,13 @@ function validateSkinData(data) {
     }
     for (const skin of data.categories[category]) {
       const validShapes = {
-        ship: ["triangle", "triangle-wide", "diamond", "void-neon", "christmas-ornament", "white-neon", "christmas-tree", "star", "fire-orb", "ice-crystal", "void-orb", "explosive-orb"],
-        shield: ["circle", "double-circle", "hexagon", "petal-ring", "gold-pulse", "christmas-lights", "star-points", "eclipse"],
-        shot: ["line", "line-thin", "line-wide", "double-line", "star", "candy-cane", "led"]
+        ship: ["triangle", "triangle-wide", "diamond", "void-neon", "christmas-ornament", "white-neon", "christmas-tree", "star", "fire-orb", "ice-crystal", "frost-crystal", "void-orb", "explosive-orb"],
+        shield: ["circle", "double-circle", "hexagon", "petal-ring", "gold-pulse", "christmas-lights", "star-points", "eclipse", "frost-ring"],
+        shot: ["line", "line-thin", "line-wide", "double-line", "star", "candy-cane", "led", "frost-shard"]
       };
       if (!skin.id || ids.has(skin.id) || !data.rarities[skin.rarity] || !skin.color ||
-          !validShapes[category].includes(skin.shape) || !skin.name?.["pt-BR"] || !skin.name?.en ||
-          !skin.description?.["pt-BR"] || !skin.description?.en) {
+        !validShapes[category].includes(skin.shape) || !skin.name?.["pt-BR"] || !skin.name?.en ||
+        !skin.description?.["pt-BR"] || !skin.description?.en) {
         throw new Error(`Skin inválida ou ID repetido: ${skin.id || "(sem ID)"}.`);
       }
       ids.add(skin.id);
@@ -4198,11 +4327,11 @@ function validateSkinData(data) {
       shot: ["line", "line-thin", "line-wide", "double-line"]
     };
     if (!event.id || eventIds.has(event.id) || !skinCategories.includes(event.category) ||
-        !Number.isFinite(event.endsAt) || !event.title?.["pt-BR"] || !event.title?.en ||
-        !event.description?.["pt-BR"] || !event.description?.en ||
-        !skin || !skin.id || !data.rarities[skin.rarity] || !skin.color ||
-        !validShapes[event.category].includes(skin.shape) || !skin.name?.["pt-BR"] || !skin.name?.en ||
-        !skin.description?.["pt-BR"] || !skin.description?.en) {
+      !Number.isFinite(event.endsAt) || !event.title?.["pt-BR"] || !event.title?.en ||
+      !event.description?.["pt-BR"] || !event.description?.en ||
+      !skin || !skin.id || !data.rarities[skin.rarity] || !skin.color ||
+      !validShapes[event.category].includes(skin.shape) || !skin.name?.["pt-BR"] || !skin.name?.en ||
+      !skin.description?.["pt-BR"] || !skin.description?.en) {
       throw new Error(`Evento de skin inválido: ${event.id || "(sem ID)"}.`);
     }
     eventIds.add(event.id);
@@ -4212,14 +4341,14 @@ function validateSkinData(data) {
 function validateBattlePassData(data) {
   const rarityOrder = ["common", "uncommon", "rare", "epic", "legendary"];
   if (!data || !Number.isSafeInteger(data.priceDiamonds) || data.priceDiamonds !== 450 ||
-      !Number.isFinite(Date.parse(data.visibleFrom)) ||
-      data.tokenIntervalSeconds !== 15 || !Array.isArray(data.levelRequirements) ||
-      data.levelRequirements.length !== 30 || data.levelRequirements.some((count, index) =>
-        !Number.isSafeInteger(count) || count !== (index < 7 ? 5 : index < 16 ? 10 : index < 26 ? 20 : 25)) ||
-      !Array.isArray(data.levels) || data.levels.length !== 30 ||
-      JSON.stringify(data.treeEvolutionCosts) !== JSON.stringify([0, 450, 700]) ||
-      !Array.isArray(data.luckDrop?.skinIds) || !data.luckDrop.rarityOdds ||
-      data.luckDrop.duplicateCoins !== 500) {
+    !Number.isFinite(Date.parse(data.visibleFrom)) ||
+    data.tokenIntervalSeconds !== 15 || !Array.isArray(data.levelRequirements) ||
+    data.levelRequirements.length !== 30 || data.levelRequirements.some((count, index) =>
+      !Number.isSafeInteger(count) || count !== (index < 7 ? 5 : index < 16 ? 10 : index < 26 ? 20 : 25)) ||
+    !Array.isArray(data.levels) || data.levels.length !== 30 ||
+    JSON.stringify(data.treeEvolutionCosts) !== JSON.stringify([0, 450, 700]) ||
+    !Array.isArray(data.luckDrop?.skinIds) || !data.luckDrop.rarityOdds ||
+    data.luckDrop.duplicateCoins !== 500) {
     throw new Error("O catálogo do Passe Neon está incompleto ou inválido.");
   }
   data.visibleFrom = Date.parse(data.visibleFrom);
@@ -4262,11 +4391,11 @@ function validateBattlePassData(data) {
     return total + odds;
   }, 0);
   if (Math.abs(totalOdds - 100) > 0.000001 ||
-      Object.entries({ drop: 10, charge: 5, coins: 5, empty: 5, ship: 3, shield: 2 })
-        .some(([type, count]) => counts.free[type] !== count || counts.premium[type] !== count) ||
-      data.levels[0].premium.find((reward) => reward.skinId === "shot-candy-cane") === undefined ||
-      data.levels[14].premium.find((reward) => reward.skinId === "shield-christmas-lights") === undefined ||
-      data.levels[29].premium.find((reward) => reward.skinId === "ship-christmas-tree") === undefined) {
+    Object.entries({ drop: 10, charge: 5, coins: 5, empty: 5, ship: 3, shield: 2 })
+      .some(([type, count]) => counts.free[type] !== count || counts.premium[type] !== count) ||
+    data.levels[0].premium.find((reward) => reward.skinId === "shot-candy-cane") === undefined ||
+    data.levels[14].premium.find((reward) => reward.skinId === "shield-christmas-lights") === undefined ||
+    data.levels[29].premium.find((reward) => reward.skinId === "ship-christmas-tree") === undefined) {
     throw new Error("As recompensas das trilhas do Passe Neon não correspondem à configuração esperada.");
   }
   for (const track of ["free", "premium"]) {
@@ -4283,37 +4412,49 @@ function validateEventData(data) {
     const startsAt = Date.parse(event.startsAt);
     const endsAt = Date.parse(event.endsAt);
     if (!event.id || ids.has(event.id) ||
-        !event.title?.["pt-BR"] || !event.title?.en ||
-        !event.description?.["pt-BR"] || !event.description?.en ||
-        !Number.isFinite(startsAt) || !Number.isFinite(endsAt) || endsAt <= startsAt ||
-        (event.scheduledDaysBefore !== undefined &&
-          (!Number.isInteger(event.scheduledDaysBefore) || event.scheduledDaysBefore < 1 || event.scheduledDaysBefore > 30))) {
+      !event.title?.["pt-BR"] || !event.title?.en ||
+      !event.description?.["pt-BR"] || !event.description?.en ||
+      !Number.isFinite(startsAt) || !Number.isFinite(endsAt) || endsAt <= startsAt ||
+      (event.scheduledDaysBefore !== undefined &&
+        (!Number.isInteger(event.scheduledDaysBefore) || event.scheduledDaysBefore < 1 || event.scheduledDaysBefore > 30))) {
       throw new Error(`Evento inválido ou ID repetido: ${event.id || "(sem ID)"}.`);
     }
     event.startsAt = startsAt;
     event.endsAt = endsAt;
-    if (event.gameMode !== undefined && !["standard", "christmas"].includes(event.gameMode)) {
+    if (event.gameMode !== undefined && !["standard", "christmas", "frost-tokens"].includes(event.gameMode)) {
       throw new Error(`Modo de jogo inválido no evento ${event.id}.`);
     }
     if (event.gameMode === "christmas") {
       if (!Number.isSafeInteger(event.bossScoreBonus) || event.bossScoreBonus <= 0 ||
-          !Array.isArray(event.phases) || event.phases.length !== 4 ||
-          !Array.isArray(event.milestoneRewards)) {
+        !Array.isArray(event.phases) || event.phases.length !== 4 ||
+        !Array.isArray(event.milestoneRewards)) {
         throw new Error(`Configuração de fases inválida no evento ${event.id}.`);
       }
     } else if (event.gameMode === "standard" &&
-        (!Array.isArray(event.phases) || event.phases.length !== 3 ||
-          !Array.isArray(event.milestoneRewards) || !event.milestoneRewards.length)) {
+      (!Array.isArray(event.phases) || event.phases.length !== 3 ||
+        !Array.isArray(event.milestoneRewards) || !event.milestoneRewards.length)) {
       throw new Error(`Configuração de fases inválida no evento ${event.id}.`);
+    } else if (event.gameMode === "frost-tokens") {
+      const shop = event.shop;
+      if (event.tokenIntervalSeconds !== 15 || !Array.isArray(shop?.skinOffers) || shop.skinOffers.length !== 3 ||
+        shop.skinOffers.some((offer) => !findSkin(offer.skinId) || offer.priceTokens !== 350) ||
+        !Array.isArray(shop.coinPacks) || shop.coinPacks.length !== 3 ||
+        shop.coinPacks.some((pack) => !Number.isSafeInteger(pack.amount) || pack.amount <= 0 ||
+          !Number.isSafeInteger(pack.priceTokens) || pack.priceTokens <= 0) ||
+        shop.coinPacks.map(({ amount, priceTokens }) => `${amount}:${priceTokens}`).join(",") !== "1000:20,2000:40,3000:60" ||
+        shop.tokenBoost?.multiplier !== 3 || shop.tokenBoost.priceTokens !== 15 ||
+        shop.tokenBoost.durationMs !== 24 * 60 * 60 * 1000 || event.phases || event.milestoneRewards) {
+        throw new Error(`Configuração da loja de tokens inválida no evento ${event.id}.`);
+      }
     }
-    if (event.gameMode === "christmas" || event.gameMode === "standard") {
+    if (["christmas", "standard"].includes(event.gameMode)) {
       const rewardIds = new Set();
       for (const reward of event.milestoneRewards) {
         const skinExists = skinCategories.some((category) =>
           skinData.categories[category].some((skin) => skin.id === reward.skinId));
         const rewardId = `${reward.atScore}:${reward.skinId}`;
         if (!Number.isSafeInteger(reward.atScore) || reward.atScore <= 0 ||
-            rewardIds.has(rewardId) || !skinExists) {
+          rewardIds.has(rewardId) || !skinExists) {
           throw new Error(`Recompensa de marco inválida no evento ${event.id}.`);
         }
         rewardIds.add(rewardId);
@@ -4323,22 +4464,22 @@ function validateEventData(data) {
         const phaseStartsAt = Date.parse(phase.startsAt);
         const phaseEndsAt = Date.parse(phase.endsAt);
         if (phase.number !== index + 1 ||
-            !Number.isFinite(phaseStartsAt) || !Number.isFinite(phaseEndsAt) ||
-            phaseStartsAt < startsAt || phaseEndsAt > endsAt || phaseEndsAt < phaseStartsAt ||
-            !Array.isArray(phase.scoreTargets) || !phase.scoreTargets.length ||
-            phase.scoreTargets.some((target) => {
-              if (!Number.isSafeInteger(target) || target <= previousTarget) return true;
-              previousTarget = target;
-              return false;
-            })) {
+          !Number.isFinite(phaseStartsAt) || !Number.isFinite(phaseEndsAt) ||
+          phaseStartsAt < startsAt || phaseEndsAt > endsAt || phaseEndsAt < phaseStartsAt ||
+          !Array.isArray(phase.scoreTargets) || !phase.scoreTargets.length ||
+          phase.scoreTargets.some((target) => {
+            if (!Number.isSafeInteger(target) || target <= previousTarget) return true;
+            previousTarget = target;
+            return false;
+          })) {
           throw new Error(`Fase inválida no evento ${event.id}.`);
         }
         phase.startsAt = phaseStartsAt;
         phase.endsAt = phaseEndsAt;
       });
       if (event.gameMode === "standard" &&
-          event.milestoneRewards.some((reward) =>
-            reward.atScore !== event.phases.at(-1).scoreTargets.at(-1))) {
+        event.milestoneRewards.some((reward) =>
+          reward.atScore !== event.phases.at(-1).scoreTargets.at(-1))) {
         throw new Error(`As recompensas do evento ${event.id} devem ser liberadas na meta final.`);
       }
     }
@@ -4353,9 +4494,9 @@ function validateBadgeData(data) {
   const ids = new Set();
   for (const badge of data.badges) {
     if (!badge.id || ids.has(badge.id) || !skinData.rarities[badge.rarity] ||
-        typeof badge.symbol !== "string" || !badge.symbol ||
-        !badge.name?.["pt-BR"] || !badge.name?.en ||
-        !badge.description?.["pt-BR"] || !badge.description?.en) {
+      typeof badge.symbol !== "string" || !badge.symbol ||
+      !badge.name?.["pt-BR"] || !badge.name?.en ||
+      !badge.description?.["pt-BR"] || !badge.description?.en) {
       throw new Error(`Emblema inválido ou ID repetido: ${badge.id || "(sem ID)"}.`);
     }
     ids.add(badge.id);
@@ -4370,16 +4511,16 @@ function validatePromoCodeData(data, skinCatalog) {
     const startsAt = promo.startsAt ? Date.parse(promo.startsAt) : 0;
     const endsAt = promo.endsAt ? Date.parse(promo.endsAt) : Infinity;
     if (!/^[A-Z0-9_-]{3,40}$/.test(code) || codes.has(code) ||
-        typeof promo.active !== "boolean" ||
-        !promo.title?.["pt-BR"] || !promo.title?.en ||
-        !Array.isArray(promo.rewards) ||
-        (!promo.rewards.length &&
-          (!Array.isArray(promo.unlockFeatures) || !promo.unlockFeatures.length)) ||
-        (promo.unlockFeatures !== undefined &&
-          (!Array.isArray(promo.unlockFeatures) ||
-            promo.unlockFeatures.some((feature) => feature !== "debug"))) ||
-        !Number.isFinite(startsAt) || !(Number.isFinite(endsAt) || endsAt === Infinity) ||
-        endsAt <= startsAt) {
+      typeof promo.active !== "boolean" ||
+      !promo.title?.["pt-BR"] || !promo.title?.en ||
+      !Array.isArray(promo.rewards) ||
+      (!promo.rewards.length &&
+        (!Array.isArray(promo.unlockFeatures) || !promo.unlockFeatures.length)) ||
+      (promo.unlockFeatures !== undefined &&
+        (!Array.isArray(promo.unlockFeatures) ||
+          promo.unlockFeatures.some((feature) => feature !== "debug"))) ||
+      !Number.isFinite(startsAt) || !(Number.isFinite(endsAt) || endsAt === Infinity) ||
+      endsAt <= startsAt) {
       throw new Error(`Código promocional inválido ou repetido: ${promo.code || "(sem código)"}.`);
     }
     codes.add(code);
@@ -4407,16 +4548,16 @@ function validateStoreData(data, skinCatalog) {
   const specialLootBox = data?.specialLootBox;
   const rarityOrder = ["common", "uncommon", "rare", "epic", "legendary"];
   if (!data?.welcomePackage?.items?.length || !luckDrop ||
-      !Number.isSafeInteger(luckDrop.priceCoins) || luckDrop.priceCoins <= 0 ||
-      !luckDrop.rarityOdds || !luckDrop.coinRewards ||
-      !Array.isArray(data.diamondPackages) || data.diamondPackages.length !== 5) {
+    !Number.isSafeInteger(luckDrop.priceCoins) || luckDrop.priceCoins <= 0 ||
+    !luckDrop.rarityOdds || !luckDrop.coinRewards ||
+    !Array.isArray(data.diamondPackages) || data.diamondPackages.length !== 5) {
     throw new Error("O arquivo da loja está incompleto.");
   }
   const totalOdds = rarityOrder.reduce((total, rarity) => {
     const odds = luckDrop.rarityOdds[rarity];
     const coinsReward = luckDrop.coinRewards[rarity];
     if (!Number.isFinite(odds) || odds < 0 ||
-        !Number.isSafeInteger(coinsReward) || coinsReward <= 0) {
+      !Number.isSafeInteger(coinsReward) || coinsReward <= 0) {
       throw new Error(`Configuração inválida para a raridade "${rarity}" no arquivo da loja.`);
     }
     return total + odds;
@@ -4431,23 +4572,23 @@ function validateStoreData(data, skinCatalog) {
   const specialStart = Date.parse(specialLootBox?.startsAt);
   const specialEnd = Date.parse(specialLootBox?.endsAt);
   if (!specialLootBox || specialLootBox.title?.["pt-BR"] !== "Inicial Box Especial!" ||
-      !Number.isSafeInteger(specialLootBox.priceDiamonds) || specialLootBox.priceDiamonds !== 1000 ||
-      !Array.isArray(specialLootBox.skinIds) || specialLootBox.skinIds.length !== 4 ||
-      new Set(specialLootBox.skinIds).size !== 4 || specialLootBox.skinOdds !== 3.1 ||
-      Math.abs(specialSkinOdds + specialCoinOdds - 100) > 0.000001 ||
-      !Number.isFinite(specialStart) || !Number.isFinite(specialEnd) ||
-      new Date(specialStart).toISOString() !== "2026-12-08T03:00:00.000Z" ||
-      new Date(specialEnd).toISOString() !== "2026-12-25T03:00:00.000Z" ||
-      !Array.isArray(specialLootBox.coinRewards) ||
-      ![100, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000].every((amount) =>
-        specialLootBox.coinRewards.some((reward) => reward.amount === amount &&
-          Number.isFinite(reward.odds) && reward.odds >= 0)) ||
-      specialLootBox.coinRewards.some((reward) =>
-        !Number.isSafeInteger(reward.amount) || reward.amount <= 0 ||
-        !Number.isFinite(reward.odds) || reward.odds < 0) ||
-      specialLootBox.coinRewards.find((reward) => reward.amount === 100000)?.odds !== 0.3 ||
-      specialLootBox.skinIds.some((skinId) => !skinCatalog.categories.ship.some((skin) =>
-        skin.id === skinId && skin.rarity === "special"))) {
+    !Number.isSafeInteger(specialLootBox.priceDiamonds) || specialLootBox.priceDiamonds !== 1000 ||
+    !Array.isArray(specialLootBox.skinIds) || specialLootBox.skinIds.length !== 4 ||
+    new Set(specialLootBox.skinIds).size !== 4 || specialLootBox.skinOdds !== 3.1 ||
+    Math.abs(specialSkinOdds + specialCoinOdds - 100) > 0.000001 ||
+    !Number.isFinite(specialStart) || !Number.isFinite(specialEnd) ||
+    new Date(specialStart).toISOString() !== "2026-12-08T03:00:00.000Z" ||
+    new Date(specialEnd).toISOString() !== "2026-12-25T03:00:00.000Z" ||
+    !Array.isArray(specialLootBox.coinRewards) ||
+    ![100, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000].every((amount) =>
+      specialLootBox.coinRewards.some((reward) => reward.amount === amount &&
+        Number.isFinite(reward.odds) && reward.odds >= 0)) ||
+    specialLootBox.coinRewards.some((reward) =>
+      !Number.isSafeInteger(reward.amount) || reward.amount <= 0 ||
+      !Number.isFinite(reward.odds) || reward.odds < 0) ||
+    specialLootBox.coinRewards.find((reward) => reward.amount === 100000)?.odds !== 0.3 ||
+    specialLootBox.skinIds.some((skinId) => !skinCatalog.categories.ship.some((skin) =>
+      skin.id === skinId && skin.rarity === "special"))) {
     throw new Error("A Caixa Especial deve ter as quatro skins, datas, preço e chances configurados corretamente.");
   }
   const missionDrop = data.missionLuckDrop;
@@ -4457,12 +4598,12 @@ function validateStoreData(data, skinCatalog) {
   ];
   if (!missionDrop || ![1, 3, 5, 7].every((amount) =>
     Number.isFinite(missionDrop.chargeOdds[amount]) && missionDrop.chargeOdds[amount] >= 0) ||
-      !Array.isArray(missionDrop.coinRewards) ||
-      ![100, 500, 1000, 3500, 5000].every((amount) =>
-        missionDrop.coinRewards.some((reward) => reward.amount === amount &&
-          Number.isFinite(reward.odds) && reward.odds >= 0)) ||
-      Math.abs(missionOdds.reduce((total, odds) => total + odds, 0) - 100) > 0.000001 ||
-      missionDrop.chargeOdds[1] !== 48 || missionDrop.chargeOdds[7] !== 0.4) {
+    !Array.isArray(missionDrop.coinRewards) ||
+    ![100, 500, 1000, 3500, 5000].every((amount) =>
+      missionDrop.coinRewards.some((reward) => reward.amount === amount &&
+        Number.isFinite(reward.odds) && reward.odds >= 0)) ||
+    Math.abs(missionOdds.reduce((total, odds) => total + odds, 0) - 100) > 0.000001 ||
+    missionDrop.chargeOdds[1] !== 48 || missionDrop.chargeOdds[7] !== 0.4) {
     throw new Error("As chances da Luck Drop de missão devem somar 100%, incluindo 48% para uma carga e 0,4% para sete.");
   }
   const exclusiveShip = skinCatalog.categories.ship.find((skin) => skin.id === luckDrop.exclusiveSkinId);
@@ -4480,8 +4621,8 @@ function validateStoreData(data, skinCatalog) {
   const packageIds = new Set();
   for (const pack of data.diamondPackages) {
     if (!pack.id || packageIds.has(pack.id) ||
-        !Number.isSafeInteger(pack.diamonds) || pack.diamonds < 100 || pack.diamonds > 4500 ||
-        !Number.isSafeInteger(pack.priceMoneyVoid) || pack.priceMoneyVoid <= 0) {
+      !Number.isSafeInteger(pack.diamonds) || pack.diamonds < 100 || pack.diamonds > 4500 ||
+      !Number.isSafeInteger(pack.priceMoneyVoid) || pack.priceMoneyVoid <= 0) {
       throw new Error("Pacote de diamantes inválido no arquivo da loja.");
     }
     packageIds.add(pack.id);
@@ -4492,8 +4633,8 @@ function validateStoreData(data, skinCatalog) {
   const diamondSkinIds = new Set();
   for (const offer of data.diamondSkins) {
     if (!offer.id || diamondSkinIds.has(offer.id) || !skinCategories.includes(offer.category) ||
-        !skinCatalog.categories[offer.category]?.some((skin) => skin.id === offer.skinId) ||
-        !Number.isSafeInteger(offer.priceDiamonds) || offer.priceDiamonds <= 0) {
+      !skinCatalog.categories[offer.category]?.some((skin) => skin.id === offer.skinId) ||
+      !Number.isSafeInteger(offer.priceDiamonds) || offer.priceDiamonds <= 0) {
       throw new Error(`Oferta de skin por diamantes inválida ou repetida: ${offer.id || "(sem ID)"}.`);
     }
     diamondSkinIds.add(offer.id);
@@ -4727,6 +4868,29 @@ function collectBattlePassToken() {
   return true;
 }
 
+function collectFrostEventToken() {
+  const event = eventData?.events.find((entry) => entry.id === FROST_TOKEN_EVENT_ID);
+  const now = Date.now();
+  if (!account || game.eventId !== FROST_TOKEN_EVENT_ID || !event ||
+    event.startsAt > now || event.endsAt <= now) return false;
+  const frostTokenRace = account.frostTokenRace || { tokens: 0, boostExpiresAt: 0 };
+  const amount = frostTokenRace.boostExpiresAt > now ? 3 : 1;
+  try {
+    persistAccount({
+      ...account,
+      frostTokenRace: {
+        ...frostTokenRace,
+        tokens: Math.min(Number.MAX_SAFE_INTEGER, frostTokenRace.tokens + amount)
+      }
+    });
+  } catch (error) {
+    showToast(error.message);
+    return false;
+  }
+  showToast(t("frostTokenCollected").replace("{amount}", String(amount)));
+  return true;
+}
+
 function openBattlePassDrop() {
   if (!account || account.battlePass.dropCharges <= 0) return;
   const rarityOrder = ["common", "uncommon", "rare", "epic", "legendary"];
@@ -4813,7 +4977,7 @@ function renderSkins() {
       : skin.id === "shield-christmas-lights"
         ? ` data-lights-mode="${account.battlePass.lightsMode}"`
         : "";
-    return `<button class="skin-card skin-card-layout rarity-${skin.rarity}${selected ? " selected" : ""}${skin.id === "ship-void-neon" ? " skin-card-void-neon" : ""}" type="button" data-skin-id="${escapeHtml(skin.id)}" style="--rarity-color:${escapeHtml(rarity.color)};--skin-color:${escapeHtml(skinColor)};--accent-color:${escapeHtml(skin.accentColor || skinColor)}" aria-pressed="${selected}"${owned && eligible ? "" : " disabled"}>
+    return `<button class="skin-card skin-card-layout rarity-${skin.rarity}${selected ? " selected" : ""}${skin.id === "ship-void-neon" ? " skin-card-void-neon" : ""}" type="button" data-skin-id="${escapeHtml(skin.id)}" style="--rarity-color:${escapeHtml(rarity.color)};--skin-color:${escapeHtml(skinColor)};--accent-color:${escapeHtml(skin.accentColor || skinColor)};--skin-opacity:${skin.opacity || 1}" aria-pressed="${selected}"${owned && eligible ? "" : " disabled"}>
       <span class="skin-card-copy"><strong>${escapeHtml(skin.name[language])}</strong><span>${escapeHtml(skin.description[language])}</span><small>${escapeHtml(t("rarity"))}: ${escapeHtml(rarity[language])}</small>${attributeCopy}${ornamentCopy}</span>
       <span class="skin-visual ${escapeHtml(skin.shape)}"${visualData} aria-hidden="true"></span>
       <span class="skin-card-action">${!owned ? escapeHtml(t("luckDropExclusive")) : !eligible ? escapeHtml(t("iceHullRequirement")) : selected ? escapeHtml(t("equipped")) : escapeHtml(t("equip"))}</span>
@@ -4842,18 +5006,18 @@ function renderSkinExtras() {
       <h3>${escapeHtml(t("treeEvolution"))}</h3>
       <p>${escapeHtml(t("treeEvolutionHint"))}</p>
       <div class="tree-evolution-previews">${[1, 2, 3].map((level) =>
-        `<div class="tree-evolution-preview${treeLevel === level ? " active" : ""}">
+      `<div class="tree-evolution-preview${treeLevel === level ? " active" : ""}">
           <span class="skin-visual christmas-tree" data-tree-level="${level}" style="--skin-color:${level === 1 ? "#35d56a" : level === 2 ? "#42ee78" : "#62f7ff"}" aria-hidden="true"></span>
           <span>${escapeHtml(t("treeLevel").replace("{level}", String(level)))}</span>
         </div>`
-      ).join("")}</div>
+    ).join("")}</div>
       <div class="tree-evolution-actions">${[2, 3].map((level) => {
-        const cost = battlePassData.treeEvolutionCosts[level - 1];
-        const label = level <= treeLevel
-          ? t("treeEvolutionCurrent")
-          : t("treeEvolutionBuy").replace("{amount}", cost.toLocaleString(language));
-        return `<button class="small-button" type="button" data-tree-evolution-level="${level}"${level <= treeLevel || account.diamonds < cost ? " disabled" : ""}>${escapeHtml(label)}</button>`;
-      }).join("")}</div>
+      const cost = battlePassData.treeEvolutionCosts[level - 1];
+      const label = level <= treeLevel
+        ? t("treeEvolutionCurrent")
+        : t("treeEvolutionBuy").replace("{amount}", cost.toLocaleString(language));
+      return `<button class="small-button" type="button" data-tree-evolution-level="${level}"${level <= treeLevel || account.diamonds < cost ? " disabled" : ""}>${escapeHtml(label)}</button>`;
+    }).join("")}</div>
       <p>${escapeHtml(t("treeEvolutionCurrent"))}: ${treeLevel}/3</p>
     </section>`
     : "";
@@ -4863,8 +5027,8 @@ function renderSkinExtras() {
       <p>${escapeHtml(t("lightsPreview"))}</p>
       <div class="lights-preview"><span class="skin-visual christmas-lights" data-lights-mode="${account.battlePass.lightsMode}" aria-hidden="true"></span></div>
       <div class="lights-mode-options">${LIGHTS_MODES.map((mode) =>
-        `<button class="small-button" type="button" data-lights-mode-option="${mode}" aria-pressed="${account.battlePass.lightsMode === mode}">${escapeHtml(t(`lightsMode${mode[0].toUpperCase()}${mode.slice(1)}`))}</button>`
-      ).join("")}</div>
+      `<button class="small-button" type="button" data-lights-mode-option="${mode}" aria-pressed="${account.battlePass.lightsMode === mode}">${escapeHtml(t(`lightsMode${mode[0].toUpperCase()}${mode.slice(1)}`))}</button>`
+    ).join("")}</div>
     </section>`
     : "";
   const goldenStarPanel = activeSkinCategory === "shield" && hasGoldenStarShield
@@ -4878,7 +5042,7 @@ function renderSkinExtras() {
 
 function purchaseChristmasTreeEvolution(level) {
   if (!account || !ownedSkins.has("ship-christmas-tree") ||
-      !Number.isInteger(level) || level !== account.battlePass.treeLevel + 1 || level > 3) return;
+    !Number.isInteger(level) || level !== account.battlePass.treeLevel + 1 || level > 3) return;
   const cost = battlePassData.treeEvolutionCosts[level - 1];
   if (account.diamonds < cost) {
     showToast(t("insufficientDiamonds"));
@@ -4929,6 +5093,11 @@ function showEvent(eventId) {
     showToast(t("eventNotFound"));
     return;
   }
+  $("#event-tabs").hidden = true;
+  $("#event-details-panel").hidden = false;
+  $("#event-shop-panel").hidden = true;
+  $("#event-progress").hidden = true;
+  $("#play-event-button").hidden = true;
   $("#event-title").textContent = event.title[language];
   $("#event-description").textContent = event.description[language];
   $("#event-countdown").textContent = `${t("eventEndsIn")} ${formatDuration(event.endsAt - Date.now())}`;
@@ -5176,8 +5345,7 @@ function renderFriendProfileInventory(profile) {
   collection.textContent = skinNames.length ? skinNames.join(", ") : t("profileNoSkins");
   const pass = document.createElement("span");
   const battlePass = profile.battlePass || {};
-  pass.textContent = `${t("friendPassLevel").replace("{level}", String(battlePass.level || 1))} · ${
-    battlePass.premium ? t("friendPassGold") : t("friendPassSilver")}`;
+  pass.textContent = `${t("friendPassLevel").replace("{level}", String(battlePass.level || 1))} · ${battlePass.premium ? t("friendPassGold") : t("friendPassSilver")}`;
   section.replaceChildren(heading, skins, collection, pass);
 }
 
@@ -5240,9 +5408,9 @@ async function confirmFriendResourceGift(event) {
       body: { type, amount }
     });
     if (!receipt.gifted || !Number.isSafeInteger(receipt.balance) ||
-        !Number.isSafeInteger(receipt.friendResourceGiftCount) ||
-        !Number.isSafeInteger(receipt.friendGiftCoinsSpent) ||
-        !Number.isSafeInteger(receipt.friendGiftDiamondsSpent)) {
+      !Number.isSafeInteger(receipt.friendResourceGiftCount) ||
+      !Number.isSafeInteger(receipt.friendGiftCoinsSpent) ||
+      !Number.isSafeInteger(receipt.friendGiftDiamondsSpent)) {
       throw new Error(t("cloudApiUnavailable"));
     }
     if (account?.cloudUid === senderUid) {
@@ -5294,7 +5462,7 @@ async function confirmFriendGift() {
       body: {}
     });
     if (!Number.isSafeInteger(receipt.diamonds) || !Number.isSafeInteger(receipt.friendPassGiftCount) ||
-        !Number.isSafeInteger(receipt.admPassGiftCount)) {
+      !Number.isSafeInteger(receipt.admPassGiftCount)) {
       throw new Error(t("cloudApiUnavailable"));
     }
     if (account?.cloudUid === senderUid) {
@@ -5670,15 +5838,19 @@ game.stars = Array.from({ length: 75 }, () => ({
   x: Math.random() * canvas.width, y: Math.random() * canvas.height, speed: 15 + Math.random() * 45
 }));
 
+function isPlayableEvent(event) {
+  return Boolean(event && ["standard", "christmas", "frost-tokens"].includes(event.gameMode) &&
+    event.startsAt <= Date.now() && event.endsAt > Date.now() &&
+    (event.gameMode === "frost-tokens" || event.phases?.length));
+}
+
 function openStartingSkills(eventId = null) {
   if (!account) {
     requireAuthentication();
     return;
   }
   const selectedEvent = eventId ? eventData.events.find((event) => event.id === eventId) : null;
-  if (eventId && (!selectedEvent || !["standard", "christmas"].includes(selectedEvent.gameMode) ||
-      !selectedEvent.phases?.length ||
-      selectedEvent.startsAt > Date.now() || selectedEvent.endsAt <= Date.now())) {
+  if (eventId && !isPlayableEvent(selectedEvent)) {
     showToast(t("eventNotAvailable"));
     return;
   }
@@ -5743,12 +5915,10 @@ async function startGame(eventId = null, startingAbilityId = null) {
   }
   await settlePreviousWeek();
   if (account.weeklyCompetition.weekId &&
-      account.weeklyCompetition.weekId !== currentWeekId() &&
-      !account.settledWeeks.includes(account.weeklyCompetition.weekId)) return;
+    account.weeklyCompetition.weekId !== currentWeekId() &&
+    !account.settledWeeks.includes(account.weeklyCompetition.weekId)) return;
   const selectedEvent = eventId ? eventData.events.find((event) => event.id === eventId) : null;
-  if (eventId && (!selectedEvent || !["standard", "christmas"].includes(selectedEvent.gameMode) ||
-      !selectedEvent.phases?.length ||
-      selectedEvent.startsAt > Date.now() || selectedEvent.endsAt <= Date.now())) {
+  if (eventId && !isPlayableEvent(selectedEvent)) {
     showToast(t("eventNotAvailable"));
     return;
   }
@@ -5911,7 +6081,7 @@ function finishRun() {
   const event = game.eventId
     ? eventData.events.find((entry) => entry.id === game.eventId)
     : null;
-  const standardRules = !event || event.gameMode === "standard";
+  const standardRules = !event || event.gameMode !== "christmas";
   const runProgress = { ...game.runMissionProgress };
   try {
     let updatedAccount = game.eventId
@@ -5944,7 +6114,7 @@ function gameUsesStandardRules() {
   const event = game.eventId
     ? eventData.events.find((entry) => entry.id === game.eventId)
     : null;
-  return !event || event.gameMode === "standard";
+  return !event || event.gameMode !== "christmas";
 }
 
 function abandonRun() {
@@ -6030,15 +6200,20 @@ function updateGame(delta) {
     game.lives = Math.min(game.lives, upgradeValue("hull"));
     renderLives();
   }
-  if (account.battlePass.level < battlePassData.levels.length) {
+  const frostTokenEvent = game.eventId === FROST_TOKEN_EVENT_ID
+    ? eventData.events.find((event) => event.id === FROST_TOKEN_EVENT_ID &&
+      event.startsAt <= Date.now() && event.endsAt > Date.now())
+    : null;
+  if (frostTokenEvent || account.battlePass.level < battlePassData.levels.length) {
     game.passTokenElapsed += delta;
-    if (game.passTokenElapsed >= battlePassData.tokenIntervalSeconds) {
-      game.passTokenElapsed %= battlePassData.tokenIntervalSeconds;
+    const tokenInterval = frostTokenEvent?.tokenIntervalSeconds || battlePassData.tokenIntervalSeconds;
+    if (game.passTokenElapsed >= tokenInterval) {
+      game.passTokenElapsed %= tokenInterval;
       game.powerUps.push({
         x: 18 + Math.random() * (canvas.width - 36),
         y: -16,
         speed: 88,
-        type: "pass-token",
+        type: frostTokenEvent ? "frost-token" : "pass-token",
         tokenStyle: Math.random() < 0.5 ? "lights" : "snowflake"
       });
     }
@@ -6048,8 +6223,9 @@ function updateGame(delta) {
 
   if (game.boss?.phase !== "arriving") {
     game.shotElapsed += delta;
-    if (game.shotElapsed >= SHOT_INTERVAL_MS / 1000) {
-      game.shotElapsed %= SHOT_INTERVAL_MS / 1000;
+    const shotInterval = (SHOT_INTERVAL_MS / 1000) * (selectedSkins.ship === "ship-frost-race" ? 1.1 : 1);
+    if (game.shotElapsed >= shotInterval) {
+      game.shotElapsed %= shotInterval;
       playSound("shoot");
       const lanes = game.elapsed < game.tripleShotUntil ? [-10, 0, 10] : [0];
       for (const lane of lanes) {
@@ -6060,8 +6236,9 @@ function updateGame(delta) {
           x: game.player.x + lane,
           y: game.player.y - 17,
           speed: 460,
-          damage: (upgradeValue("damage") + (selectedSkins.shot === "shot-double-gold" ? 1 : 0) +
-            (selectedSkins.ship === "ship-special-ice" ? 3 : 0)) *
+          damage: Math.max(1, upgradeValue("damage") + (selectedSkins.shot === "shot-double-gold" ? 1 : 0) +
+            (selectedSkins.ship === "ship-special-ice" ? 3 : 0) -
+            (selectedSkins.shot === "shot-frost-race" ? 1 : 0)) *
             (1 + ornamentStage / 100)
         });
       }
@@ -6094,7 +6271,7 @@ function updateGame(delta) {
   for (let bulletIndex = game.bullets.length - 1; bulletIndex >= 0; bulletIndex--) {
     const bullet = game.bullets[bulletIndex];
     if (game.boss?.phase === "vulnerable" &&
-        Math.abs(bullet.x - game.boss.x) < 42 && Math.abs(bullet.y - game.boss.y) < 37) {
+      Math.abs(bullet.x - game.boss.x) < 42 && Math.abs(bullet.y - game.boss.y) < 37) {
       game.boss.health -= bullet.damage;
       game.bullets.splice(bulletIndex, 1);
       burst(bullet.x, bullet.y);
@@ -6181,6 +6358,11 @@ function updateGame(delta) {
         if (collected) showToast(t("battlePassTokens"));
         continue;
       }
+      if (powerUp.type === "frost-token") {
+        collectFrostEventToken();
+        game.powerUps.splice(index, 1);
+        continue;
+      }
       if (powerUp.type === "shield") game.shieldHits += upgradeValue("shield");
       else game.tripleShotUntil = Math.max(game.tripleShotUntil, game.elapsed) + TRIPLE_SHOT_DURATION_SECONDS;
       game.powerUps.splice(index, 1);
@@ -6216,6 +6398,7 @@ function drawGame() {
   for (const star of game.stars) context.fillRect(star.x, star.y, 1.5, 1.5);
   const shipSkin = selectedSkin("ship");
   context.save();
+  context.globalAlpha = shipSkin.opacity ?? 1;
   context.shadowBlur = settings.quality === "minimum" ? 0 : 12;
   context.shadowColor = shipSkin.color;
   context.strokeStyle = shipSkin.color;
@@ -6250,6 +6433,24 @@ function drawGame() {
     context.lineTo(game.player.x - 6, game.player.y - 8);
     context.closePath();
     context.fill();
+  } else if (shipSkin.shape === "frost-crystal") {
+    context.fillStyle = shipSkin.color;
+    context.beginPath();
+    context.moveTo(game.player.x, game.player.y - 18);
+    context.lineTo(game.player.x + 12, game.player.y - 5);
+    context.lineTo(game.player.x + 8, game.player.y + 12);
+    context.lineTo(game.player.x - 8, game.player.y + 12);
+    context.lineTo(game.player.x - 12, game.player.y - 5);
+    context.closePath();
+    context.fill();
+    context.strokeStyle = shipSkin.accentColor;
+    context.stroke();
+    context.beginPath();
+    context.moveTo(game.player.x, game.player.y - 12);
+    context.lineTo(game.player.x, game.player.y + 9);
+    context.moveTo(game.player.x - 7, game.player.y - 3);
+    context.lineTo(game.player.x + 7, game.player.y + 5);
+    context.stroke();
   } else if (shipSkin.shape === "ice-crystal") {
     context.fillStyle = shipSkin.color;
     context.beginPath();
@@ -6391,7 +6592,12 @@ function drawGame() {
       context.stroke();
     }
   }
-  if (game.shieldHits > 0 || game.invulnerableUntil > game.elapsed) drawShield();
+  if (game.shieldHits > 0 || game.invulnerableUntil > game.elapsed) {
+    context.save();
+    context.globalAlpha = selectedSkin("shield").opacity ?? 1;
+    drawShield();
+    context.restore();
+  }
   context.restore();
 
   if (game.iceFrozenUntil > game.elapsed) {
@@ -6404,6 +6610,7 @@ function drawGame() {
 
   const shotSkin = selectedSkin("shot");
   context.save();
+  context.globalAlpha = shotSkin.opacity ?? 1;
   context.strokeStyle = shotSkin.color;
   context.shadowColor = shotSkin.color;
   context.shadowBlur = settings.quality === "minimum" ? 0 : 9;
@@ -6450,6 +6657,19 @@ function drawGame() {
       }
       context.closePath();
       context.fill();
+      continue;
+    }
+    if (shotSkin.shape === "frost-shard") {
+      context.fillStyle = shotSkin.color;
+      context.beginPath();
+      context.moveTo(bullet.x, bullet.y - 8);
+      context.lineTo(bullet.x + 4, bullet.y - 2);
+      context.lineTo(bullet.x + 2, bullet.y + 3);
+      context.lineTo(bullet.x - 2, bullet.y + 3);
+      context.lineTo(bullet.x - 4, bullet.y - 2);
+      context.closePath();
+      context.fill();
+      context.stroke();
       continue;
     }
     context.lineWidth = shotSkin.shape === "line-thin" ? 1 : shotSkin.shape === "line-wide" ? 4 : 2;
@@ -6517,24 +6737,42 @@ function drawGame() {
   context.font = "12px 'Press Start 2P', monospace";
   context.textAlign = "center";
   for (const powerUp of game.powerUps) {
-    if (powerUp.type === "pass-token") {
+    if (powerUp.type === "pass-token" || powerUp.type === "frost-token") {
       const pulse = settings.quality === "minimum" ? 1 : 0.75 + Math.sin(game.elapsed * 7) * 0.25;
       context.save();
       context.globalAlpha = pulse;
-      context.strokeStyle = "#ffe6a5";
-      context.fillStyle = "#b9f4ff";
+      context.strokeStyle = powerUp.type === "frost-token" ? "#f8fbff" : "#ffe6a5";
+      context.fillStyle = powerUp.type === "frost-token" ? "#b9f4ff" : "#b9f4ff";
       context.shadowColor = "#62f7ff";
       context.shadowBlur = settings.quality === "minimum" ? 0 : 13;
       context.lineWidth = 2;
-      context.beginPath();
-      context.arc(powerUp.x, powerUp.y, 11, 0, Math.PI * 2);
-      context.fill();
-      context.stroke();
-      if (powerUp.tokenStyle === "snowflake") {
+      if (powerUp.type === "frost-token") {
+        context.beginPath();
+        context.moveTo(powerUp.x, powerUp.y - 11);
+        context.lineTo(powerUp.x + 8, powerUp.y - 3);
+        context.lineTo(powerUp.x + 5, powerUp.y + 9);
+        context.lineTo(powerUp.x - 5, powerUp.y + 9);
+        context.lineTo(powerUp.x - 8, powerUp.y - 3);
+        context.closePath();
+        context.fill();
+        context.stroke();
+        context.beginPath();
+        context.moveTo(powerUp.x, powerUp.y - 6);
+        context.lineTo(powerUp.x, powerUp.y + 6);
+        context.moveTo(powerUp.x - 4, powerUp.y - 2);
+        context.lineTo(powerUp.x + 4, powerUp.y + 3);
+        context.stroke();
+      } else {
+        context.beginPath();
+        context.arc(powerUp.x, powerUp.y, 11, 0, Math.PI * 2);
+        context.fill();
+        context.stroke();
+      }
+      if (powerUp.type === "pass-token" && powerUp.tokenStyle === "snowflake") {
         context.font = "15px sans-serif";
         context.fillStyle = "#453768";
         context.fillText("❄", powerUp.x, powerUp.y + 5);
-      } else {
+      } else if (powerUp.type === "pass-token") {
         context.strokeStyle = "#55525e";
         context.beginPath();
         context.moveTo(powerUp.x - 7, powerUp.y);
@@ -6628,6 +6866,17 @@ function drawShield() {
   const shieldSkin = selectedSkin("shield");
   context.strokeStyle = shieldSkin.color;
   context.shadowColor = shieldSkin.color;
+  if (shieldSkin.shape === "frost-ring") {
+    context.shadowBlur = settings.quality === "minimum" ? 0 : 8;
+    context.lineWidth = 2;
+    context.beginPath();
+    context.arc(game.player.x, game.player.y, 25, 0, Math.PI * 2);
+    context.stroke();
+    context.beginPath();
+    context.arc(game.player.x, game.player.y, 20, 0, Math.PI * 2);
+    context.stroke();
+    return;
+  }
   if (shieldSkin.shape === "gold-pulse") {
     const pulse = settings.quality === "minimum" ? 9 : 12 + Math.sin(game.elapsed * 4) * 8;
     context.shadowBlur = pulse;
@@ -6762,7 +7011,7 @@ function runDebugChecks() {
   const specialBox = storeData?.specialLootBox;
   const specialBoxOdds = Array.isArray(specialBox?.skinIds) && Array.isArray(specialBox?.coinRewards)
     ? specialBox.skinIds.length * specialBox.skinOdds +
-      specialBox.coinRewards.reduce((sum, reward) => sum + reward.odds, 0)
+    specialBox.coinRewards.reduce((sum, reward) => sum + reward.odds, 0)
     : 0;
   const checks = [
     ["Canvas inicializado", Boolean(context)],
@@ -6867,7 +7116,7 @@ function runDebugChecks() {
     ["Chefe tem três protetores de 10 de vida", BOSS_GUARDIAN_COUNT === 3 && GUARDIAN_MAX_HEALTH === 10]
   ];
   const passed = checks.every(([, result]) => result);
-  $("#debug-output").textContent = checks.map(([label, result]) => `${result ? t("checkPassed") : t("checkFailed")}: ${label}`).join("\n");
+  $("#debug-output").textContent = checks.map(([label, result]) => `${result ? t("checkPassed") : t("checkFailed")}: ${label} `).join("\n");
   if (!passed) showToast("Uma ou mais verificações falharam; consulte o painel de depuração.");
 }
 
@@ -6883,13 +7132,13 @@ async function initialize() {
       fetch("data/promo-codes.json"),
       fetch("data/battle-pass.json")
     ]);
-    if (!missionResponse.ok) throw new Error(`data/missions.json: HTTP ${missionResponse.status}`);
-    if (!skinResponse.ok) throw new Error(`data/skins.json: HTTP ${skinResponse.status}`);
-    if (!storeResponse.ok) throw new Error(`data/store.json: HTTP ${storeResponse.status}`);
-    if (!eventResponse.ok) throw new Error(`data/events.json: HTTP ${eventResponse.status}`);
-    if (!badgeResponse.ok) throw new Error(`data/badges.json: HTTP ${badgeResponse.status}`);
-    if (!promoCodeResponse.ok) throw new Error(`data/promo-codes.json: HTTP ${promoCodeResponse.status}`);
-    if (!battlePassResponse.ok) throw new Error(`data/battle-pass.json: HTTP ${battlePassResponse.status}`);
+    if (!missionResponse.ok) throw new Error(`data / missions.json: HTTP ${missionResponse.status} `);
+    if (!skinResponse.ok) throw new Error(`data / skins.json: HTTP ${skinResponse.status} `);
+    if (!storeResponse.ok) throw new Error(`data / store.json: HTTP ${storeResponse.status} `);
+    if (!eventResponse.ok) throw new Error(`data / events.json: HTTP ${eventResponse.status} `);
+    if (!badgeResponse.ok) throw new Error(`data / badges.json: HTTP ${badgeResponse.status} `);
+    if (!promoCodeResponse.ok) throw new Error(`data / promo - codes.json: HTTP ${promoCodeResponse.status} `);
+    if (!battlePassResponse.ok) throw new Error(`data / battle - pass.json: HTTP ${battlePassResponse.status} `);
     [missionData, skinData, storeData, eventData, badgeData, promoCodeData, battlePassData] = await Promise.all([
       missionResponse.json(), skinResponse.json(), storeResponse.json(),
       eventResponse.json(), badgeResponse.json(), promoCodeResponse.json(), battlePassResponse.json()
@@ -6950,9 +7199,9 @@ async function initialize() {
     setInterval(updateBattlePassVisibility, 60000);
     offerTimer = setInterval(renderOfferCountdown, 1000);
   } catch (error) {
-    $("#mission-list").textContent = `Não foi possível carregar as missões: ${error.message}`;
+    $("#mission-list").textContent = `Não foi possível carregar as missões: ${error.message} `;
     $("#mission-timer").textContent = "";
-    $("#skin-grid").textContent = `Não foi possível carregar os dados: ${error.message}`;
+    $("#skin-grid").textContent = `Não foi possível carregar os dados: ${error.message} `;
     $("#auth-status").textContent = `Erro ao carregar os arquivos do jogo: ${error.message}`;
     $("#test-shield").disabled = true;
     $("#test-triple").disabled = true;
@@ -7046,7 +7295,7 @@ async function submitAuthForm(form, mode) {
       const createdAt = Date.now();
       const initialState = normalizeAccount({
         id: randomHex(16),
-        playerId: `NV-${randomHex(4).toUpperCase()}`,
+        playerId: `NV - ${randomHex(4).toUpperCase()} `,
         username,
         normalizedName,
         passwordSalt: salt,
@@ -7152,7 +7401,7 @@ $("#cloud-migration-form").addEventListener("submit", async (event) => {
       throw new Error(t("invalidCredentials"));
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254 ||
-        cloudPassword.length < 10 || cloudPassword.length > 128) {
+      cloudPassword.length < 10 || cloudPassword.length > 128) {
       throw new Error(t("invalidCredentials"));
     }
     const salt = randomHex(16);
@@ -7202,10 +7451,10 @@ $("#backup-import-form").addEventListener("submit", async (event) => {
     updatedAccounts.push(importedAccount);
     writeAccounts(updatedAccounts);
     try {
-      localStorage.setItem(`${STORAGE_KEYS.missions}.${importedAccount.playerId}`, JSON.stringify(importedMissions));
+      localStorage.setItem(`${STORAGE_KEYS.missions}.${importedAccount.playerId} `, JSON.stringify(importedMissions));
     } catch (error) {
       writeAccounts(previousAccounts);
-      throw new Error(`${t("localStorageUnavailable")} ${error.message}`);
+      throw new Error(`${t("localStorageUnavailable")} ${error.message} `);
     }
     activateAccount(importedAccount);
     $("#play-button").disabled = false;
@@ -7237,7 +7486,7 @@ $("#export-account-form").addEventListener("submit", async (event) => {
     const url = URL.createObjectURL(blob);
     const download = document.createElement("a");
     download.href = url;
-    download.download = `neon-void-${account.playerId}.json`;
+    download.download = `neon - void -${account.playerId}.json`;
     document.body.append(download);
     download.click();
     download.remove();
@@ -7335,6 +7584,20 @@ document.addEventListener("click", (event) => {
     activeCollectionTab = target.dataset.collectionTab;
     renderBadges();
   }
+  if (target.dataset.eventTab) {
+    const showShop = target.dataset.eventTab === "shop";
+    $("#event-details-tab").setAttribute("aria-selected", String(!showShop));
+    $("#event-shop-tab").setAttribute("aria-selected", String(showShop));
+    $("#event-details-panel").hidden = showShop;
+    $("#event-shop-panel").hidden = !showShop;
+    if (showShop) {
+      const currentEvent = eventData?.events.find((entry) => entry.id === $("#play-event-button").dataset.eventId);
+      if (currentEvent?.shop) renderFrostShop(currentEvent);
+    }
+  }
+  if (target.dataset.frostSkin) purchaseFrostShopItem("skin", target.dataset.frostSkin);
+  if (target.dataset.frostCoins) purchaseFrostShopItem("coins", Number(target.dataset.frostCoins));
+  if (target.dataset.frostBoost) purchaseFrostShopItem("boost");
   if (target.dataset.competitionMode) {
     activeCompetitionMode = target.dataset.competitionMode;
     void loadLeaderboard(activeLeaderboardScope);
@@ -7496,7 +7759,7 @@ $("#admin-gift-form").addEventListener("submit", async (event) => {
   $("#admin-player-status").textContent = "";
   try {
     const response = await adminRequest(
-      `/api/admin/players/${encodeURIComponent(activeAdminProfileUid)}/gift`,
+      `/ api / admin / players / ${encodeURIComponent(activeAdminProfileUid)}/gift`,
       {
         method: "POST",
         body: type === "skin"
@@ -7627,7 +7890,7 @@ $("#delete-account-form").addEventListener("submit", async (event) => {
     const storedAccount = accounts.find((entry) => entry.id === account?.id);
     const password = $("#delete-account-password").value;
     if (!storedAccount || (!storedAccount.cloudUid &&
-        await hashPassword(password, storedAccount.passwordSalt) !== storedAccount.passwordHash)) {
+      await hashPassword(password, storedAccount.passwordSalt) !== storedAccount.passwordHash)) {
       throw new Error(t("invalidCredentials"));
     }
     if (storedAccount.cloudUid) {
@@ -7775,7 +8038,7 @@ document.addEventListener("keydown", (event) => {
   if (event.code === "KeyH" && game.running) {
     const target = event.target;
     if (target instanceof HTMLElement &&
-        (target.isContentEditable || target.matches("input, textarea, select, [role='textbox']"))) return;
+      (target.isContentEditable || target.matches("input, textarea, select, [role='textbox']"))) return;
     event.preventDefault();
     useSpecialAbility();
     return;
