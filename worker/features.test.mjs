@@ -2,10 +2,12 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const [store, skins, badges, app, html, masterSite, adminRequestSite, adminRequestScript, worker, wrangler] = await Promise.all([
+const [store, skins, badges, events, battlePass, app, html, masterSite, adminRequestSite, adminRequestScript, worker, wrangler] = await Promise.all([
   readFile(new URL("../data/store.json", import.meta.url), "utf8").then(JSON.parse),
   readFile(new URL("../data/skins.json", import.meta.url), "utf8").then(JSON.parse),
   readFile(new URL("../data/badges.json", import.meta.url), "utf8").then(JSON.parse),
+  readFile(new URL("../data/events.json", import.meta.url), "utf8").then(JSON.parse),
+  readFile(new URL("../data/battle-pass.json", import.meta.url), "utf8").then(JSON.parse),
   readFile(new URL("../js/app.js", import.meta.url), "utf8"),
   readFile(new URL("../index.html", import.meta.url), "utf8"),
   readFile(new URL("../SITES/master.html", import.meta.url), "utf8"),
@@ -14,6 +16,48 @@ const [store, skins, badges, app, html, masterSite, adminRequestSite, adminReque
   readFile(new URL("./index.js", import.meta.url), "utf8"),
   readFile(new URL("./wrangler.toml", import.meta.url), "utf8")
 ]);
+
+test("the December events and Neon Pass are scheduled for the requested dates", () => {
+  const frostRace = events.events.find((event) => event.id === "corrida-tokens-geada-2026");
+  const christmas = events.events.find((event) => event.id === "natal-2026");
+  assert.equal(Date.parse(frostRace.startsAt), Date.parse("2026-12-01T00:00:00-03:00"));
+  assert.equal(Date.parse(frostRace.endsAt), Date.parse("2027-01-01T00:00:00-03:00"));
+  assert.equal(frostRace.gameMode, "frost-tokens");
+  assert.equal(frostRace.shop.skinOffers.length, 3);
+  assert.ok(frostRace.shop.skinOffers.every((offer) => offer.priceTokens === 350));
+  assert.deepEqual(frostRace.shop.coinPacks.map(({ amount, priceTokens }) => [amount, priceTokens]), [
+    [1000, 20], [2000, 40], [3000, 60]
+  ]);
+  assert.deepEqual(frostRace.shop.tokenBoost, {
+    multiplier: 3,
+    priceTokens: 15,
+    durationMs: 86400000
+  });
+  assert.equal(Date.parse(christmas.startsAt), Date.parse("2026-12-01T00:00:00-03:00"));
+  assert.equal(Date.parse(christmas.endsAt), Date.parse("2026-12-25T23:59:59-03:00"));
+  assert.equal(christmas.phases.length, 4);
+  assert.equal(Date.parse(battlePass.visibleFrom), Date.parse("2026-11-30T00:00:00-03:00"));
+  assert.ok(Date.parse(battlePass.visibleFrom) <= Date.parse("2026-12-01T00:00:00-03:00"));
+  for (const [category, skinId] of [
+    ["ship", "ship-frost-race"], ["shield", "shield-frost-race"], ["shot", "shot-frost-race"]
+  ]) {
+    const skin = skins.categories[category].find((entry) => entry.id === skinId);
+    assert.ok(skin);
+    assert.ok(skin.opacity < 1);
+  }
+});
+
+test("Frost Token Rush isolates its currency and one-day multiplier from the Neon Pass", () => {
+  assert.match(app, /function collectFrostEventToken\(\)/);
+  assert.match(app, /const amount = frostTokenRace\.boostExpiresAt > now \? 3 : 1/);
+  assert.match(app, /boostExpiresAt: Math\.max\(Date\.now\(\), tokenRace\.boostExpiresAt\) \+ boost\.durationMs/);
+  assert.match(app, /type: frostTokenEvent \? "frost-token" : "pass-token"/);
+  assert.match(app, /function isPlayableEvent\(event\)/);
+  assert.match(app, /function purchaseFrostShopItem\(kind, value\)/);
+  assert.match(app, /function eventScoreLimit\(event\)/);
+  assert.match(html, /data-event-tab="shop"/);
+  assert.match(html, /id="frost-shop-list"/);
+});
 
 test("the diamond shop sells the three requested skins at their configured prices", () => {
   assert.deepEqual(store.diamondSkins.map(({ category, skinId, priceDiamonds }) =>
