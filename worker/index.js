@@ -6,6 +6,7 @@ const GOOGLE_SCOPE = "https://www.googleapis.com/auth/datastore";
 const MAX_ACCOUNT_BYTES = 600_000;
 const ADMIN_SESSION_TTL_MS = 15 * 60 * 1000;
 const ADM_BALANCE = Number.MAX_SAFE_INTEGER - 1_000_000;
+const PUBLIC_NAME_COLORS = new Set(["black", "white", "gray", "purple", "green", "yellow", "blue", "gold"]);
 
 function jsonResponse(body, status = 200, headers = {}) {
   return new Response(JSON.stringify(body), { status, headers: { ...JSON_HEADERS, ...headers } });
@@ -208,10 +209,26 @@ function sanitizeGameState(value) {
   return state;
 }
 
+function publicNameColor(profile) {
+  const color = PUBLIC_NAME_COLORS.has(profile.nameColor) ? profile.nameColor : "gray";
+  if (["black", "white", "gray"].includes(color)) return color;
+  const state = profile.state && typeof profile.state === "object" ? profile.state : {};
+  const owned = Array.isArray(state.ownedNameColors) ? state.ownedNameColors : [];
+  if (color === "gold") {
+    return state.battlePass?.premium === true &&
+      Array.isArray(state.battlePass.premiumClaimed) &&
+      state.battlePass.premiumClaimed.includes(25)
+      ? "gold"
+      : "gray";
+  }
+  return owned.includes(color) ? color : "gray";
+}
+
 function publicProfile(profile) {
   return {
     uid: profile.uid,
     username: profile.username,
+    nameColor: publicNameColor(profile),
     adminRole: ["provisional", "permanent"].includes(profile.adminRole) ? profile.adminRole : null,
     adminApprovedAt: Number.isSafeInteger(profile.adminApprovedAt) ? profile.adminApprovedAt : null,
     admEnabled: profile.admEnabled === true,
@@ -372,6 +389,7 @@ async function reserveUsername(env, username, uid, accessToken, state, createdAt
     badges: state.badges,
     equippedBadges: state.equippedBadges,
     leaderboardOptIn: state.leaderboardOptIn === true,
+    nameColor: publicNameColor({ nameColor: state.nameColor, state }),
     region: typeof state.region === "string" ? state.region : "",
     state,
     createdAt,
@@ -1115,6 +1133,7 @@ async function saveCurrentUser(request, env, uid) {
       bestScore: Math.max(current.bestScore || 0, state.bestScore),
       badges: { ...(current.badges || {}), ...state.badges },
       equippedBadges,
+      nameColor: publicNameColor({ nameColor: state.nameColor, state }),
       leaderboardOptIn: state.leaderboardOptIn === true,
       region: typeof state.region === "string" ? state.region : "",
       state,
@@ -1356,6 +1375,7 @@ async function listFriends(env, uid) {
     .map((profile) => ({
       uid: profile.uid,
       username: profile.username,
+      nameColor: publicNameColor(profile),
       admEnabled: profile.admEnabled === true,
       bestScore: profile.bestScore || 0
     }));

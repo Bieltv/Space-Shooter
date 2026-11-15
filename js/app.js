@@ -2,7 +2,7 @@ const translations = {
   "pt-BR": {
     debug: "Depuração", tagline: "UM SHOOTER DE OUTRA GALÁXIA", subtitle: "O vazio está chamando. Você vai responder?",
     play: "Jogar", settings: "Configurações", skins: "Skins", store: "Loja", missions: "Missões", evolution: "Evolução", battlePass: "Passe do Néon", exit: "Sair",
-    battlePassHint: "Colete fichas que caem durante as partidas para avançar até o nível 30.",
+    battlePassHint: "Colete fichas que caem durante as partidas para avançar até o nível 40.",
     battlePassUnavailable: "O Passe do Néon estará disponível em 30 de novembro.",
     battlePassLevel: "Nível do passe", battlePassTokens: "Fichas", battlePassPremium: "Passe Neon Ouro",
     battlePassBuy: "Desbloquear Ouro", battlePassOpenDrop: "Abrir Luck Drop do passe",
@@ -20,6 +20,8 @@ const translations = {
     passRewardDrop: "Luck Drop exclusivo", passRewardCharge: "1 carga de habilidade",
     passRewardCoins: "{amount} Neon-moedas", passRewardEmpty: "Sem recompensa",
     passRewardSkin: "Skin: {name}", passRewardLocked: "Recompensa bloqueada",
+    passRewardStartingCharge: "{amount} carga(s) inicial(is) · {ability}",
+    passRewardSkinTrial: "Teste de 14 dias: {name}", passRewardNameColor: "Cor do nome: {name}",
     passRewardUnlocked: "Desbloqueada", passRewardReceived: "Recebida",
     passNextLevel: "Próximo nível: {level}", passProgress: "{current} / {required} fichas",
     passPremiumLocked: "Desbloqueie Ouro para receber esta recompensa.",
@@ -32,6 +34,17 @@ const translations = {
     missionDropCoinsReward: "Luck Drop de missão: {amount} Neon-moedas.",
     missionDropChargesReward: "Luck Drop de missão: {amount} cargas de {ability}.",
     missionDropNoCredits: "Conclua as seis missões diárias para ganhar uma Luck Drop.",
+    vault: "Cofre", vaultHint: "Guarde suas Luck Drops e pacotes para abrir quando quiser.",
+    vaultItems: "Itens guardados", vaultEmpty: "Nenhuma caixa ou pacote guardado.", vaultOpen: "Abrir selecionado",
+    vaultOpenNow: "Abrir agora", vaultLater: "Guardar para depois",
+    vaultAcquireTitle: "Item recebido", vaultAcquireCopy: "Você recebeu {item}. Quer abrir agora ou guardar no Cofre?",
+    vaultResultsTitle: "Recompensas recebidas", vaultWeeklyDrop: "Luck semanal {week}",
+    vaultLuckDrop: "Luck Drop", vaultMissionDrop: "Luck Drop de missão",
+    vaultPassDrop: "Luck Drop do Passe", vaultSpecialBox: "Caixa Especial",
+    vaultWelcomePack: "Pacote Inicial", vaultUnknownRarity: "Raridade definida ao abrir",
+    vaultPackContents: "Conteúdo do pacote", vaultDrawOdds: "Possíveis recompensas", vaultSkinPreview: "Skin: {name}",
+    vaultCoinsPreview: "+{amount} Neon-moedas", vaultChargesPreview: "{amount} carga(s) de habilidade",
+    vaultItemCount: "X{amount}", vaultSpecialBoxUnavailable: "A Caixa Especial não está disponível agora.",
     dropInfo: "Informações", dropInfoTitle: "Conteúdo e chances",
     missionDropSection: "Luck Drop das missões", paidDropSection: "Luck Drop da loja",
     dropOddsSummary: "{reward} · {odds}% de chance",
@@ -49,7 +62,9 @@ const translations = {
     medalModalityPlayers: "Pessoas", medalModalityAi: "IA", medalModalityBoth: "Pessoas e IA",
     medalEarnedOn: "Conquistada em {date} · {year}", medalEmpty: "Nenhuma medalha conquistada ainda.",
     weeklyRewardsHint: "Fim da semana: top 1 recebe 15 Luck Drops e 10.000 moedas; top 2, 5 drops e 5.000; top 3, 3 drops e 2.000; top 4 e 5, 1.500 moedas.",
-    weeklyPeakHint: "A IA tem dois picos diários e pode chegar a cinco vezes seu recorde semanal.",
+    weeklyPeakHint: "Cinco rivais avançam durante a semana; o mais forte pode alcançar até cinco vezes sua referência.",
+    weeklyCompetitionStarts: "Semana {week} começa em {time}.",
+    weeklyCompetitionEnds: "Semana {week} termina em {time}. A próxima corrida começa no domingo às 10h.",
     startingSkillChargeStatus: "Cargas disponíveis: {amount}",
     startingSkillConfirm: "Continuar", startingSkillConfirmTitle: "Confirmar habilidade?",
     startingSkillStart: "Confirmar e jogar", startingSkillCancel: "Voltar",
@@ -187,6 +202,15 @@ const translations = {
     profileBadgeLimit: "Você pode equipar no máximo três emblemas.",
     profileBadgeUnavailable: "Esse emblema ainda não está registrado na conta online.",
     profileBadges: "Emblemas equipados", profileBadgeCollection: "Emblemas conquistados",
+    nameColors: "Cores do nome", nameColorsHint: "Preto, branco e cinza são grátis. As demais cores custam 1.000 Neon-moedas.",
+    nameColorSelect: "Usar cor", nameColorSelected: "Selecionada",
+    nameColorBuy: "Comprar · 1.000 Neon-moedas", nameColorPurchased: "Cor comprada e selecionada.",
+    nameColorInsufficient: "Você precisa de 1.000 Neon-moedas para comprar esta cor.",
+    nameColorPassUnlock: "Desbloqueada no Passe Ouro, nível 25.",
+    nameColorBlack: "Preto", nameColorWhite: "Branco", nameColorGray: "Cinza",
+    nameColorPurple: "Roxo", nameColorGreen: "Verde", nameColorYellow: "Amarelo",
+    nameColorBlue: "Azul", nameColorGold: "Dourado",
+    skinTrialUntil: "Teste até {date}",
     profileNoBadges: "Nenhum emblema conquistado ainda.",
     equipBadge: "Equipar", unequipBadge: "Remover",
     messages: "Mensagens", rewards: "Recompensas", specialPackages: "Pacotes especiais",
@@ -295,7 +319,7 @@ const translations = {
     yourBalance: "Seu saldo", packageCost: "Custo do pacote", balanceAfter: "Saldo após comprar",
     purchaseConfirmation: "CONFIRMAR COMPRA", cancel: "Cancelar", buy: "Comprar",
     close: "Fechar", noOffers: "Nenhuma oferta disponível para esta conta no momento.",
-    offerExpires: "Sua oferta termina em", packagePurchased: "Pacote comprado! As três skins foram adicionadas à sua conta.",
+    offerExpires: "Sua oferta termina em", packagePurchased: "Pacote comprado e guardado no Cofre.",
     packageExpired: "A oferta do Pacote Inicial expirou.", insufficientCoins: "Moedas insuficientes para comprar este pacote.",
     accountCreated: "Conta criada! Guarde seu e-mail e senha.", loggedOut: "Você saiu da sua conta.",
     fullscreenUnavailable: "Não foi possível ativar tela cheia; a partida continuará em janela.",
@@ -320,7 +344,7 @@ const translations = {
   en: {
     debug: "Debug", tagline: "A SHOOTER FROM ANOTHER GALAXY", subtitle: "The void is calling. Will you answer?",
     play: "Play", settings: "Settings", skins: "Skins", store: "Store", missions: "Missions", evolution: "Upgrades", battlePass: "Neon Pass", exit: "Exit",
-    battlePassHint: "Collect tokens that fall during matches to advance to level 30.",
+    battlePassHint: "Collect tokens that fall during matches to advance to level 40.",
     battlePassUnavailable: "The Neon Pass will be available on November 30.",
     battlePassLevel: "Pass level", battlePassTokens: "Tokens", battlePassPremium: "Neon Pass Gold",
     battlePassBuy: "Unlock Gold", battlePassOpenDrop: "Open Pass Luck Drop",
@@ -338,6 +362,8 @@ const translations = {
     passRewardDrop: "Exclusive Luck Drop", passRewardCharge: "1 ability charge",
     passRewardCoins: "{amount} Neon Coins", passRewardEmpty: "No reward",
     passRewardSkin: "Skin: {name}", passRewardLocked: "Reward locked",
+    passRewardStartingCharge: "{amount} starting charge(s) · {ability}",
+    passRewardSkinTrial: "14-day trial: {name}", passRewardNameColor: "Name color: {name}",
     passRewardUnlocked: "Unlocked", passRewardReceived: "Received",
     passNextLevel: "Next level: {level}", passProgress: "{current} / {required} tokens",
     passPremiumLocked: "Unlock Gold to receive this reward.",
@@ -350,6 +376,17 @@ const translations = {
     missionDropCoinsReward: "Mission Luck Drop: {amount} Neon Coins.",
     missionDropChargesReward: "Mission Luck Drop: {amount} charges of {ability}.",
     missionDropNoCredits: "Complete all six daily missions to earn a Luck Drop.",
+    vault: "Vault", vaultHint: "Save Luck Drops and packs to open whenever you want.",
+    vaultItems: "Stored items", vaultEmpty: "No boxes or packs stored.", vaultOpen: "Open selected",
+    vaultOpenNow: "Open now", vaultLater: "Save for later",
+    vaultAcquireTitle: "Item received", vaultAcquireCopy: "You received {item}. Open it now or save it in the Vault?",
+    vaultResultsTitle: "Rewards received", vaultWeeklyDrop: "Weekly Luck {week}",
+    vaultLuckDrop: "Luck Drop", vaultMissionDrop: "Mission Luck Drop",
+    vaultPassDrop: "Pass Luck Drop", vaultSpecialBox: "Special Box",
+    vaultWelcomePack: "Starter Pack", vaultUnknownRarity: "Rarity determined when opened",
+    vaultPackContents: "Pack contents", vaultDrawOdds: "Possible rewards", vaultSkinPreview: "Skin: {name}",
+    vaultCoinsPreview: "+{amount} Neon Coins", vaultChargesPreview: "{amount} ability charge(s)",
+    vaultItemCount: "X{amount}", vaultSpecialBoxUnavailable: "The Special Box is not available right now.",
     dropInfo: "Odds", dropInfoTitle: "Contents and odds",
     missionDropSection: "Mission Luck Drop", paidDropSection: "Store Luck Drop",
     dropOddsSummary: "{reward} · {odds}% chance",
@@ -367,7 +404,9 @@ const translations = {
     medalModalityPlayers: "Players", medalModalityAi: "AI", medalModalityBoth: "Players and AI",
     medalEarnedOn: "Earned on {date} · {year}", medalEmpty: "No medals earned yet.",
     weeklyRewardsHint: "Weekly prizes: 1st gets 15 Luck Drops and 10,000 coins; 2nd, 5 drops and 5,000; 3rd, 3 drops and 2,000; 4th and 5th, 1,500 coins.",
-    weeklyPeakHint: "AI has two daily peaks and can reach five times your weekly best score.",
+    weeklyPeakHint: "Five rivals progress throughout the week; the strongest can reach up to five times their reference score.",
+    weeklyCompetitionStarts: "Week {week} starts in {time}.",
+    weeklyCompetitionEnds: "Week {week} ends in {time}. The next race starts Sunday at 10 AM.",
     startingSkillChargeStatus: "Available charges: {amount}",
     startingSkillConfirm: "Continue", startingSkillConfirmTitle: "Confirm ability?",
     startingSkillStart: "Confirm and play", startingSkillCancel: "Back",
@@ -505,6 +544,15 @@ const translations = {
     profileBadgeLimit: "You can equip up to three badges.",
     profileBadgeUnavailable: "This badge is not registered to your online account yet.",
     profileBadges: "Equipped badges", profileBadgeCollection: "Earned badges",
+    nameColors: "Name colors", nameColorsHint: "Black, white, and gray are free. Other colors cost 1,000 Neon Coins.",
+    nameColorSelect: "Use color", nameColorSelected: "Selected",
+    nameColorBuy: "Buy · 1,000 Neon Coins", nameColorPurchased: "Color purchased and selected.",
+    nameColorInsufficient: "You need 1,000 Neon Coins to buy this color.",
+    nameColorPassUnlock: "Unlocked in the Gold Pass at level 25.",
+    nameColorBlack: "Black", nameColorWhite: "White", nameColorGray: "Gray",
+    nameColorPurple: "Purple", nameColorGreen: "Green", nameColorYellow: "Yellow",
+    nameColorBlue: "Blue", nameColorGold: "Gold",
+    skinTrialUntil: "Trial until {date}",
     profileNoBadges: "No badges earned yet.",
     equipBadge: "Equip", unequipBadge: "Remove",
     messages: "Messages", rewards: "Rewards", specialPackages: "Special packages",
@@ -613,7 +661,7 @@ const translations = {
     yourBalance: "Your balance", packageCost: "Pack price", balanceAfter: "Balance after purchase",
     purchaseConfirmation: "CONFIRM PURCHASE", cancel: "Cancel", buy: "Buy",
     close: "Close", noOffers: "There are no offers available for this account right now.",
-    offerExpires: "Your offer expires in", packagePurchased: "Pack purchased! All three skins were added to your account.",
+    offerExpires: "Your offer expires in", packagePurchased: "Pack purchased and saved in the Vault.",
     packageExpired: "The Starter Pack offer has expired.", insufficientCoins: "You don't have enough coins to buy this pack.",
     accountCreated: "Account created! Keep your email and password safe.", loggedOut: "You signed out.",
     fullscreenUnavailable: "Could not enter fullscreen; the game will continue windowed.",
@@ -682,6 +730,23 @@ const LIGHTS_MODES = ["off", "fast", "slow", "steady"];
 const qualityLevels = ["minimum", "medium", "high"];
 const skinCategories = ["ship", "shield", "shot"];
 const defaultSkins = { ship: "ship-common", shield: "shield-common", shot: "shot-common" };
+const NAME_COLORS = {
+  black: { label: "nameColorBlack", css: "#5b5b63", price: 0 },
+  white: { label: "nameColorWhite", css: "#ffffff", price: 0 },
+  gray: { label: "nameColorGray", css: "#a7a5b4", price: 0 },
+  purple: { label: "nameColorPurple", css: "#c27bff", price: 1000 },
+  green: { label: "nameColorGreen", css: "#43ed87", price: 1000 },
+  yellow: { label: "nameColorYellow", css: "#ffe45e", price: 1000 },
+  blue: { label: "nameColorBlue", css: "#55b8ff", price: 1000 },
+  gold: { label: "nameColorGold", css: "#ffd95a", price: 0 }
+};
+const DEFAULT_NAME_COLORS = ["black", "white", "gray"];
+const NAME_COLOR_CLASS_NAMES = Object.keys(NAME_COLORS).map((color) => `name-color-${color}`);
+const BATTLE_PASS_TRIAL_SKIN_IDS = new Set([
+  "shot-candy-cane",
+  "shield-christmas-lights",
+  "ship-christmas-tree"
+]);
 let language = "pt-BR";
 let missionData;
 let skinData;
@@ -713,6 +778,9 @@ let diamonds = 0;
 let moneyVoid = 0;
 let activeSkinCategory = "ship";
 let selectedBadgeId = null;
+let selectedVaultItemId = null;
+let pendingVaultAcquisition = null;
+const vaultAcquisitionQueue = [];
 let verifiedProfileBadges = null;
 let profileStatusKey = null;
 let profileStatusMessage = null;
@@ -728,6 +796,10 @@ let activePublicProfile = null;
 let activeFriendGiftUid = null;
 let activeFriendResourceGiftUid = null;
 let pendingSpecialLootQuantity = 0;
+let activeEventCountdown = null;
+let weeklyCompetitionAdvancePromise = null;
+let weeklyLeaderboardRefreshPromise = null;
+let weeklyCompetitionRetryAt = 0;
 let specialLootSpinInProgress = false;
 let pendingDiamondPackageId = null;
 let pendingDiamondSkinId = null;
@@ -847,6 +919,7 @@ function applyTranslations() {
   renderMissions();
   renderSkins();
   renderStore();
+  renderVault();
   renderEvents();
   renderBadges();
   renderBattlePass();
@@ -879,6 +952,9 @@ function updateWallet() {
   $("#diamond-screen-money-void").textContent = formattedMoneyVoid;
   $("#event-money-void").textContent = formattedMoneyVoid;
   $("#diamond-screen-value").textContent = formattedDiamonds;
+  const vaultCount = vaultItemCount();
+  $("#home-vault-count").textContent = vaultCount > 99 ? "99+" : String(vaultCount);
+  $("#home-vault-count").hidden = vaultCount === 0;
 }
 
 function formatCurrencyBalance(amount) {
@@ -1346,6 +1422,82 @@ function trimInboxRewards(rewards) {
   return [...claimed, ...pending].sort((first, second) => first.createdAt - second.createdAt);
 }
 
+const VAULT_ITEM_TYPES = new Set([
+  "luck-drop", "mission-drop", "pass-drop", "weekly-drop", "special-box", "welcome-pack"
+]);
+const VAULT_RARITIES = new Set(["common", "uncommon", "rare", "epic", "legendary"]);
+
+function normalizeVaultItems(savedItems) {
+  if (!Array.isArray(savedItems)) return [];
+  const seenIds = new Set();
+  return savedItems.filter((item) => {
+    if (!item || !VAULT_ITEM_TYPES.has(item.type) || typeof item.id !== "string" ||
+      item.id.length > 80 || seenIds.has(item.id) ||
+      !Number.isSafeInteger(item.quantity) || item.quantity <= 0 ||
+      !Number.isSafeInteger(item.acquiredAt) || item.acquiredAt <= 0) return false;
+    seenIds.add(item.id);
+    return true;
+  })
+    .map((item) => ({
+      id: item.id,
+      type: item.type,
+      quantity: item.quantity,
+      acquiredAt: item.acquiredAt,
+      ...(item.type === "weekly-drop" && Number.isSafeInteger(item.weekNumber) && item.weekNumber > 0
+        ? { weekNumber: item.weekNumber }
+        : {}),
+      ...(item.type === "weekly-drop" && VAULT_RARITIES.has(item.rarity)
+        ? { rarity: item.rarity }
+        : {})
+    }));
+}
+
+function addVaultItem(nextAccount, type, quantity = 1, details = {}) {
+  if (!VAULT_ITEM_TYPES.has(type) || !Number.isSafeInteger(quantity) || quantity <= 0) {
+    throw new Error("Não foi possível guardar este item no Cofre.");
+  }
+  const vaultItems = normalizeVaultItems(nextAccount.vaultItems);
+  const itemDetails = type === "weekly-drop"
+    ? {
+      weekNumber: Number.isSafeInteger(details.weekNumber) && details.weekNumber > 0 ? details.weekNumber : 1,
+      rarity: VAULT_RARITIES.has(details.rarity) ? details.rarity : "common"
+    }
+    : {};
+  const existing = vaultItems.find((item) => item.type === type &&
+    item.weekNumber === itemDetails.weekNumber && item.rarity === itemDetails.rarity);
+  if (existing) {
+    if (!Number.isSafeInteger(existing.quantity + quantity)) throw new Error(t("rewardBalanceError"));
+    existing.quantity += quantity;
+    return { account: { ...nextAccount, vaultItems }, item: existing };
+  }
+  const item = {
+    id: randomHex(8),
+    type,
+    quantity,
+    acquiredAt: Date.now(),
+    ...itemDetails
+  };
+  vaultItems.push(item);
+  return { account: { ...nextAccount, vaultItems }, item };
+}
+
+function vaultItemCount(type, items = account?.vaultItems) {
+  return normalizeVaultItems(items)
+    .filter((item) => !type || item.type === type)
+    .reduce((sum, item) => Math.min(Number.MAX_SAFE_INTEGER, sum + item.quantity), 0);
+}
+
+function findAddedVaultItem(previousItems, nextItems) {
+  return findAddedVaultItems(previousItems, nextItems)[0];
+}
+
+function findAddedVaultItems(previousItems, nextItems) {
+  const previous = new Map(normalizeVaultItems(previousItems).map((item) => [item.id, item.quantity]));
+  return normalizeVaultItems(nextItems)
+    .map((item) => ({ item, added: item.quantity - (previous.get(item.id) || 0) }))
+    .filter((entry) => entry.added > 0);
+}
+
 function normalizeAccount(nextAccount) {
   const savedUpgrades = nextAccount.upgrades && typeof nextAccount.upgrades === "object" ? nextAccount.upgrades : {};
   const upgrades = Object.fromEntries(["damage", "hull", "shield"].map((type) => [
@@ -1429,13 +1581,57 @@ function normalizeAccount(nextAccount) {
   const savedBattlePass = nextAccount.battlePass && typeof nextAccount.battlePass === "object"
     ? nextAccount.battlePass
     : null;
+  const ownedSkins = Array.isArray(nextAccount.ownedSkins)
+    ? [...new Set(nextAccount.ownedSkins.filter((skinId) => typeof skinId === "string" && /^[a-z0-9-]{1,60}$/i.test(skinId)))]
+    : Object.values(defaultSkins);
+  const savedTrials = nextAccount.trialSkinExpiresAt && typeof nextAccount.trialSkinExpiresAt === "object" &&
+    !Array.isArray(nextAccount.trialSkinExpiresAt)
+    ? nextAccount.trialSkinExpiresAt
+    : {};
+  const trialSkinExpiresAt = Object.fromEntries(Object.entries(savedTrials)
+    .filter(([skinId, expiresAt]) => BATTLE_PASS_TRIAL_SKIN_IDS.has(skinId) &&
+      Number.isSafeInteger(expiresAt) && expiresAt > Date.now()));
+  const ownedSkinSet = new Set(ownedSkins);
+  const equippedSkins = Object.fromEntries(skinCategories.map((category) => {
+    const skinId = nextAccount.equippedSkins?.[category];
+    return [category, typeof skinId === "string" &&
+      (skinId === defaultSkins[category] || ownedSkinSet.has(skinId) || trialSkinExpiresAt[skinId] > Date.now())
+      ? skinId
+      : defaultSkins[category]];
+  }));
+  const ownedNameColors = new Set([
+    ...DEFAULT_NAME_COLORS,
+    ...(Array.isArray(nextAccount.ownedNameColors)
+      ? nextAccount.ownedNameColors.filter((color) =>
+        Object.hasOwn(NAME_COLORS, color) && color !== "gold")
+      : [])
+  ]);
+  if (savedBattlePass?.premium === true &&
+    Array.isArray(savedBattlePass.premiumClaimed) && savedBattlePass.premiumClaimed.includes(25)) {
+    ownedNameColors.add("gold");
+  }
+  const selectedNameColor = ownedNameColors.has(nextAccount.nameColor) ? nextAccount.nameColor : "gray";
+  const vaultItems = normalizeVaultItems(nextAccount.vaultItems);
+  const legacyMissionDrops = Number.isSafeInteger(nextAccount.missionDropCredits) && nextAccount.missionDropCredits > 0
+    ? nextAccount.missionDropCredits
+    : 0;
+  const legacyPassDrops = Number.isSafeInteger(savedBattlePass?.dropCharges) && savedBattlePass.dropCharges > 0
+    ? savedBattlePass.dropCharges
+    : 0;
+  if (legacyMissionDrops) {
+    vaultItems.push({ id: randomHex(8), type: "mission-drop", quantity: legacyMissionDrops, acquiredAt: Date.now() });
+  }
+  if (legacyPassDrops) {
+    vaultItems.push({ id: randomHex(8), type: "pass-drop", quantity: legacyPassDrops, acquiredAt: Date.now() });
+  }
+  const maximumPassLevel = battlePassData?.levels?.length || 40;
   const passLevel = Number.isSafeInteger(savedBattlePass?.level)
-    ? clamp(savedBattlePass.level, 1, 30)
+    ? clamp(savedBattlePass.level, 1, maximumPassLevel)
     : 1;
   const passTokenRequirement = battlePassData?.levelRequirements?.[passLevel - 1] || 25;
   const battlePass = {
     level: passLevel,
-    tokens: passLevel >= 30
+    tokens: passLevel >= maximumPassLevel
       ? 0
       : Number.isSafeInteger(savedBattlePass?.tokens)
         ? clamp(savedBattlePass.tokens, 0, passTokenRequirement - 1)
@@ -1459,9 +1655,7 @@ function normalizeAccount(nextAccount) {
         ? savedBattlePass.startingAbilityCharges[ability.id]
         : 0
     ])),
-    dropCharges: Number.isSafeInteger(savedBattlePass?.dropCharges) && savedBattlePass.dropCharges >= 0
-      ? savedBattlePass.dropCharges
-      : 0,
+    dropCharges: 0,
     treeLevel: Number.isSafeInteger(savedBattlePass?.treeLevel)
       ? clamp(savedBattlePass.treeLevel, nextAccount.ownedSkins?.includes("ship-christmas-tree") ? 1 : 0, 3)
       : nextAccount.ownedSkins?.includes("ship-christmas-tree") ? 1 : 0,
@@ -1469,6 +1663,11 @@ function normalizeAccount(nextAccount) {
   };
   const normalized = {
     ...nextAccount,
+    ownedSkins,
+    equippedSkins,
+    trialSkinExpiresAt,
+    ownedNameColors: [...ownedNameColors],
+    nameColor: selectedNameColor,
     adminRole: ["provisional", "permanent"].includes(nextAccount.adminRole) ? nextAccount.adminRole : null,
     adminMode: Boolean(nextAccount.cloudUid && ["provisional", "permanent"].includes(nextAccount.adminRole)),
     admEnabled: Boolean(nextAccount.cloudUid && nextAccount.admEnabled === true),
@@ -1510,9 +1709,8 @@ function normalizeAccount(nextAccount) {
     equippedBadges,
     medals,
     startingAbilityTenPacks,
-    missionDropCredits: Number.isSafeInteger(nextAccount.missionDropCredits) && nextAccount.missionDropCredits >= 0
-      ? nextAccount.missionDropCredits
-      : 0,
+    missionDropCredits: 0,
+    vaultItems,
     bossesDefeated: Number.isSafeInteger(nextAccount.bossesDefeated) && nextAccount.bossesDefeated >= 0
       ? nextAccount.bossesDefeated
       : 0,
@@ -1570,13 +1768,13 @@ function normalizeAccount(nextAccount) {
     normalized.nextUpgradePrices = { damage: null, hull: null, shield: null };
     normalized.battlePass = {
       ...normalized.battlePass,
-      level: 30,
+      level: maximumPassLevel,
       tokens: 0,
       premium: true,
       abilityCharges: Number.MAX_SAFE_INTEGER,
       startingAbilityCharges: Object.fromEntries(STARTING_ABILITIES
         .map((ability) => [ability.id, Number.MAX_SAFE_INTEGER])),
-      dropCharges: Number.MAX_SAFE_INTEGER,
+      dropCharges: 0,
       treeLevel: 3
     };
   }
@@ -1852,6 +2050,8 @@ function updateAccount(nextAccount) {
     if (account.cloudUid) void loadFriends({ silent: true });
   }
   $("#leaderboard-button").hidden = false;
+  $("#vault-button").hidden = false;
+  $("#vault-quick-button").hidden = false;
   $("#leaderboard-settings").hidden = false;
   $("#leaderboard-region").value = account.region || "";
   $("#leaderboard-opt-in").checked = account.leaderboardOptIn === true;
@@ -1894,6 +2094,7 @@ function updateAccount(nextAccount) {
   $("#settings-player-id").textContent = account.playerId;
   $("#player-id").hidden = false;
   updateWallet();
+  if (!$("#screen-vault").hidden) renderVault();
   renderAdmScreen();
   renderSkins();
   renderStore();
@@ -2269,6 +2470,291 @@ function renderStore() {
   renderOfferCountdown();
 }
 
+function vaultItemName(item) {
+  if (item.type === "weekly-drop") {
+    return t("vaultWeeklyDrop").replace("{week}", String(item.weekNumber || 1));
+  }
+  const keys = {
+    "luck-drop": "vaultLuckDrop",
+    "mission-drop": "vaultMissionDrop",
+    "pass-drop": "vaultPassDrop",
+    "special-box": "vaultSpecialBox",
+    "welcome-pack": "vaultWelcomePack"
+  };
+  return t(keys[item.type]);
+}
+
+function vaultItemRarity(item) {
+  if (item.type === "weekly-drop") {
+    return item.rarity && skinData?.rarities[item.rarity]
+      ? localizedText(skinData.rarities[item.rarity])
+      : "";
+  }
+  if (item.type === "special-box" && skinData?.rarities.special) {
+    return localizedText(skinData.rarities.special);
+  }
+  if (item.type === "welcome-pack") return t("vaultPackContents");
+  return t("vaultUnknownRarity");
+}
+
+function createVaultPreviewCard({ skinId, rarity, text, symbol }) {
+  const card = document.createElement("article");
+  card.className = "vault-preview-card";
+  const visual = document.createElement("span");
+  visual.className = "vault-preview-visual";
+  const skin = skinId ? findSkin(skinId) : null;
+  if (skin) {
+    visual.className = `skin-visual ${skin.shape}`;
+    visual.style.setProperty("--skin-color", skin.color);
+    visual.style.setProperty("--accent-color", skin.accentColor || skin.color);
+  } else {
+    visual.textContent = symbol || "◇";
+  }
+  const label = document.createElement("strong");
+  label.textContent = skin
+    ? t("vaultSkinPreview").replace("{name}", localizedText(skin.name))
+    : text;
+  card.style.setProperty("--vault-accent", skinData?.rarities[rarity]?.color || "var(--cyan)");
+  const tier = document.createElement("small");
+  tier.textContent = skinData?.rarities[rarity]
+    ? localizedText(skinData.rarities[rarity])
+    : "";
+  card.append(visual, label, tier);
+  return card;
+}
+
+function vaultPreviewCards(item) {
+  const cards = [];
+  if (!skinData) return cards;
+  const addSkin = (skin, rarity = skin.rarity) => cards.push({
+    skinId: skin.id,
+    rarity,
+    text: ""
+  });
+  const addCoins = (amount, rarity = "common") => cards.push({
+    rarity,
+    text: t("vaultCoinsPreview").replace("{amount}", amount.toLocaleString(language)),
+    symbol: "N"
+  });
+  if (item.type === "welcome-pack") {
+    for (const reward of storeData?.welcomePackage.items || []) {
+      const skin = findSkin(reward.skinId);
+      if (skin) addSkin(skin);
+    }
+  } else if (item.type === "special-box") {
+    for (const skinId of storeData?.specialLootBox.skinIds || []) {
+      const skin = findSkin(skinId);
+      if (skin) addSkin(skin, "special");
+    }
+    for (const reward of storeData?.specialLootBox.coinRewards || []) addCoins(reward.amount);
+  } else if (item.type === "mission-drop") {
+    for (const amount of [1, 3, 5, 7]) {
+      cards.push({
+        rarity: "common",
+        text: t("vaultChargesPreview").replace("{amount}", String(amount)),
+        symbol: "✦"
+      });
+    }
+    for (const reward of storeData?.missionLuckDrop.coinRewards || []) addCoins(reward.amount);
+  } else if (item.type === "pass-drop") {
+    for (const rarity of ["common", "uncommon", "rare", "epic", "legendary"]) {
+      for (const skin of getBattlePassDropEligibleSkins(rarity)) addSkin(skin);
+    }
+    addCoins(battlePassData?.luckDrop.duplicateCoins || 500);
+  } else {
+    const rarities = item.type === "weekly-drop"
+      ? [item.rarity || "common"]
+      : ["common", "uncommon", "rare", "epic", "legendary"];
+    for (const rarity of rarities) {
+      const skins = getLuckDropEligibleSkins(rarity);
+      for (const skin of skins) addSkin(skin);
+      addCoins(storeData?.luckDrop.coinRewards[rarity] || 0, rarity);
+    }
+  }
+  return cards;
+}
+
+function renderVault() {
+  const list = $("#vault-list");
+  if (!list || !account) return;
+  const items = normalizeVaultItems(account.vaultItems);
+  const empty = $("#vault-empty");
+  empty.hidden = items.length > 0;
+  const selectedId = items.some((item) => item.id === selectedVaultItemId)
+    ? selectedVaultItemId
+    : items[0]?.id || null;
+  selectedVaultItemId = selectedId;
+  list.replaceChildren(...items.map((item) => {
+    const button = document.createElement("button");
+    button.className = "vault-item";
+    button.type = "button";
+    button.dataset.vaultItemId = item.id;
+    button.setAttribute("aria-pressed", String(item.id === selectedId));
+    const visual = document.createElement("span");
+    visual.className = "vault-item-visual";
+    visual.textContent = item.type === "welcome-pack" ? "★" : item.type === "special-box" ? "✦" : "◇";
+    if (item.rarity && skinData?.rarities[item.rarity]) {
+      button.style.setProperty("--vault-accent", skinData.rarities[item.rarity].color);
+    }
+    const quantity = document.createElement("span");
+    quantity.className = "vault-item-quantity";
+    quantity.textContent = t("vaultItemCount").replace("{amount}", String(item.quantity));
+    const copy = document.createElement("span");
+    copy.className = "vault-item-copy";
+    const name = document.createElement("strong");
+    name.textContent = vaultItemName(item);
+    const rarity = document.createElement("small");
+    rarity.textContent = vaultItemRarity(item);
+    copy.append(name, rarity);
+    button.append(visual, quantity, copy);
+    return button;
+  }));
+  const selected = items.find((item) => item.id === selectedId);
+  const title = $("#vault-selected-title");
+  const rarity = $("#vault-selected-rarity");
+  const previews = $("#vault-preview-grid");
+  const openButton = $("#open-vault-item");
+  title.textContent = selected ? vaultItemName(selected) : "";
+  rarity.textContent = selected ? vaultItemRarity(selected) : "";
+  previews.replaceChildren(...(selected ? vaultPreviewCards(selected).map(createVaultPreviewCard) : []));
+  openButton.disabled = !selected;
+  openButton.dataset.vaultItemId = selected?.id || "";
+}
+
+function promptVaultAcquisition(item, quantity = 1) {
+  if (!item) return;
+  const acquisition = {
+    itemId: item.id,
+    quantity: Math.min(item.quantity, Math.max(1, quantity))
+  };
+  if ($("#vault-acquire-dialog").open) {
+    vaultAcquisitionQueue.push(acquisition);
+    return;
+  }
+  pendingVaultAcquisition = acquisition;
+  showVaultAcquisitionPrompt(item);
+}
+
+function showVaultAcquisitionPrompt(item) {
+  $("#vault-acquire-copy").textContent = t("vaultAcquireCopy").replace("{item}", vaultItemName(item));
+  $("#vault-acquire-dialog").showModal();
+}
+
+function showNextVaultAcquisition() {
+  if ($("#vault-acquire-dialog").open || !vaultAcquisitionQueue.length) return;
+  const next = vaultAcquisitionQueue.shift();
+  const item = normalizeVaultItems(account?.vaultItems).find((entry) => entry.id === next.itemId);
+  if (!item) {
+    showNextVaultAcquisition();
+    return;
+  }
+  pendingVaultAcquisition = next;
+  showVaultAcquisitionPrompt(item);
+}
+
+function showVaultResults(item, rewards) {
+  $("#vault-results-title").textContent = vaultItemName(item);
+  $("#vault-results").replaceChildren(...rewards.map(createSpecialLootResult));
+  $("#vault-results-dialog").showModal();
+}
+
+function removeVaultQuantity(nextAccount, itemId, quantity) {
+  const items = normalizeVaultItems(nextAccount.vaultItems)
+    .map((item) => item.id === itemId ? { ...item, quantity: item.quantity - quantity } : item)
+    .filter((item) => item.quantity > 0);
+  return { ...nextAccount, vaultItems: items };
+}
+
+function applyVaultReward(nextAccount, reward) {
+  if (reward.type === "coins") {
+    return { ...nextAccount, coins: nextAccount.coins + reward.amount };
+  }
+  if (reward.type === "charges") {
+    const currentCharges = nextAccount.battlePass.startingAbilityCharges[reward.abilityId];
+    const updatedCharges = currentCharges + reward.amount;
+    if (!Number.isSafeInteger(updatedCharges)) throw new Error(t("rewardBalanceError"));
+    return {
+      ...nextAccount,
+      battlePass: {
+        ...nextAccount.battlePass,
+        startingAbilityCharges: {
+          ...nextAccount.battlePass.startingAbilityCharges,
+          [reward.abilityId]: updatedCharges
+        }
+      }
+    };
+  }
+  if (reward.type === "skin") {
+    if (nextAccount.ownedSkins.includes(reward.skinId)) {
+      return reward.fallbackCoins
+        ? { ...nextAccount, coins: nextAccount.coins + reward.fallbackCoins }
+        : nextAccount;
+    }
+    return { ...nextAccount, ownedSkins: [...nextAccount.ownedSkins, reward.skinId] };
+  }
+  throw new Error("Tipo de recompensa inválido no Cofre.");
+}
+
+function openVaultItem(itemId, requestedQuantity = 1) {
+  if (!account || !Number.isSafeInteger(requestedQuantity) || requestedQuantity < 1) return;
+  const item = normalizeVaultItems(account.vaultItems).find((entry) => entry.id === itemId);
+  if (!item) return;
+  const quantity = item.type === "special-box"
+    ? Math.min(item.quantity, requestedQuantity)
+    : item.type === "welcome-pack" ? 1 : 1;
+  try {
+    let updated = { ...account, ownedSkins: [...account.ownedSkins] };
+    let rewards;
+    if (item.type === "special-box") {
+      const owned = new Set(updated.ownedSkins);
+      rewards = Array.from({ length: quantity }, () => rollSpecialLootBoxReward(owned));
+      updated = {
+        ...updated,
+        ownedSkins: [...owned],
+        coins: updated.coins + rewards.reduce((sum, reward) =>
+          sum + (reward.type === "coins" ? reward.amount : 0), 0),
+        luckDropsOpened: updated.luckDropsOpened + quantity
+      };
+    } else if (item.type === "welcome-pack") {
+      rewards = (storeData?.welcomePackage.items || []).map((entry) => ({
+        type: "skin",
+        skinId: entry.skinId
+      }));
+      updated = {
+        ...updated,
+        ownedSkins: [...new Set([...updated.ownedSkins, ...rewards.map((reward) => reward.skinId)])]
+      };
+    } else {
+      const reward = item.type === "mission-drop"
+        ? rollMissionLuckDropReward()
+        : item.type === "pass-drop"
+          ? rollBattlePassDropReward()
+          : item.type === "weekly-drop"
+            ? rollLuckDropReward(item.rarity)
+            : rollLuckDropReward();
+      updated = applyVaultReward(updated, reward);
+      updated.luckDropsOpened += 1;
+      rewards = [reward];
+    }
+    if (!Number.isSafeInteger(updated.coins) || !Number.isSafeInteger(updated.luckDropsOpened)) {
+      throw new Error(t("rewardBalanceError"));
+    }
+    updated = removeVaultQuantity(updated, item.id, quantity);
+    persistAccount(updated);
+    if (item.type === "luck-drop" || item.type === "mission-drop" ||
+      item.type === "pass-drop" || item.type === "weekly-drop") {
+      const kind = item.type === "mission-drop" ? "mission" : item.type === "pass-drop" ? "pass" : "store";
+      $("#luck-drop-result-dialog").showModal();
+      startLuckDropSpin(rewards[0], kind);
+    } else {
+      showVaultResults(item, rewards);
+    }
+  } catch (error) {
+    showToast(error.message);
+    showNextVaultAcquisition();
+  }
+}
+
 function specialBoxIsActive() {
   const box = storeData?.specialLootBox;
   return Boolean(box && Date.now() >= Date.parse(box.startsAt) && Date.now() < Date.parse(box.endsAt));
@@ -2431,7 +2917,10 @@ function renderEvents() {
     const timer = document.createElement("small");
     const active = event.startsAt <= now;
     timer.className = active ? "event-active" : "event-upcoming";
-    timer.textContent = `${t(active ? "eventActive" : "eventUpcoming")} · ${t(active ? "eventEndsIn" : "eventStartsIn")} ${formatDuration((active ? event.endsAt : event.startsAt) - now)}`;
+    timer.dataset.eventCountdown = "";
+    timer.dataset.startsAt = String(Date.parse(event.startsAt));
+    timer.dataset.endsAt = String(Date.parse(event.endsAt));
+    timer.textContent = `${t(active ? "eventActive" : "eventUpcoming")} · ${t(active ? "eventEndsIn" : "eventStartsIn")} ${formatDuration(Math.max(0, Date.parse((active ? event.endsAt : event.startsAt)) - now))}`;
     copy.append(title, description, timer);
     const button = document.createElement("button");
     button.className = "neon-button cyan";
@@ -2442,6 +2931,25 @@ function renderEvents() {
     return card;
   }));
   updateEventBadge();
+  updateEventCountdown();
+}
+
+function updateEventCountdown() {
+  const now = Date.now();
+  $$("#events-list [data-event-countdown]").forEach((timer) => {
+    const active = Number(timer.dataset.startsAt) <= now;
+    const targetAt = Number(active ? timer.dataset.endsAt : timer.dataset.startsAt);
+    timer.classList.toggle("event-active", active);
+    timer.classList.toggle("event-upcoming", !active);
+    timer.textContent = `${t(active ? "eventActive" : "eventUpcoming")} · ${t(active ? "eventEndsIn" : "eventStartsIn")} ${formatDuration(Math.max(0, targetAt - now))}`;
+  });
+  updateEventBadge();
+
+  const eventScreen = $("#screen-event");
+  if (!eventScreen || eventScreen.hidden || !activeEventCountdown) return;
+  const isActive = activeEventCountdown.startsAt === null || activeEventCountdown.startsAt <= now;
+  const targetAt = isActive ? activeEventCountdown.endsAt : activeEventCountdown.startsAt;
+  $("#event-countdown").textContent = `${t(isActive ? "eventEndsIn" : "eventStartsIn")} ${formatDuration(Math.max(0, targetAt - now))}`;
 }
 
 function recordBadge(nextAccount, badgeId, earnedAt = Date.now()) {
@@ -2622,6 +3130,7 @@ function renderOwnProfile() {
   const grid = $("#profile-badge-grid");
   if (!grid || !account || !badgeData || !skinData) return;
   $("#own-profile-username").textContent = account.username;
+  applyNameColor($("#own-profile-username"), account.nameColor);
   $("#own-profile-username").classList.toggle("admin-gold-name", account.adminRole === "permanent");
   $("#own-profile-username").classList.toggle("adm-name-rgb", account.admEnabled === true);
   $("#own-profile-player-id").textContent = account.playerId;
@@ -2637,6 +3146,7 @@ function renderOwnProfile() {
       className: "profile-empty",
       textContent: t("playerProfileNoBadges")
     })]));
+  renderNameColors();
 
   const status = $("#profile-database-status");
   if (profileStatusMessage) {
@@ -2683,6 +3193,7 @@ function renderUsernameSettings() {
   if (!account) return;
   $("#username-settings-row").hidden = !account.cloudUid;
   $("#settings-username").textContent = account.username || "";
+  applyNameColor($("#settings-username"), account.nameColor);
   $("#settings-username").classList.toggle("adm-name-rgb", account.admEnabled === true);
   const nextUsernameChangeAt = account.usernameChangedAt
     ? account.usernameChangedAt + 30 * 24 * 60 * 60 * 1000
@@ -2692,6 +3203,78 @@ function renderUsernameSettings() {
     : t("usernameChangeHint");
 }
 
+function applyNameColor(element, color) {
+  if (!element) return;
+  element.classList.remove(...NAME_COLOR_CLASS_NAMES);
+  if (Object.hasOwn(NAME_COLORS, color)) {
+    element.classList.add(`name-color-${color}`);
+    element.style.setProperty("--name-color", NAME_COLORS[color].css);
+  } else {
+    element.style.removeProperty("--name-color");
+  }
+}
+
+function renderNameColors() {
+  const list = $("#profile-name-colors");
+  if (!list || !account) return;
+  const owned = new Set(account.ownedNameColors);
+  const goldUnlocked = account.battlePass.premium &&
+    account.battlePass.premiumClaimed.includes(25) && owned.has("gold");
+  list.replaceChildren(...Object.entries(NAME_COLORS).map(([color, details]) => {
+    const available = owned.has(color) && (color !== "gold" || goldUnlocked);
+    const selected = account.nameColor === color;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `name-color-option${selected ? " selected" : ""}`;
+    button.dataset.nameColor = color;
+    button.disabled = color === "gold" && !goldUnlocked;
+    button.setAttribute("aria-pressed", String(selected));
+    button.style.setProperty("--name-color", details.css);
+    const swatch = document.createElement("span");
+    swatch.className = "name-color-swatch";
+    swatch.setAttribute("aria-hidden", "true");
+    const label = document.createElement("strong");
+    label.textContent = t(details.label);
+    const action = document.createElement("small");
+    action.textContent = selected
+      ? t("nameColorSelected")
+      : available
+        ? t("nameColorSelect")
+        : color === "gold"
+          ? t("nameColorPassUnlock")
+          : t("nameColorBuy");
+    button.append(swatch, label, action);
+    return button;
+  }));
+}
+
+function selectNameColor(color) {
+  const details = NAME_COLORS[color];
+  if (!account || !details) return;
+  const owned = account.ownedNameColors.includes(color);
+  const goldUnlocked = color === "gold" && account.battlePass.premium &&
+    account.battlePass.premiumClaimed.includes(25) && owned;
+  if (color === "gold" && !goldUnlocked) {
+    showToast(t("nameColorPassUnlock"));
+    return;
+  }
+  if (!owned) {
+    if (account.coins < details.price) {
+      showToast(t("nameColorInsufficient"));
+      return;
+    }
+    persistAccount({
+      ...account,
+      coins: account.coins - details.price,
+      ownedNameColors: [...account.ownedNameColors, color],
+      nameColor: color
+    });
+    showToast(t("nameColorPurchased"));
+    return;
+  }
+  persistAccount({ ...account, nameColor: color });
+}
+
 function renderOwnResources() {
   const resources = $("#own-profile-resources");
   if (!resources || !account) return;
@@ -2699,7 +3282,7 @@ function renderOwnResources() {
     [t("coins"), formatCurrencyBalance(account.coins)],
     [t("diamonds"), formatCurrencyBalance(account.diamonds)],
     [t("skins"), account.ownedSkins.length.toLocaleString(language)],
-    [t("battlePass"), `${account.battlePass.level}/30 · ${account.battlePass.premium ? t("friendPassGold") : t("friendPassSilver")}`]
+    [t("battlePass"), `${account.battlePass.level}/${battlePassData?.levels.length || 40} · ${account.battlePass.premium ? t("friendPassGold") : t("friendPassSilver")}`]
   ];
   resources.replaceChildren(...entries.map(([label, value]) => {
     const item = document.createElement("div");
@@ -2763,6 +3346,7 @@ function renderFriends() {
       const copy = document.createElement("div");
       copy.className = "friend-entry-copy";
       const name = document.createElement("strong");
+      applyNameColor(name, friend.nameColor);
       name.classList.toggle("adm-name-rgb", friend.admEnabled === true);
       name.textContent = friend.username;
       const score = document.createElement("small");
@@ -3290,12 +3874,14 @@ function makeInboxReward(reward) {
 }
 
 function findSkin(skinId) {
+  if (!skinData) return undefined;
   return skinCategories.flatMap((category) => skinData.categories[category])
     .find((skin) => skin.id === skinId);
 }
 
 function getLuckDropEligibleSkins(rarity) {
-  const welcomeSkinIds = new Set(storeData.welcomePackage.items.map((item) => item.skinId));
+  if (!skinData) return [];
+  const welcomeSkinIds = new Set((storeData?.welcomePackage?.items || []).map((item) => item.skinId));
   const excludedSkinIds = getPassAndEventSkinIds();
   return skinCategories.flatMap((category) => skinData.categories[category])
     .filter((skin) => skin.rarity === rarity &&
@@ -3331,19 +3917,19 @@ function getBattlePassDropEligibleSkins(rarity) {
       !ownedSkins.has(skin.id) && !eventSkinIds.has(skin.id));
 }
 
-function rollLuckDropReward() {
-  const luckDrop = storeData.luckDrop;
-  const randomBytes = crypto.getRandomValues(new Uint32Array(1));
-  const roll = randomBytes[0] / 0x100000000 * 100;
+function rollLuckDropRarity() {
+  const roll = crypto.getRandomValues(new Uint32Array(1))[0] / 0x100000000 * 100;
   let cumulative = 0;
-  let rarity = "common";
   for (const tier of ["common", "uncommon", "rare", "epic", "legendary"]) {
-    cumulative += luckDrop.rarityOdds[tier];
-    if (roll < cumulative) {
-      rarity = tier;
-      break;
-    }
+    cumulative += storeData.luckDrop.rarityOdds[tier];
+    if (roll < cumulative) return tier;
   }
+  throw new Error("As chances da Luck Drop não incluem a raridade sorteada.");
+}
+
+function rollLuckDropReward(forcedRarity = null) {
+  const luckDrop = storeData.luckDrop;
+  const rarity = VAULT_RARITIES.has(forcedRarity) ? forcedRarity : rollLuckDropRarity();
   const eligibleSkins = getLuckDropEligibleSkins(rarity);
   if (eligibleSkins.length) {
     const index = Math.floor(crypto.getRandomValues(new Uint32Array(1))[0] / 0x100000000 * eligibleSkins.length);
@@ -3425,7 +4011,7 @@ function createSpecialLootResult(reward, index) {
     : `${reward.amount.toLocaleString(language)} ${t("coins")}`;
   const rarity = document.createElement("small");
   rarity.textContent = reward.type === "skin"
-    ? localizedText(skinData.rarities.special)
+    ? localizedText(skinData.rarities[reward.rarity || findSkin(reward.skinId).rarity])
     : reward.duplicateSkinId ? t("specialBoxDuplicate") : t("rewards");
   card.append(visual, name, rarity);
   return card;
@@ -3440,29 +4026,16 @@ function confirmSpecialLootSpin() {
   specialLootSpinInProgress = true;
   $("#special-loot-error").textContent = "";
   try {
-    const owned = new Set(account.ownedSkins);
-    const rewards = Array.from({ length: quantity }, () => rollSpecialLootBoxReward(owned));
-    const coinReward = rewards.reduce((sum, reward) =>
-      sum + (reward.type === "coins" ? reward.amount : 0), 0);
-    const nextAccount = {
+    const purchased = {
       ...account,
-      diamonds: account.diamonds - price,
-      coins: account.coins + coinReward,
-      ownedSkins: [...owned],
-      luckDropsOpened: account.luckDropsOpened + quantity
+      diamonds: account.diamonds - price
     };
-    if (!Number.isSafeInteger(nextAccount.coins)) throw new Error(t("rewardBalanceError"));
+    const { account: nextAccount, item } = addVaultItem(purchased, "special-box", quantity);
     persistAccount(recordBadge(nextAccount, "first-diamond-purchase"));
-    $("#special-loot-confirmation").hidden = true;
-    $("#special-loot-reveal").hidden = false;
-    $("#special-loot-results").replaceChildren();
-    $("#special-loot-result-copy").textContent = t("luckDropSpinning");
-    setTimeout(() => {
-      $("#special-loot-results").replaceChildren(...rewards.map(createSpecialLootResult));
-      $("#special-loot-result-copy").textContent = t("specialBoxResults").replace("{amount}", String(quantity));
-      specialLootSpinInProgress = false;
-      $("#close-special-loot").focus();
-    }, 1200);
+    $("#special-loot-dialog").close();
+    pendingSpecialLootQuantity = 0;
+    specialLootSpinInProgress = false;
+    promptVaultAcquisition(item, quantity);
   } catch (error) {
     specialLootSpinInProgress = false;
     $("#special-loot-error").textContent = error.message;
@@ -3543,13 +4116,17 @@ function showLuckDropResult(reward) {
     visual.style.setProperty("--rarity-color", rarity.color);
     visual.style.setProperty("--skin-color", skin.color);
     visual.append(skinVisual);
-    $("#luck-drop-result-copy").textContent = t("luckDropSkinReward")
+    $("#luck-drop-result-copy").textContent = t(reward.source === "pass"
+      ? "battlePassDropResultSkin"
+      : "luckDropSkinReward")
       .replace("{name}", localizedText(skin.name))
       .replace("{rarity}", localizedText(rarity));
   } else {
     visual.textContent = "N";
     $("#luck-drop-result-copy").textContent = reward.source === "mission"
       ? t("missionDropCoinsReward").replace("{amount}", reward.amount.toLocaleString(language))
+      : reward.source === "pass"
+        ? t("battlePassDropResultCoins").replace("{amount}", reward.amount.toLocaleString(language))
       : t("luckDropCoinsReward")
         .replace("{amount}", reward.amount.toLocaleString(language))
         .replace("{rarity}", localizedText(skinData.rarities[reward.rarity]));
@@ -3575,10 +4152,23 @@ function startLuckDropSpin(reward, dropKind = "store") {
         type: "coins", amount: entry.amount, rarity: "common"
       }))
     ]
+    : dropKind === "pass"
+      ? ["common", "uncommon", "rare", "epic", "legendary"]
+        .flatMap((rarity) => getBattlePassDropEligibleSkins(rarity))
+        .map((skin) => ({ type: "skin", skinId: skin.id, rarity: skin.rarity, source: "pass" }))
     : ["common", "uncommon", "rare", "epic", "legendary"]
       .flatMap((rarity) => getLuckDropEligibleSkins(rarity))
       .map((skin) => ({ type: "skin", skinId: skin.id, rarity: skin.rarity }));
-  if (dropKind !== "mission") {
+  if (dropKind === "pass") {
+    for (const rarity of ["common", "uncommon", "rare", "epic", "legendary"]) {
+      previews.push({
+        type: "coins",
+        amount: battlePassData.luckDrop.duplicateCoins,
+        rarity,
+        source: "pass"
+      });
+    }
+  } else if (dropKind !== "mission") {
     for (const [rarity, amount] of Object.entries(storeData.luckDrop.coinRewards)) {
       previews.push({ type: "coins", amount, rarity });
     }
@@ -3658,35 +4248,14 @@ function openLuckDrop() {
 }
 
 function openMissionLuckDrop() {
-  if (!account || !account.missionDropCredits || luckSpinInProgress) {
-    if (account && !account.missionDropCredits) showToast(t("missionDropNoCredits"));
+  const item = normalizeVaultItems(account?.vaultItems).find((entry) => entry.type === "mission-drop");
+  if (!item) {
+    if (account) showToast(t("missionDropNoCredits"));
     return;
   }
-  try {
-    const reward = rollMissionLuckDropReward();
-    const nextAccount = {
-      ...account,
-      missionDropCredits: account.missionDropCredits - 1,
-      luckDropsOpened: account.luckDropsOpened + 1,
-      coins: reward.type === "coins" ? account.coins + reward.amount : account.coins,
-      battlePass: reward.type === "charges"
-        ? {
-          ...account.battlePass,
-          startingAbilityCharges: {
-            ...account.battlePass.startingAbilityCharges,
-            [reward.abilityId]: account.battlePass.startingAbilityCharges[reward.abilityId] + reward.amount
-          }
-        }
-        : account.battlePass
-    };
-    if (!Number.isSafeInteger(nextAccount.coins)) throw new Error(t("rewardBalanceError"));
-    persistAccount(nextAccount);
-    $("#luck-drop-result-title").textContent = t("luckDropSpinning");
-    $("#luck-drop-result-dialog").showModal();
-    startLuckDropSpin(reward, "mission");
-  } catch (error) {
-    showToast(error.message);
-  }
+  showScreen("vault");
+  selectedVaultItemId = item.id;
+  renderVault();
 }
 
 function openLuckDropInfo() {
@@ -3741,22 +4310,14 @@ function confirmLuckDropSpin() {
     return;
   }
   try {
-    const reward = rollLuckDropReward();
-    const updatedCoins = account.coins - storeData.luckDrop.priceCoins +
-      (reward.type === "coins" ? reward.amount : 0);
-    if (!Number.isSafeInteger(updatedCoins)) throw new Error(t("rewardBalanceError"));
-    let nextAccount = {
-      ...account,
-      coins: updatedCoins,
-      ownedSkins: reward.type === "skin"
-        ? [...account.ownedSkins, reward.skinId]
-        : account.ownedSkins,
-      luckDropsOpened: account.luckDropsOpened + 1
-    };
+    const purchaseAccount = { ...account, coins: account.coins - storeData.luckDrop.priceCoins };
+    const result = addVaultItem(purchaseAccount, "luck-drop");
+    let nextAccount = result.account;
     nextAccount = recordBadge(nextAccount, "first-coin-purchase");
     persistAccount(nextAccount);
     recordMissionMetric("coinsSpent", storeData.luckDrop.priceCoins);
-    startLuckDropSpin(reward);
+    $("#luck-drop-result-dialog").close();
+    promptVaultAcquisition(result.item);
   } catch (error) {
     showToast(error.message);
   }
@@ -4231,7 +4792,9 @@ function maybeStartMissionTimer() {
   if (allMissionsComplete() && !missionState.rewardGranted) {
     missionState.rewardGranted = true;
     try {
-      persistAccount({ ...account, missionDropCredits: account.missionDropCredits + 1 });
+      const { account: updatedAccount, item } = addVaultItem(account, "mission-drop");
+      persistAccount(updatedAccount);
+      promptVaultAcquisition(item);
     } catch (error) {
       missionState.rewardGranted = false;
       showToast(error.message);
@@ -4294,8 +4857,9 @@ function renderMissions() {
       <progress max="${mission.goal}" value="${progress}" aria-label="${escapeHtml(title)}: ${progress} / ${mission.goal}"></progress>
     </article>`;
   }).join("");
-  $("#mission-drop-count").textContent = String(account?.missionDropCredits || 0);
-  $("#open-mission-drop").disabled = !account?.missionDropCredits;
+  const missionDropCount = vaultItemCount("mission-drop");
+  $("#mission-drop-count").textContent = String(missionDropCount);
+  $("#open-mission-drop").disabled = missionDropCount === 0;
 }
 
 function validateSkinData(data) {
@@ -4345,9 +4909,9 @@ function validateBattlePassData(data) {
   if (!data || !Number.isSafeInteger(data.priceDiamonds) || data.priceDiamonds !== 450 ||
     !Number.isFinite(Date.parse(data.visibleFrom)) ||
     data.tokenIntervalSeconds !== 15 || !Array.isArray(data.levelRequirements) ||
-    data.levelRequirements.length !== 30 || data.levelRequirements.some((count, index) =>
+    data.levelRequirements.length !== 40 || data.levelRequirements.some((count, index) =>
       !Number.isSafeInteger(count) || count !== (index < 7 ? 5 : index < 16 ? 10 : index < 26 ? 20 : 25)) ||
-    !Array.isArray(data.levels) || data.levels.length !== 30 ||
+    !Array.isArray(data.levels) || data.levels.length !== 40 ||
     JSON.stringify(data.treeEvolutionCosts) !== JSON.stringify([0, 450, 700]) ||
     !Array.isArray(data.luckDrop?.skinIds) || !data.luckDrop.rarityOdds ||
     data.luckDrop.duplicateCoins !== 500) {
@@ -4366,16 +4930,31 @@ function validateBattlePassData(data) {
     }
     for (const track of ["free", "premium"]) {
       for (const reward of level[track]) {
-        if (reward.type === "skin") {
+        if (reward.type === "skin" || reward.type === "skin-trial") {
           const skin = skinData.categories[reward.category]?.find((entry) => entry.id === reward.skinId);
           if (!skin || (reward.category !== "ship" && reward.category !== "shield" && reward.category !== "shot")) {
             throw new Error(`Skin de recompensa inválida no nível ${level.level} do Passe Neon.`);
           }
-          if (!signatureSkinIds.has(reward.skinId)) counts[track][reward.category] += 1;
+          if (reward.type === "skin-trial" &&
+            (!BATTLE_PASS_TRIAL_SKIN_IDS.has(reward.skinId) || reward.durationDays !== 14)) {
+            throw new Error(`Teste de skin inválido no nível ${level.level} do Passe Neon.`);
+          }
+          if (index < 30 && reward.type === "skin" && !signatureSkinIds.has(reward.skinId)) {
+            counts[track][reward.category] += 1;
+          }
         } else if (["drop", "charge", "coins", "empty"].includes(reward.type)) {
-          counts[track][reward.type] += 1;
+          if (index < 30) counts[track][reward.type] += 1;
           if (reward.type === "coins" && (!Number.isSafeInteger(reward.amount) || reward.amount <= 0)) {
             throw new Error(`Quantidade de moedas inválida no nível ${level.level} do Passe Neon.`);
+          }
+        } else if (reward.type === "starting-charge") {
+          if (!STARTING_ABILITIES.some((ability) => ability.id === reward.abilityId) ||
+            !Number.isSafeInteger(reward.amount) || reward.amount < 1 || reward.amount > 2) {
+            throw new Error(`Carga inicial inválida no nível ${level.level} do Passe Neon.`);
+          }
+        } else if (reward.type === "name-color") {
+          if (track !== "premium" || level.level !== 25 || reward.color !== "gold") {
+            throw new Error(`Cor de nome inválida no nível ${level.level} do Passe Neon.`);
           }
         } else {
           throw new Error(`Tipo de recompensa inválido no nível ${level.level} do Passe Neon.`);
@@ -4397,13 +4976,22 @@ function validateBattlePassData(data) {
       .some(([type, count]) => counts.free[type] !== count || counts.premium[type] !== count) ||
     data.levels[0].premium.find((reward) => reward.skinId === "shot-candy-cane") === undefined ||
     data.levels[14].premium.find((reward) => reward.skinId === "shield-christmas-lights") === undefined ||
-    data.levels[29].premium.find((reward) => reward.skinId === "ship-christmas-tree") === undefined) {
+    data.levels[29].premium.find((reward) => reward.skinId === "ship-christmas-tree") === undefined ||
+    data.levels[4].free.find((reward) =>
+      reward.type === "skin-trial" && reward.skinId === "shot-candy-cane" && reward.durationDays === 14) === undefined ||
+    data.levels[14].free.find((reward) =>
+      reward.type === "skin-trial" && reward.skinId === "shield-christmas-lights" && reward.durationDays === 14) === undefined ||
+    data.levels[34].free.find((reward) =>
+      reward.type === "skin-trial" && reward.skinId === "ship-christmas-tree" && reward.durationDays === 14) === undefined ||
+    data.levels[24].premium.find((reward) => reward.type === "name-color" && reward.color === "gold") === undefined ||
+    !["free", "premium"].every((track) =>
+      data.levels[38][track].some((reward) => reward.type === "coins" && reward.amount === 10000))) {
     throw new Error("As recompensas das trilhas do Passe Neon não correspondem à configuração esperada.");
   }
   for (const track of ["free", "premium"]) {
     const coinTotal = data.levels.reduce((sum, level) =>
       sum + level[track].filter((reward) => reward.type === "coins").reduce((total, reward) => total + reward.amount, 0), 0);
-    if (coinTotal !== 1500) throw new Error(`A trilha ${track} deve distribuir 1.500 Neon-moedas.`);
+    if (coinTotal !== 11500) throw new Error(`A trilha ${track} deve distribuir 11.500 Neon-moedas.`);
   }
 }
 
@@ -4662,6 +5250,22 @@ function selectedSkin(category) {
   return skin || fallback[category];
 }
 
+function hasSkinAccess(accountData, skinId) {
+  return Boolean(accountData && (
+    accountData.ownedSkins.includes(skinId) ||
+    (Number.isSafeInteger(accountData.trialSkinExpiresAt?.[skinId]) &&
+      accountData.trialSkinExpiresAt[skinId] > Date.now())
+  ));
+}
+
+function expireSkinTrials() {
+  if (!account?.trialSkinExpiresAt) return;
+  const activeTrials = Object.fromEntries(Object.entries(account.trialSkinExpiresAt)
+    .filter(([, expiresAt]) => Number.isSafeInteger(expiresAt) && expiresAt > Date.now()));
+  if (Object.keys(activeTrials).length === Object.keys(account.trialSkinExpiresAt).length) return;
+  persistAccount({ ...account, trialSkinExpiresAt: activeTrials });
+}
+
 const christmasOrnamentColors = ["#ef3340", "#35d56a", "#ffd45c", "#e7edf5"];
 const christmasOrnamentStages = ["ornamentRed", "ornamentGreen", "ornamentGold", "ornamentSilver"];
 const CHRISTMAS_ORNAMENT_UNLOCK_SCORE = 550000;
@@ -4681,13 +5285,25 @@ function renderBattlePassReward(reward, level, track, unlocked, claimed) {
   let content = "";
   if (reward.type === "drop") content = t("passRewardDrop");
   else if (reward.type === "charge") content = t("passRewardCharge");
+  else if (reward.type === "starting-charge") {
+    const ability = STARTING_ABILITIES.find((entry) => entry.id === reward.abilityId);
+    if (!ability) throw new Error(`Habilidade inicial inválida no nível ${level} do Passe Neon.`);
+    content = t("passRewardStartingCharge")
+      .replace("{amount}", String(reward.amount))
+      .replace("{ability}", t(ability.title));
+  }
   else if (reward.type === "coins") {
     content = t("passRewardCoins").replace("{amount}", reward.amount.toLocaleString(language));
   } else if (reward.type === "empty") content = t("passRewardEmpty");
-  else if (reward.type === "skin") {
+  else if (reward.type === "skin" || reward.type === "skin-trial") {
     const skin = findSkin(reward.skinId);
     if (!skin) throw new Error(`Skin de recompensa não encontrada: ${reward.skinId}.`);
-    content = `${escapeHtml(t("passRewardSkin").replace("{name}", localizedText(skin.name)))}<span class="skin-visual ${escapeHtml(skin.shape)}" style="--skin-color:${escapeHtml(skin.color)}" aria-hidden="true"></span>`;
+    const rewardLabel = reward.type === "skin-trial" ? "passRewardSkinTrial" : "passRewardSkin";
+    content = `${escapeHtml(t(rewardLabel).replace("{name}", localizedText(skin.name)))}<span class="skin-visual ${escapeHtml(skin.shape)}" style="--skin-color:${escapeHtml(skin.color)}" aria-hidden="true"></span>`;
+  } else if (reward.type === "name-color") {
+    const color = NAME_COLORS[reward.color];
+    if (!color) throw new Error(`Cor de nome inválida no nível ${level} do Passe Neon.`);
+    content = `${escapeHtml(t("passRewardNameColor").replace("{name}", t(color.label)))}<span class="name-color-swatch" style="--name-color:${escapeHtml(color.css)}" aria-hidden="true"></span>`;
   } else {
     throw new Error(`Tipo de recompensa não reconhecido: ${reward.type}.`);
   }
@@ -4728,8 +5344,9 @@ function renderBattlePass() {
     ? t("battlePassPremiumActive")
     : `${t("battlePassBuy")} · ${battlePassData.priceDiamonds.toLocaleString(language)} ${t("diamonds")}`;
   const dropButton = $("#open-battle-pass-drop");
-  dropButton.disabled = progress.dropCharges <= 0;
-  dropButton.textContent = `${t("battlePassOpenDrop")} · ${progress.dropCharges}`;
+  const passDropCount = vaultItemCount("pass-drop");
+  dropButton.disabled = passDropCount <= 0;
+  dropButton.textContent = `${t("battlePassOpenDrop")} · ${passDropCount}`;
   const freeClaimed = new Set(progress.freeClaimed);
   const premiumClaimed = new Set(progress.premiumClaimed);
   $("#battle-pass-level-list").innerHTML = battlePassData.levels.map((level) => {
@@ -4783,9 +5400,11 @@ function purchaseBattlePassPremium() {
     };
     updatedAccount = grantBattlePassRewardsThrough(updatedAccount, "premium", updatedAccount.battlePass.level);
     updatedAccount = recordBadge(updatedAccount, "first-diamond-purchase");
+    const gainedVaultItem = findAddedVaultItem(account.vaultItems, updatedAccount.vaultItems);
     persistAccount(updatedAccount);
     $("#battle-pass-purchase-dialog").close();
     showToast(t("battlePassPurchased"));
+    if (gainedVaultItem) promptVaultAcquisition(gainedVaultItem.item, 1);
   } catch (error) {
     $("#battle-pass-purchase-error").textContent = error.message;
     button.disabled = account.diamonds < battlePassData.priceDiamonds;
@@ -4796,21 +5415,31 @@ function applyBattlePassRewardsToLevel(nextAccount, level, track) {
   const progress = nextAccount.battlePass;
   const claimedKey = track === "free" ? "freeClaimed" : "premiumClaimed";
   if (progress[claimedKey].includes(level)) return nextAccount;
-  const next = {
+  let next = {
     ...nextAccount,
     battlePass: {
       ...progress,
       [claimedKey]: [...progress[claimedKey], level]
     },
-    ownedSkins: [...nextAccount.ownedSkins]
+    ownedSkins: [...nextAccount.ownedSkins],
+    ownedNameColors: [...nextAccount.ownedNameColors],
+    trialSkinExpiresAt: { ...nextAccount.trialSkinExpiresAt }
   };
   for (const reward of battlePassData.levels[level - 1][track]) {
     if (reward.type === "coins") {
       next.coins += reward.amount;
     } else if (reward.type === "charge") {
       next.battlePass.abilityCharges += 1;
+    } else if (reward.type === "starting-charge") {
+      const currentCharges = next.battlePass.startingAbilityCharges[reward.abilityId];
+      const updatedCharges = currentCharges + reward.amount;
+      if (!Number.isSafeInteger(updatedCharges)) throw new Error(t("rewardBalanceError"));
+      next.battlePass.startingAbilityCharges = {
+        ...next.battlePass.startingAbilityCharges,
+        [reward.abilityId]: updatedCharges
+      };
     } else if (reward.type === "drop") {
-      next.battlePass.dropCharges += 1;
+      next = addVaultItem(next, "pass-drop").account;
     } else if (reward.type === "skin") {
       if (!next.ownedSkins.includes(reward.skinId)) {
         next.ownedSkins.push(reward.skinId);
@@ -4819,6 +5448,16 @@ function applyBattlePassRewardsToLevel(nextAccount, level, track) {
         }
       } else {
         next.coins += 500;
+      }
+    } else if (reward.type === "skin-trial") {
+      if (!next.ownedSkins.includes(reward.skinId)) {
+        const existingExpiry = next.trialSkinExpiresAt[reward.skinId] || 0;
+        next.trialSkinExpiresAt[reward.skinId] =
+          Math.max(Date.now(), existingExpiry) + reward.durationDays * 24 * 60 * 60 * 1000;
+      }
+    } else if (reward.type === "name-color") {
+      if (!next.ownedNameColors.includes(reward.color)) {
+        next.ownedNameColors.push(reward.color);
       }
     }
   }
@@ -4855,7 +5494,10 @@ function collectBattlePassToken() {
     }
   }
   try {
+    const previousVaultItems = account.vaultItems;
     persistAccount(updatedAccount);
+    const gainedVaultItem = findAddedVaultItem(previousVaultItems, account.vaultItems);
+    if (gainedVaultItem) promptVaultAcquisition(gainedVaultItem.item, 1);
   } catch (error) {
     showToast(error.message);
     return false;
@@ -4894,56 +5536,40 @@ function collectFrostEventToken() {
 }
 
 function openBattlePassDrop() {
-  if (!account || account.battlePass.dropCharges <= 0) return;
+  if (vaultItemCount("pass-drop") === 0) return;
+  showScreen("vault");
+  selectedVaultItemId = normalizeVaultItems(account?.vaultItems)
+    .find((item) => item.type === "pass-drop")?.id || null;
+  renderVault();
+}
+
+function rollBattlePassDropReward() {
   const rarityOrder = ["common", "uncommon", "rare", "epic", "legendary"];
-  const roll = Math.random() * 100;
+  const roll = crypto.getRandomValues(new Uint32Array(1))[0] / 0x100000000 * 100;
   let cumulative = 0;
   const rarity = rarityOrder.find((entry) => {
     cumulative += battlePassData.luckDrop.rarityOdds[entry];
     return roll < cumulative;
   }) || "legendary";
-  const availableSkins = battlePassData.luckDrop.skinIds
-    ? getBattlePassDropEligibleSkins(rarity)
-    : [];
-  const nextBattlePass = {
-    ...account.battlePass,
-    dropCharges: account.battlePass.dropCharges - 1
-  };
-  let updatedAccount;
-  let resultMessage;
+  const availableSkins = getBattlePassDropEligibleSkins(rarity);
   if (availableSkins.length) {
-    const skin = availableSkins[Math.floor(Math.random() * availableSkins.length)];
-    updatedAccount = {
-      ...account,
-      battlePass: nextBattlePass,
-      ownedSkins: [...account.ownedSkins, skin.id]
-    };
-    resultMessage = t("battlePassDropResultSkin")
-      .replace("{name}", localizedText(skin.name))
-      .replace("{rarity}", localizedText(skinData.rarities[skin.rarity]));
-  } else {
-    updatedAccount = {
-      ...account,
-      battlePass: nextBattlePass,
-      coins: account.coins + battlePassData.luckDrop.duplicateCoins
-    };
-    resultMessage = t(account.ownedSkins.some((skinId) => battlePassData.luckDrop.skinIds.includes(skinId))
-      ? "battlePassDropEmpty"
-      : "battlePassDropResultCoins")
-      .replace("{amount}", String(battlePassData.luckDrop.duplicateCoins));
+    const skin = availableSkins[
+      Math.floor(crypto.getRandomValues(new Uint32Array(1))[0] / 0x100000000 * availableSkins.length)
+    ];
+    return { type: "skin", skinId: skin.id, rarity, source: "pass" };
   }
-  try {
-    persistAccount(updatedAccount);
-    showToast(resultMessage);
-  } catch (error) {
-    showToast(error.message);
-  }
+  return {
+    type: "coins",
+    amount: battlePassData.luckDrop.duplicateCoins,
+    rarity,
+    source: "pass"
+  };
 }
 
 function renderSkins() {
   if (!skinData || !account) return;
   const list = skinData.categories[activeSkinCategory].filter((skin) =>
-    ownedSkins.has(skin.id) || skin.id === storeData?.luckDrop?.exclusiveSkinId
+    hasSkinAccess(account, skin.id) || skin.id === storeData?.luckDrop?.exclusiveSkinId
   );
   const activeEvents = (skinData.events || []).filter((event) =>
     event.category === activeSkinCategory && Number.isFinite(event.endsAt) && event.endsAt > Date.now()
@@ -4958,6 +5584,11 @@ function renderSkins() {
   grid.innerHTML = list.map((skin) => {
     const selected = selectedSkins[activeSkinCategory] === skin.id;
     const owned = ownedSkins.has(skin.id);
+    const available = hasSkinAccess(account, skin.id);
+    const trialExpiresAt = account.trialSkinExpiresAt?.[skin.id];
+    const trialCopy = !owned && trialExpiresAt > Date.now()
+      ? `<small>${escapeHtml(t("skinTrialUntil").replace("{date}", new Date(trialExpiresAt).toLocaleDateString(language)))}</small>`
+      : "";
     const eligible = skin.id !== "ship-special-ice" || upgradeValue("hull") > 4;
     const rarity = skinData.rarities[skin.rarity];
     const ornament = skin.evolutive === true;
@@ -4979,10 +5610,10 @@ function renderSkins() {
       : skin.id === "shield-christmas-lights"
         ? ` data-lights-mode="${account.battlePass.lightsMode}"`
         : "";
-    return `<button class="skin-card skin-card-layout rarity-${skin.rarity}${selected ? " selected" : ""}${skin.id === "ship-void-neon" ? " skin-card-void-neon" : ""}" type="button" data-skin-id="${escapeHtml(skin.id)}" style="--rarity-color:${escapeHtml(rarity.color)};--skin-color:${escapeHtml(skinColor)};--accent-color:${escapeHtml(skin.accentColor || skinColor)};--skin-opacity:${skin.opacity || 1}" aria-pressed="${selected}"${owned && eligible ? "" : " disabled"}>
-      <span class="skin-card-copy"><strong>${escapeHtml(skin.name[language])}</strong><span>${escapeHtml(skin.description[language])}</span><small>${escapeHtml(t("rarity"))}: ${escapeHtml(rarity[language])}</small>${attributeCopy}${ornamentCopy}</span>
+    return `<button class="skin-card skin-card-layout rarity-${skin.rarity}${selected ? " selected" : ""}${skin.id === "ship-void-neon" ? " skin-card-void-neon" : ""}" type="button" data-skin-id="${escapeHtml(skin.id)}" style="--rarity-color:${escapeHtml(rarity.color)};--skin-color:${escapeHtml(skinColor)};--accent-color:${escapeHtml(skin.accentColor || skinColor)};--skin-opacity:${skin.opacity || 1}" aria-pressed="${selected}"${available && eligible ? "" : " disabled"}>
+      <span class="skin-card-copy"><strong>${escapeHtml(skin.name[language])}</strong><span>${escapeHtml(skin.description[language])}</span><small>${escapeHtml(t("rarity"))}: ${escapeHtml(rarity[language])}</small>${trialCopy}${attributeCopy}${ornamentCopy}</span>
       <span class="skin-visual ${escapeHtml(skin.shape)}"${visualData} aria-hidden="true"></span>
-      <span class="skin-card-action">${!owned ? escapeHtml(t("luckDropExclusive")) : !eligible ? escapeHtml(t("iceHullRequirement")) : selected ? escapeHtml(t("equipped")) : escapeHtml(t("equip"))}</span>
+      <span class="skin-card-action">${!available ? escapeHtml(t("luckDropExclusive")) : !eligible ? escapeHtml(t("iceHullRequirement")) : selected ? escapeHtml(t("equipped")) : escapeHtml(t("equip"))}</span>
     </button>`;
   }).join("") + activeEvents.map((event) => {
     const skin = event.skin;
@@ -5081,13 +5712,16 @@ function showEvent(eventId) {
     item.id === eventId && item.endsAt > Date.now()
   );
   if (listedEvent) {
-    const isActive = listedEvent.startsAt <= Date.now();
+    activeEventCountdown = {
+      startsAt: Date.parse(listedEvent.startsAt),
+      endsAt: Date.parse(listedEvent.endsAt)
+    };
     $("#event-title").textContent = localizedText(listedEvent.title);
     $("#event-description").textContent = localizedText(listedEvent.description);
-    $("#event-countdown").textContent = `${t(isActive ? "eventEndsIn" : "eventStartsIn")} ${formatDuration((isActive ? listedEvent.endsAt : listedEvent.startsAt) - Date.now())}`;
     $("#event-back").dataset.screen = "events";
     renderEventDetails(listedEvent);
     showScreen("event");
+    updateEventCountdown();
     return;
   }
   const event = skinData.events?.find((item) => item.id === eventId && item.endsAt > Date.now());
@@ -5100,11 +5734,12 @@ function showEvent(eventId) {
   $("#event-shop-panel").hidden = true;
   $("#event-progress").hidden = true;
   $("#play-event-button").hidden = true;
+  activeEventCountdown = { startsAt: null, endsAt: Date.parse(event.endsAt) };
   $("#event-title").textContent = event.title[language];
   $("#event-description").textContent = event.description[language];
-  $("#event-countdown").textContent = `${t("eventEndsIn")} ${formatDuration(event.endsAt - Date.now())}`;
   $("#event-back").dataset.screen = "skins";
   showScreen("event");
+  updateEventCountdown();
 }
 
 function renderPauseMissions() {
@@ -5180,6 +5815,7 @@ function showScreen(name) {
   if (name === "missions") renderMissions();
   if (name === "skins") renderSkins();
   if (name === "store") renderStore();
+  if (name === "vault") renderVault();
   if (name === "diamonds") renderDiamondPackages();
   if (name === "accuracy") renderAccuracyScreen();
   if (name === "events") renderEvents();
@@ -5195,6 +5831,7 @@ function showScreen(name) {
   }
   if (name === "admin") void loadBannedPlayers();
   if (name === "battle-pass") renderBattlePass();
+  if (name === "leaderboard") updateWeeklyCompetitionClock();
   if (name === "starting-skills") renderStartingSkills();
   if (name === "inbox") {
     void loadFriends({ silent: true });
@@ -5268,6 +5905,7 @@ async function openPublicProfile(uid) {
     $("#admin-player-actions").hidden = !account?.adminMode;
     $("#admin-toggle-ban").textContent = t(activeAdminProfileBanned ? "unbanAccount" : "banAccount");
     $("#player-profile-title").textContent = profile.username;
+    applyNameColor($("#player-profile-title"), profile.nameColor);
     $("#player-profile-title").classList.toggle("admin-gold-name", profile.adminRole === "permanent");
     $("#player-profile-title").classList.toggle("adm-name-rgb", profile.admEnabled === true);
     $("#player-profile-score").textContent = t("playerProfileScore")
@@ -5548,12 +6186,7 @@ async function changePlayerBan(uid, banned) {
 
 async function loadLeaderboard(scope) {
   if (!account) return;
-  const pendingPreviousWeek = account.weeklyCompetition.weekId &&
-    account.weeklyCompetition.weekId !== currentWeekId() &&
-    !account.settledWeeks.includes(account.weeklyCompetition.weekId);
-  if (pendingPreviousWeek) await settlePreviousWeek();
-  if (!account) return;
-  if (pendingPreviousWeek && !account.settledWeeks.includes(account.weeklyCompetition.weekId)) return;
+  if (!await advanceWeeklyCompetition()) return;
   const rotatedAccount = rotateWeeklyCompetition(account);
   if (rotatedAccount !== account) persistAccount(rotatedAccount);
   if (activeCompetitionMode === "ai") refreshAiCompetition();
@@ -5600,6 +6233,7 @@ async function loadLeaderboard(scope) {
       rank.textContent = `#${index + 1}`;
       const player = document.createElement("span");
       player.className = "leaderboard-entry-name";
+      applyNameColor(player, entry.nameColor);
       if (entry.adminRole === "permanent") player.classList.add("admin-gold-name");
       if (entry.admEnabled === true) player.classList.add("adm-name-rgb");
       player.textContent = entry.username;
@@ -5688,9 +6322,13 @@ function applyWeeklyPlacement(nextAccount, rank, mode, weekId) {
   }[rank];
   let updated = {
     ...nextAccount,
-    coins: nextAccount.coins + rewards.coins,
-    missionDropCredits: nextAccount.missionDropCredits + rewards.drops
+    coins: nextAccount.coins + rewards.coins
   };
+  if (rewards.drops) {
+    const weekStartAt = Date.parse(`${weekId}T10:00:00-03:00`);
+    const weekNumber = WeeklyCompetition.currentWindow(weekStartAt).weekNumber;
+    updated = addWeeklyVaultDrops(updated, rewards.drops, weekNumber);
+  }
   if (rewards.medal) {
     updated = addWeeklyMedal(updated, rewards.medal, mode, weekId);
     if (rank === 1) updated = applyGoldMedalBonus(updated);
@@ -5700,6 +6338,19 @@ function applyWeeklyPlacement(nextAccount, rank, mode, weekId) {
     if (mode === "players") {
       updated = { ...updated, bestScore: Math.max(updated.bestScore, updated.weeklyCompetition.score) };
     }
+  }
+  return updated;
+}
+
+function addWeeklyVaultDrops(nextAccount, quantity, weekNumber) {
+  const rarityCounts = new Map();
+  for (let index = 0; index < quantity; index++) {
+    const rarity = rollLuckDropRarity();
+    rarityCounts.set(rarity, (rarityCounts.get(rarity) || 0) + 1);
+  }
+  let updated = nextAccount;
+  for (const [rarity, amount] of rarityCounts) {
+    updated = addVaultItem(updated, "weekly-drop", amount, { weekNumber, rarity }).account;
   }
   return updated;
 }
@@ -5738,10 +6389,10 @@ function applyGoldMedalBonus(nextAccount) {
 }
 
 async function settlePreviousWeek() {
-  if (!account) return;
+  if (!account) return false;
   const previous = account.weeklyCompetition;
   const thisWeek = currentWeekId();
-  if (!previous.weekId || previous.weekId === thisWeek || account.settledWeeks.includes(previous.weekId)) return;
+  if (!previous.weekId || previous.weekId === thisWeek || account.settledWeeks.includes(previous.weekId)) return true;
   let updated = account;
   try {
     if (account.leaderboardOptIn && account.cloudUid && previous.score > 0) {
@@ -5750,30 +6401,45 @@ async function settlePreviousWeek() {
       const rank = players.findIndex((player) => player.uid === account.cloudUid) + 1;
       if (rank > 0) updated = applyWeeklyPlacement(updated, rank, "players", previous.weekId);
     }
-    if (previous.score > 0) {
-      const aiScores = previous.aiScores.length
-        ? previous.aiScores
-        : Array.from({ length: 5 }, (_, index) => previous.score * (index + 1));
-      const aiRank = [previous.score, ...aiScores].sort((a, b) => b - a).indexOf(previous.score) + 1;
-      updated = applyWeeklyPlacement(updated, aiRank, "ai", previous.weekId);
-    }
+    const aiScores = WeeklyCompetition.aiScores({
+      weeklyScore: previous.score,
+      bestScore: account.bestScore,
+      progress: 1,
+      previousScores: previous.aiScores
+    });
+    const aiRank = aiScores.filter((score) => score > previous.score).length + 1;
+    updated = {
+      ...updated,
+      weeklyCompetition: { ...previous, aiScores }
+    };
+    updated = applyWeeklyPlacement(updated, aiRank, "ai", previous.weekId);
     updated = { ...updated, settledWeeks: [...updated.settledWeeks, previous.weekId].slice(-8) };
+    const newVaultItems = findAddedVaultItems(account.vaultItems, updated.vaultItems);
     persistAccount(updated);
+    weeklyCompetitionRetryAt = 0;
     showToast(t("weeklyPrizesGranted"));
+    for (const entry of newVaultItems) promptVaultAcquisition(entry.item, 1);
+    return true;
   } catch (error) {
+    weeklyCompetitionRetryAt = Date.now() + 60 * 1000;
     showToast(`${t("weeklyPrizeError")} ${error.message}`);
+    return false;
   }
 }
 
-function currentWeekId(now = new Date()) {
+function currentWeekId(now = Date.now()) {
+  return WeeklyCompetition.currentWindow(now instanceof Date ? now.getTime() : now).weekId;
+}
+
+function legacyCurrentWeekId(now = new Date()) {
   const monday = new Date(now);
   monday.setHours(0, 0, 0, 0);
   monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
   return `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, "0")}-${String(monday.getDate()).padStart(2, "0")}`;
 }
 
-function rotateWeeklyCompetition(nextAccount) {
-  const weekId = currentWeekId();
+function rotateWeeklyCompetition(nextAccount, window = WeeklyCompetition.currentWindow()) {
+  const weekId = window.weekId;
   if (nextAccount.weeklyCompetition.weekId === weekId) return nextAccount;
   const previous = nextAccount.weeklyCompetition;
   const history = previous.weekId
@@ -5790,36 +6456,107 @@ function rotateWeeklyCompetition(nextAccount) {
   };
 }
 
-function refreshAiCompetition() {
-  if (!account) return;
-  const scores = Array.from({ length: 5 }, (_, index) =>
-    Math.floor(account.weeklyCompetition.score * (index + 1) * 0.1));
-  const hour = new Date().getHours();
-  if ((hour >= 10 && hour < 11) || (hour >= 18 && hour < 19)) {
-    scores.forEach((score, index) => {
-      scores[index] = Math.floor(account.weeklyCompetition.score * (index + 1));
-      scores[index] = Math.max(score, scores[index]);
-    });
+async function advanceWeeklyCompetition() {
+  if (!account) return false;
+  const currentWindow = WeeklyCompetition.currentWindow();
+  if (Date.now() < currentWindow.startAt) return false;
+  if (account.weeklyCompetition.weekId === currentWindow.weekId) return true;
+  if (Date.now() < weeklyCompetitionRetryAt) return false;
+  if (account.weeklyCompetition.weekId === legacyCurrentWeekId() &&
+    account.weeklyCompetition.weekId !== currentWindow.weekId) {
+    try {
+      persistAccount({
+        ...account,
+        weeklyCompetition: { ...account.weeklyCompetition, weekId: currentWindow.weekId }
+      });
+      return true;
+    } catch (error) {
+      weeklyCompetitionRetryAt = Date.now() + 60 * 1000;
+      showToast(`${t("weeklyPrizeError")} ${error.message}`);
+      return false;
+    }
   }
+  if (weeklyCompetitionAdvancePromise) return weeklyCompetitionAdvancePromise;
+
+  weeklyCompetitionAdvancePromise = (async () => {
+    const previousWeekId = account.weeklyCompetition.weekId;
+    if (!await settlePreviousWeek()) return false;
+    if (!account) return false;
+    const latestWindow = WeeklyCompetition.currentWindow();
+    if (Date.now() < latestWindow.startAt) return false;
+    const nextAccount = rotateWeeklyCompetition(account, latestWindow);
+    if (nextAccount !== account) persistAccount(nextAccount);
+    return !previousWeekId || account.settledWeeks.includes(previousWeekId) ||
+      account.weeklyCompetition.weekId === latestWindow.weekId;
+  })();
+  try {
+    return await weeklyCompetitionAdvancePromise;
+  } catch (error) {
+    weeklyCompetitionRetryAt = Date.now() + 60 * 1000;
+    showToast(`${t("weeklyPrizeError")} ${error.message}`);
+    return false;
+  } finally {
+    weeklyCompetitionAdvancePromise = null;
+  }
+}
+
+function refreshAiCompetition() {
+  if (!account || account.weeklyCompetition.weekId !== currentWeekId()) return;
+  const window = WeeklyCompetition.windowForId(account.weeklyCompetition.weekId);
+  if (!window) return;
+  const now = Date.now();
+  const progress = (now - window.startAt) / (window.endAt - window.startAt);
+  const scores = WeeklyCompetition.aiScores({
+    weeklyScore: account.weeklyCompetition.score,
+    bestScore: account.bestScore,
+    progress,
+    previousScores: account.weeklyCompetition.aiScores
+  });
   const previous = account.weeklyCompetition.aiScores;
-  const nextScores = scores.map((score, index) => Math.max(score, previous[index] || 0));
-  if (JSON.stringify(previous) !== JSON.stringify(nextScores)) {
+  if (JSON.stringify(previous) !== JSON.stringify(scores)) {
     persistAccount({
       ...account,
-      weeklyCompetition: { ...account.weeklyCompetition, aiScores: nextScores }
+      weeklyCompetition: { ...account.weeklyCompetition, aiScores: scores }
     });
   }
 }
 
 function getAiLeaderboardEntries(score = account?.weeklyCompetition.score || 0, savedAiScores = account?.weeklyCompetition.aiScores || []) {
-  const aiScores = savedAiScores;
+  const aiScores = savedAiScores.length === 5
+    ? savedAiScores
+    : WeeklyCompetition.aiScores({
+      weeklyScore: score,
+      bestScore: account?.bestScore || 0,
+      progress: 0,
+      previousScores: savedAiScores
+    });
   return [
-    { username: account?.username || t("player"), bestScore: score },
+    { username: account?.username || t("player"), bestScore: score, nameColor: account?.nameColor },
     ...Array.from({ length: 5 }, (_, index) => ({
       username: `${t("anonymousPlayer")} ${index + 1}`,
-      bestScore: aiScores[index] || Math.floor(score * (index + 1) * 0.1)
+      bestScore: aiScores[index]
     }))
   ];
+}
+
+function updateWeeklyCompetitionClock() {
+  const now = Date.now();
+  const window = WeeklyCompetition.currentWindow(now);
+  const startsNextRace = now < window.startAt;
+  const remaining = Math.max(0, (startsNextRace ? window.startAt : window.endAt) - now);
+  $("#weekly-competition-clock").textContent = t(
+    startsNextRace ? "weeklyCompetitionStarts" : "weeklyCompetitionEnds"
+  ).replace("{week}", String(window.weekNumber)).replace("{time}", formatDuration(remaining));
+  if (!account || startsNextRace || account.weeklyCompetition.weekId === window.weekId) return;
+
+  const previousWeekId = account.weeklyCompetition.weekId;
+  void advanceWeeklyCompetition().then((advanced) => {
+    if (advanced && account && account.weeklyCompetition.weekId !== previousWeekId &&
+      !$("#screen-leaderboard").hidden && !weeklyLeaderboardRefreshPromise) {
+      weeklyLeaderboardRefreshPromise = loadLeaderboard(activeLeaderboardScope)
+        .finally(() => { weeklyLeaderboardRefreshPromise = null; });
+    }
+  });
 }
 
 const canvas = $("#game-canvas");
@@ -5915,10 +6652,7 @@ async function startGame(eventId = null, startingAbilityId = null) {
     requireAuthentication();
     return;
   }
-  await settlePreviousWeek();
-  if (account.weeklyCompetition.weekId &&
-    account.weeklyCompetition.weekId !== currentWeekId() &&
-    !account.settledWeeks.includes(account.weeklyCompetition.weekId)) return;
+  if (!await advanceWeeklyCompetition()) return;
   const selectedEvent = eventId ? eventData.events.find((event) => event.id === eventId) : null;
   if (eventId && !isPlayableEvent(selectedEvent)) {
     showToast(t("eventNotAvailable"));
@@ -7049,8 +7783,8 @@ function runDebugChecks() {
     ["Chance de escudo de 1 em 50", SHIELD_DROP_CHANCE === 1 / 50],
     ["Chance de tiro triplo de 1 em 20", TRIPLE_SHOT_DROP_CHANCE === 1 / 20],
     ["Tiro triplo dura 15 segundos", TRIPLE_SHOT_DURATION_SECONDS === 15],
-    ["Passe Neon possui 30 níveis, custa 450 diamantes e solta fichas a cada 15 segundos",
-      battlePassData?.levels.length === 30 && battlePassData.priceDiamonds === 450 &&
+    ["Passe Neon possui 40 níveis, custa 450 diamantes e solta fichas a cada 15 segundos",
+      battlePassData?.levels.length === 40 && battlePassData.priceDiamonds === 450 &&
       battlePassData.tokenIntervalSeconds === 15 &&
       battlePassData.visibleFrom === Date.parse("2026-11-30T00:00:00-03:00")],
     ["Código DEPURATIONMODE libera o painel de depuração",
@@ -7159,13 +7893,17 @@ async function initialize() {
     renderBadges();
     renderBattlePass();
     updateBattlePassVisibility();
+    updateWeeklyCompetitionClock();
     setInterval(updateMissionClock, 1000);
+    setInterval(expireSkinTrials, 60 * 1000);
     setInterval(renderAccuracyScreen, 1000);
     setInterval(() => {
+      refreshAiCompetition();
       if (!$("#screen-leaderboard").hidden && activeCompetitionMode === "ai") {
         void loadLeaderboard(activeLeaderboardScope);
       }
     }, 60000);
+    setInterval(updateWeeklyCompetitionClock, 1000);
     setInterval(() => {
       if (account?.adminMode && adminSessionToken) {
         void refreshAdminSession().catch((error) => {
@@ -7197,6 +7935,7 @@ async function initialize() {
       }
     }, 60 * 1000);
     setInterval(renderEvents, 60000);
+    setInterval(updateEventCountdown, 1000);
     setInterval(renderSpecialLootBox, 60000);
     setInterval(updateBattlePassVisibility, 60000);
     offerTimer = setInterval(renderOfferCountdown, 1000);
@@ -7515,17 +8254,17 @@ async function purchaseWelcomePack() {
     }
     const pack = storeData.welcomePackage;
     if (coins < pack.priceCoins) throw new Error(t("insufficientCoins"));
-    let updatedAccount = {
+    const purchasedAccount = {
       ...account,
       coins: coins - pack.priceCoins,
-      ownedSkins: [...new Set([...account.ownedSkins, ...pack.items.map((item) => item.skinId)])],
       welcomeOffer: { ...account.welcomeOffer, available: false, purchased: true }
     };
-    updatedAccount = recordBadge(updatedAccount, "first-coin-purchase");
-    persistAccount(updatedAccount);
+    const { account: updatedAccount, item } = addVaultItem(purchasedAccount, "welcome-pack");
+    const finalAccount = recordBadge(updatedAccount, "first-coin-purchase");
+    persistAccount(finalAccount);
     $("#purchase-dialog").close();
     showToast(t("packagePurchased"));
-    showScreen("skins");
+    promptVaultAcquisition(item);
   } catch (error) {
     $("#purchase-error").textContent = error.message;
     button.disabled = coins < storeData.welcomePackage.priceCoins || !account.welcomeOffer.available;
@@ -7562,6 +8301,10 @@ document.addEventListener("click", (event) => {
   if (target.hasAttribute("data-faq")) openFaq();
   if (target.dataset.badgeId) openBadgeDetails(target.dataset.badgeId);
   if (target.hasAttribute("data-luck-drop-info")) openLuckDropInfo();
+  if (target.dataset.vaultItemId && target.id !== "open-vault-item") {
+    selectedVaultItemId = target.dataset.vaultItemId;
+    renderVault();
+  }
   if (target.dataset.storeTab) {
     $$("[data-store-tab]").forEach((tab) =>
       tab.setAttribute("aria-selected", String(tab === target)));
@@ -7674,7 +8417,7 @@ document.addEventListener("click", (event) => {
   if (target.dataset.skinId && skinData) {
     target.disabled = true;
     try {
-      if (!ownedSkins.has(target.dataset.skinId)) throw new Error(t("eventLocked"));
+      if (!hasSkinAccess(account, target.dataset.skinId)) throw new Error(t("eventLocked"));
       persistAccount({
         ...account,
         equippedSkins: { ...account.equippedSkins, [activeSkinCategory]: target.dataset.skinId }
@@ -7686,6 +8429,7 @@ document.addEventListener("click", (event) => {
       target.disabled = false;
     }
   }
+  if (target.dataset.nameColor) selectNameColor(target.dataset.nameColor);
 });
 
 $("#promo-code-form").addEventListener("submit", (event) => {
@@ -7855,6 +8599,31 @@ $("#cancel-diamond-skin-purchase").addEventListener("click", () => {
 $("#close-luck-drop-result").addEventListener("click", () => {
   if (!luckSpinInProgress) $("#luck-drop-result-dialog").close();
 });
+$("#open-vault-item").addEventListener("click", (event) => {
+  event.preventDefault();
+  if (event.currentTarget.dataset.vaultItemId) openVaultItem(event.currentTarget.dataset.vaultItemId);
+});
+$("#vault-open-now").addEventListener("click", (event) => {
+  event.preventDefault();
+  const acquisition = pendingVaultAcquisition;
+  pendingVaultAcquisition = null;
+  $("#vault-acquire-dialog").close();
+  if (acquisition) openVaultItem(acquisition.itemId, acquisition.quantity);
+});
+$("#vault-save-for-later").addEventListener("click", (event) => {
+  event.preventDefault();
+  pendingVaultAcquisition = null;
+  $("#vault-acquire-dialog").close();
+  showNextVaultAcquisition();
+});
+$("#close-vault-results").addEventListener("click", () => $("#vault-results-dialog").close());
+$("#vault-acquire-dialog").addEventListener("close", () => {
+  if (!pendingVaultAcquisition) return;
+  pendingVaultAcquisition = null;
+  showNextVaultAcquisition();
+});
+$("#vault-results-dialog").addEventListener("close", showNextVaultAcquisition);
+$("#luck-drop-result-dialog").addEventListener("close", showNextVaultAcquisition);
 $("#luck-drop-result-dialog").addEventListener("cancel", (event) => {
   if (luckSpinInProgress) event.preventDefault();
 });

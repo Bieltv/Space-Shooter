@@ -14,9 +14,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=29">
+  <link rel="stylesheet" href="css/style.css?v=31">
   <script defer src="js/config.js"></script>
-  <script defer src="js/app.js?v=39"></script>
+  <script defer src="js/weekly-competition.js"></script>
+  <script defer src="js/app.js?v=42"></script>
 </head>
 
 <body>
@@ -48,6 +49,10 @@
           title="Caixa de entrada">
           <span aria-hidden="true">✉</span><span class="quick-nav-badge inbox-badge" id="home-inbox-count"
             hidden></span>
+        </button>
+        <button class="quick-nav-button" id="vault-quick-button" type="button" data-screen="vault"
+          data-i18n-aria-label="vault" title="Cofre" hidden>
+          <span aria-hidden="true">▣</span><span class="quick-nav-badge inbox-badge" id="home-vault-count" hidden></span>
         </button>
         <button class="quick-nav-button friends-quick-button" id="friends-quick-button" type="button"
           data-screen="friends" data-i18n-aria-label="friends" title="Amizades">
@@ -150,6 +155,8 @@
           <button class="neon-button cyan" data-screen="settings" data-i18n="settings">Configurações</button>
           <button class="neon-button cyan" data-screen="skins" data-i18n="skins">Skins</button>
           <button class="neon-button gold-button" data-screen="store" data-i18n="store">Loja</button>
+          <button class="neon-button gold-button" id="vault-button" data-screen="vault" data-i18n="vault"
+            hidden>Cofre</button>
           <button class="neon-button cyan" id="leaderboard-button" data-screen="leaderboard" data-i18n="leaderboard"
             hidden>Ranking</button>
           <button class="neon-button pink" data-screen="missions" data-i18n="missions">Missões</button>
@@ -353,11 +360,11 @@
         <p class="eyebrow" data-i18n="menuLabel">MENU</p>
         <h2 id="battle-pass-title" data-i18n="battlePass">Passe do Néon</h2>
         <p class="section-copy" data-i18n="battlePassHint">Colete fichas que caem durante as partidas para avançar até o
-          nível 30.</p>
+          nível 40.</p>
         <div class="battle-pass-overview">
           <div class="battle-pass-level-summary">
             <span data-i18n="battlePassLevel">Nível do passe</span>
-            <strong id="battle-pass-level">1 / 30</strong>
+            <strong id="battle-pass-level">1 / 40</strong>
           </div>
           <div class="battle-pass-token-summary">
             <span data-i18n="battlePassTokens">Fichas</span>
@@ -375,7 +382,7 @@
           <button class="neon-button cyan" id="open-battle-pass-drop" type="button" data-i18n="battlePassOpenDrop"
             disabled>Abrir Luck Drop do passe</button>
         </div>
-        <div class="battle-pass-level-list" id="battle-pass-level-list" aria-label="Recompensas dos 30 níveis"></div>
+        <div class="battle-pass-level-list" id="battle-pass-level-list" aria-label="Recompensas dos 40 níveis"></div>
         <button class="neon-button back-button" data-screen="home" data-i18n="back">Voltar</button>
       </div>
     </section>
@@ -422,6 +429,11 @@
         </div>
         <p class="profile-database-status inline-status" id="profile-database-status" role="status" aria-live="polite">
         </p>
+        <section class="profile-name-colors" aria-labelledby="profile-name-colors-title">
+          <h3 id="profile-name-colors-title" data-i18n="nameColors">Cores do nome</h3>
+          <p class="section-copy" data-i18n="nameColorsHint">Preto, branco e cinza são grátis. As demais cores custam 1.000 Neon-moedas.</p>
+          <div class="name-color-list" id="profile-name-colors"></div>
+        </section>
         <button class="small-button" id="profile-resources-button" type="button" aria-expanded="false"
           data-i18n="showResources">Meus recursos</button>
         <section class="profile-resources" id="own-profile-resources" aria-label="Recursos da conta" hidden></section>
@@ -503,28 +515,30 @@
             aria-selected="true" data-event-tab="details" data-i18n="eventDetailsTab">Evento</button>
           <button type="button" role="tab" id="event-shop-tab" aria-controls="event-shop-panel" aria-selected="false"
             data-event-tab="shop" data-i18n="eventShopTab">Loja geada</button>
-    </section>
-    <section id="event-details-panel" role="tabpanel" aria-labelledby="event-details-tab">
-      <p class="offer-countdown" id="event-countdown"></p>
-      <section class="event-progress" id="event-progress" hidden>
-        <div class="event-wallet"><span data-i18n="moneyVoid">Money-Void</span><strong id="event-money-void">0</strong>
         </div>
-        <p class="event-score-summary" id="event-score-summary"></p>
-        <p class="event-boss-reward" id="event-boss-reward"></p>
-        <div class="event-phase-list" id="event-phase-list"></div>
-      </section>
-      <button class="neon-button pink" id="play-event-button" type="button" data-i18n="playEvent" hidden>Jogar
-        evento</button>
-    </section>
-    <section class="event-shop-panel" id="event-shop-panel" role="tabpanel" aria-labelledby="event-shop-tab" hidden>
-      <div class="event-wallet frost-token-wallet"><span data-i18n="frostTokenBalance">Tokens de cristal de
-          gelo</span><strong id="frost-token-count">0</strong></div>
-      <p class="event-shop-status" id="frost-shop-status" role="status" aria-live="polite"></p>
-      <div class="event-shop-list" id="frost-shop-list"></div>
-    </section>
-    <button class="neon-button back-button" id="event-back" type="button" data-screen="events"
-      data-i18n="back">Voltar</button>
-    </div>
+        <section id="event-details-panel" role="tabpanel" aria-labelledby="event-details-tab">
+          <p class="offer-countdown" id="event-countdown"></p>
+          <section class="event-progress" id="event-progress" hidden>
+            <div class="event-wallet"><span data-i18n="moneyVoid">Money-Void</span><strong
+                id="event-money-void">0</strong>
+            </div>
+            <p class="event-score-summary" id="event-score-summary"></p>
+            <p class="event-boss-reward" id="event-boss-reward"></p>
+            <div class="event-phase-list" id="event-phase-list"></div>
+          </section>
+          <button class="neon-button pink" id="play-event-button" type="button" data-i18n="playEvent" hidden>Jogar
+            evento</button>
+        </section>
+        <section class="event-shop-panel" id="event-shop-panel" role="tabpanel"
+          aria-labelledby="event-shop-tab" hidden>
+          <div class="event-wallet frost-token-wallet"><span data-i18n="frostTokenBalance">Tokens de cristal de
+              gelo</span><strong id="frost-token-count">0</strong></div>
+          <p class="event-shop-status" id="frost-shop-status" role="status" aria-live="polite"></p>
+          <div class="event-shop-list" id="frost-shop-list"></div>
+        </section>
+        <button class="neon-button back-button" id="event-back" type="button" data-screen="events"
+          data-i18n="back">Voltar</button>
+      </div>
     </section>
 
     <section class="screen" id="screen-store" aria-labelledby="store-title" hidden>
@@ -630,6 +644,26 @@
       </div>
     </section>
 
+    <section class="screen" id="screen-vault" aria-labelledby="vault-title" hidden>
+      <div class="panel vault-panel">
+        <p class="eyebrow" data-i18n="menuLabel">MENU</p>
+        <h2 id="vault-title" data-i18n="vault">Cofre</h2>
+        <p class="section-copy" data-i18n="vaultHint">Guarde suas Luck Drops e pacotes para abrir quando quiser.</p>
+        <p class="inline-status" id="vault-empty" data-i18n="vaultEmpty" hidden>Nenhuma caixa guardada.</p>
+        <div class="vault-layout">
+          <div class="vault-list" id="vault-list" data-i18n-aria-label="vaultItems" aria-label="Itens guardados"></div>
+          <section class="vault-detail" id="vault-detail" aria-live="polite">
+            <h3 id="vault-selected-title"></h3>
+            <p class="vault-selected-rarity" id="vault-selected-rarity"></p>
+            <div class="vault-preview-grid" id="vault-preview-grid"></div>
+            <button class="neon-button gold-button" id="open-vault-item" type="button" data-i18n="vaultOpen"
+              disabled>Abrir</button>
+          </section>
+        </div>
+        <button class="neon-button back-button" type="button" data-screen="home" data-i18n="back">Voltar</button>
+      </div>
+    </section>
+
     <section class="screen" id="screen-accuracy" aria-labelledby="accuracy-title" hidden>
       <div class="panel accuracy-panel">
         <p class="eyebrow" data-i18n="minigameLabel">DESAFIO DE PRECISÃO</p>
@@ -695,6 +729,7 @@
           <button type="button" class="small-button" id="leaderboard-state-tab" data-leaderboard-scope="state"
             aria-pressed="false" data-i18n="regional">Estado</button>
         </div>
+        <p class="section-copy weekly-competition-clock" id="weekly-competition-clock"></p>
         <p class="section-copy" data-i18n="weeklyRewardsHint">Fim da semana: top 1 recebe 15 Luck Drops e 10.000 moedas;
           top 2, 5 drops e 5.000; top 3, 3 drops e 2.000; top 4 e 5, 1.500 moedas.</p>
         <p class="section-copy" data-i18n="weeklyPeakHint">A IA tem dois picos diários e pode chegar a cinco vezes seu
@@ -1025,6 +1060,27 @@
       <h2 id="luck-drop-info-title" data-i18n="dropInfoTitle">Conteúdo e chances</h2>
       <div class="luck-drop-info-list" id="luck-drop-info-list"></div>
       <button type="button" class="neon-button cyan" id="close-luck-drop-info" data-i18n="close">Fechar</button>
+    </div>
+  </dialog>
+
+  <dialog class="game-dialog" id="vault-acquire-dialog" aria-labelledby="vault-acquire-title">
+    <div class="dialog-panel">
+      <p class="eyebrow" data-i18n="vault">COFRE</p>
+      <h2 id="vault-acquire-title" data-i18n="vaultAcquireTitle">Item recebido</h2>
+      <p class="section-copy" id="vault-acquire-copy"></p>
+      <div class="dialog-actions">
+        <button class="neon-button muted" id="vault-save-for-later" type="button" data-i18n="vaultLater">Guardar</button>
+        <button class="neon-button gold-button" id="vault-open-now" type="button" data-i18n="vaultOpenNow">Abrir agora</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="game-dialog" id="vault-results-dialog" aria-labelledby="vault-results-title">
+    <div class="dialog-panel">
+      <p class="eyebrow" data-i18n="vault">COFRE</p>
+      <h2 id="vault-results-title" data-i18n="vaultResultsTitle">Recompensas</h2>
+      <div class="special-loot-results" id="vault-results"></div>
+      <button class="neon-button muted" id="close-vault-results" type="button" data-i18n="close">Fechar</button>
     </div>
   </dialog>
 
