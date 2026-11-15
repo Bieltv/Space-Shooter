@@ -59,6 +59,19 @@ test("Frost Token Rush isolates its currency and one-day multiplier from the Neo
   assert.match(html, /id="frost-shop-list"/);
 });
 
+test("ADM redemption falls back when the master panel is not configured", () => {
+  assert.match(app, /response\.status !== 401 && response\.status !== 503/);
+  assert.match(app, /cloudRequest\("\/api\/adm\/activate"/);
+  assert.match(app, /admRequiresCloud/);
+});
+
+test("new account registration uses Firebase without a misleading local-only greeting", () => {
+  assert.match(app, /cloudRequest\("\/api\/auth\/register"/);
+  assert.match(app, /inboxWelcomeBody: "Sua conta está pronta/);
+  assert.doesNotMatch(app, /inboxWelcomeBody: "Sua conta local está pronta/);
+  assert.doesNotMatch(app, /inboxWelcomeBody: "Your local account is ready/);
+});
+
 test("the diamond shop sells the three requested skins at their configured prices", () => {
   assert.deepEqual(store.diamondSkins.map(({ category, skinId, priceDiamonds }) =>
     [category, skinId, priceDiamonds]), [

@@ -222,7 +222,7 @@ const translations = {
     accuracyMissed: "O tempo acabou. Tente novamente em 6 horas.",
     inboxMessagesEmpty: "Nenhuma mensagem por enquanto.", inboxRewardsEmpty: "Nenhuma recompensa de código promocional.",
     claimReward: "Resgatar", rewardClaimed: "Resgatada", inboxWelcomeTitle: "Boas-vindas ao Neon Void",
-    inboxWelcomeBody: "Sua conta local está pronta. As recompensas de códigos promocionais aparecem na aba Recompensas.",
+    inboxWelcomeBody: "Sua conta está pronta. As recompensas de códigos promocionais aparecem na aba Recompensas.",
     luckDropSkinReward: "Skin recebida: {name} ({rarity}).",
     luckDropCoinsReward: "Recompensa: {amount} Neon-moedas ({rarity}).",
     diamondPurchaseTitle: "Comprar {amount} diamantes?", diamondsPurchased: "Diamantes adicionados à carteira!",
@@ -540,7 +540,7 @@ const translations = {
     accuracyMissed: "Time ran out. Try again in 6 hours.",
     inboxMessagesEmpty: "No messages yet.", inboxRewardsEmpty: "No promo code rewards.",
     claimReward: "Claim", rewardClaimed: "Claimed", inboxWelcomeTitle: "Welcome to Neon Void",
-    inboxWelcomeBody: "Your local account is ready. Promo code rewards appear in the Rewards tab.",
+    inboxWelcomeBody: "Your account is ready. Promo code rewards appear in the Rewards tab.",
     luckDropSkinReward: "Skin received: {name} ({rarity}).",
     luckDropCoinsReward: "Reward: {amount} Neon Coins ({rarity}).",
     diamondPurchaseTitle: "Buy {amount} diamonds?", diamondsPurchased: "Diamonds added to your wallet!",
@@ -3953,7 +3953,9 @@ async function redeemPromoCode(value) {
         openGameSite("SITES/master.html");
         return;
       }
-      if (response.status !== 401) throw new Error(result.error || t("cloudApiUnavailable"));
+      if (response.status !== 401 && response.status !== 503) {
+        throw new Error(result.error || t("cloudApiUnavailable"));
+      }
     } catch (error) {
       status.textContent = error.message || t("cloudApiUnavailable");
       return;
